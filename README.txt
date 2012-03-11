@@ -60,7 +60,7 @@ Other items included with the distribution:
 
    To run all of the regression tests type:
 
-          runTests 
+          runAllTests 
    
    from the top-level package directory. 
    
