@@ -1,0 +1,39 @@
+classdef simpleTestClass
+    % Settings test class
+    properties
+        BlockName;
+        Select           % Selector
+    end
+ 
+    methods
+        function obj = simpleTestClass()
+           obj.Select = viscore.dataSelector('viscore.dataConfig');
+           obj.Select.putObject(class(obj), viscore.managedObj(class(obj), ...
+               simpleTestClass.getDefaultProperties()));
+        end 
+        
+    end
+
+    methods (Static = true)
+        function settings = getDefaultProperties()
+            % Field name, class name, class modifier, display name, type, default, options,
+            % descriptions
+            cName = 'simpleTestClass';
+            settings = struct( ...
+                 'Enabled',      {true}, ...
+                 'ID',         {'BlockName'}, ...
+                 'Category',      {cName}, ...
+                 'Definition',    {'My definition'}, ...
+                 'DisplayName',   {'Block name'}, ...
+                 'Type',          {'string'}, ...
+                 'Value',         {'Window'}, ...
+                 'Dditable',      {true}, ...
+                 'Options',       {''}, ...
+                 'Description',   {'Block name or label (e.g. ''Window'')'} ...
+                                   );
+                               
+        end
+
+    end % static methods
+    
+end % simpleTestClass

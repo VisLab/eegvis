@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding="utf-8"?>
+
+<toc version="2.0">
+<!-- First tocitem specifies top level in Help browser Contents pane -->
+<!-- This can be a roadmap page, as shown below, or a content page -->
+    <tocitem target="eegvis_product_page.html">EEGVIS
+        <!-- Nest tocitems to create hierarchical entries in  Contents-->
+        <!-- To include icons, use the following syntax for tocitems: -->
+        <!-- <tocitem target="foo.html" image="HelpIcon.NAME"> -->
+        <!-- Title-of-Section </tocitem> -->
+        <!-- where NAME is one of the following (use capital letters): -->
+        <!-- FUNCTION, USER_GUIDE, EXAMPLES, BLOCK, GETTING_STARTED, -->
+        <!-- DEMOS, RELEASE_NOTES --> 
+        <!-- Icon images used for these entries are also stored in -->
+        <!-- matlabroot/toolbox/matlab/icons -->
+        <!-- A Getting Started Guide usually comes first -->
+        <tocitem target="eegvis_getting_started.html" image="HelpIcon.GETTING_STARTED">
+            Getting Started
+            <tocitem target="eegvis_system_requirements.html">System Requirements
+            </tocitem>
+            <tocitem target="eegvis_features.html">Features
+            </tocitem>
+        </tocitem>
+     <!-- User Guide comes next -->
+        <tocitem target="http://venom.cs.utsa.edu/dmz/techrep/2011/CS-TR-2011-018.pdf" 
+                 image="$toolbox/matlab/icons/webicon.gif">Technical Report
+        </tocitem>
+     <!-- Function reference next -->
+     <!-- First item is page describing function categories, if any -->
+        <tocitem target="eegvis_functions_by_cat.html" 
+                 image="HelpIcon.FUNCTION">Function Reference
+            <!-- List category with link to anchor in above page -->
+            <tocitem target="eegvis_functions_by_cat.html#1">Top-level functions 
+                <tocitem target="eegbrowse_help.html" image="HelpIcon.FUNCTION">eegbrowse</tocitem>
+                <tocitem target="eegplugin_eegvis_help.html" image="HelpIcon.FUNCTION">eegplugin_eegvis</tocitem>
+                <tocitem target="eegvis_help.html" image="HelpIcon.FUNCTION">eegvis</tocitem>
+                <tocitem target="pop_eegbrowse_help.html" image="HelpIcon.FUNCTION">pop_eegbrowse</tocitem>
+                <tocitem target="pop_eegvis_help.html" image="HelpIcon.FUNCTION">pop_eegvis</tocitem>                
+            </tocitem>
+            <tocitem target="eegvis_functions_by_cat.html#2">Core package
+                <tocitem target="blockedData_help.html" image="HelpIcon.FUNCTION">blockedData</tocitem>
+                <tocitem target="counter_help.html" image="HelpIcon.FUNCTION">counter</tocitem>
+                <tocitem target="dataConfig_help.html" image="HelpIcon.FUNCTION">dataConfig</tocitem>
+                <tocitem target="dataManager_help.html" image="HelpIcon.FUNCTION">dataManager</tocitem>
+                <tocitem target="dataSelector_help.html" image="HelpIcon.FUNCTION">dataSelector</tocitem>
+                <tocitem target="dataSlice_help.html" image="HelpIcon.FUNCTION">dataSlice</tocitem>
+                <tocitem target="managedObj_help.html" image="HelpIcon.FUNCTION">managedObj</tocitem>
+                <tocitem target="tableConfig_help.html" image="HelpIcon.FUNCTION">tableConfig</tocitem>
+                <tocitem target="tablePanel_help.html" image="HelpIcon.FUNCTION">tablePanel</tocitem>                
+            </tocitem>
+            <tocitem target="eegvis_functions_by_cat.html#3">Function package
+                <tocitem target="functionConfig_help.html" image="HelpIcon.FUNCTION">functionConfig</tocitem>
+                <tocitem target="functionObj_help.html" image="HelpIcon.FUNCTION">functionObj</tocitem>
+            </tocitem>
+            <tocitem target="eegvis_functions_by_cat.html#4">Property package
+                <tocitem target="colorListProperty_help.html" image="HelpIcon.FUNCTION">colorListProperty</tocitem>
+                <tocitem target="colorProperty_help.html" image="HelpIcon.FUNCTION">colorProperty</tocitem>
+                <tocitem target="configurable_help.html" image="HelpIcon.FUNCTION">configurable</tocitem>
+                <tocitem target="configurableObj_help.html" image="HelpIcon.FUNCTION">configurableObj</tocitem>
+                <tocitem target="doubleProperty_help.html" image="HelpIcon.FUNCTION">doubleProperty</tocitem>
+                <tocitem target="enumeratedProperty_help.html" image="HelpIcon.FUNCTION">enumeratedProperty</tocitem>
+                <tocitem target="integerProperty_help.html" image="HelpIcon.FUNCTION">integerProperty</tocitem>
+                <tocitem target="intervalProperty_help.html" image="HelpIcon.FUNCTION">intervalProperty</tocitem>
+                <tocitem target="logicalProperty_help.html" image="HelpIcon.FUNCTION">logicalProperty</tocitem> 
+                <tocitem target="property_help.html" image="HelpIcon.FUNCTION">property</tocitem>
+                <tocitem target="propertyConfig_help.html" image="HelpIcon.FUNCTION">propertyConfig</tocitem>
+                <tocitem target="stringListProperty_help.html" image="HelpIcon.FUNCTION">stringListProperty</tocitem>
+                <tocitem target="stringProperty_help.html" image="HelpIcon.FUNCTION">stringProperty</tocitem>
+                <tocitem target="unsignedIntegerProperty_help.html" image="HelpIcon.FUNCTION">unsignedIntegerProperty</tocitem>
+                <tocitem target="vectorProperty_help.html" image="HelpIcon.FUNCTION">vectorProperty</tocitem>                    
+            </tocitem>            
+            <tocitem target="eegvis_functions_by_cat.html#5">Visualization package
+                <tocitem target="axesPanel_help.html" image="HelpIcon.FUNCTION">axesPanel</tocitem>
+                <tocitem target="blockBoxPlot_help.html" image="HelpIcon.FUNCTION">blockBoxPlot</tocitem>
+                <tocitem target="blockHistogramPlot_help.html" image="HelpIcon.FUNCTION">blockHistogramPlot</tocitem>
+                <tocitem target="blockImagePlot_help.html" image="HelpIcon.FUNCTION">blockImagePlot</tocitem>
+                <tocitem target="clickable_help.html" image="HelpIcon.FUNCTION">clickable</tocitem>
+                <tocitem target="cursorExplorable_help.html" image="HelpIcon.FUNCTION">cursorExplorable</tocitem>
+                <tocitem target="cursorExplorer_help.html" image="HelpIcon.FUNCTION">cursorExplorer</tocitem>
+                <tocitem target="dualView_help.html" image="HelpIcon.FUNCTION">dualView</tocitem>
+                <tocitem target="elementBoxPlot_help.html" image="HelpIcon.FUNCTION">elementBoxPlot</tocitem> 
+                <tocitem target="horizontalPanel_help.html" image="HelpIcon.FUNCTION">horizontalPanel</tocitem>
+                <tocitem target="plotConfig_help.html" image="HelpIcon.FUNCTION">plotConfig</tocitem>
+                <tocitem target="plotObj_help.html" image="HelpIcon.FUNCTION">plotObj</tocitem>
+                <tocitem target="resizable_help.html" image="HelpIcon.FUNCTION">resizable</tocitem>
+                <tocitem target="shadowSignalPlot_help.html" image="HelpIcon.FUNCTION">shadowSignalPlot</tocitem>                
+                <tocitem target="stackedSignalPlot_help.html" image="HelpIcon.FUNCTION">signalHistogramPlot</tocitem>
+                <tocitem target="tabPanel_help.html" image="HelpIcon.FUNCTION">tabPanel</tocitem> 
+                <tocitem target="verticalPanel_help.html" image="HelpIcon.FUNCTION">verticalPanel</tocitem>                  
+            </tocitem>
+           
+            
+  
+            <!-- <...> -->
+        </tocitem>
+        <!-- Optional Release Notes file -->
+        <tocitem target="eegvis_release_notes.html" 
+            image="HelpIcon.RELEASE_NOTES">Release Notes
+        </tocitem>
+        <!-- Optional List of Examples, with hyperlinks to examples in other files -->
+        <!-- Optional Function Reference by category comes next -->
+       <!-- <tocreference target="helpfuncbycat.xml" 
+                      image="HelpIcon.FUNCTION">
+        </tocreference> -->
+        
+        <!-- Optional link or links to your or other Web sites -->
+        <tocitem target="http://visual.cs.utsa.edu/eegvis" 
+                 image="$toolbox/matlab/icons/webicon.gif">
+        EegVis Toobox Home page
+        </tocitem>
+    </tocitem>
+</toc>
