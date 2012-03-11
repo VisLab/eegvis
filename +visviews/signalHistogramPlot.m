@@ -1,28 +1,77 @@
 % visviews.signalHistogramPlot() display histogram of signal values
 %
 % Usage:
-%   >>   visviews.signalHistogramPlot(parent, manager, key)
-%   >>   obj = visviews.signalHistogramPlot(parent, manager, key)
+%   >>  visviews.signalHistogramPlot(parent, manager, key)
+%   >>  obj = visviews.signalHistogramPlot(parent, manager, key)
 %
-% Inputs:
-%    parent     parent container for the panel
-%    manager    dataManager handling configuration
-%    key        string used as key to identify for property configuration
+% Description:
+% obj = visviews.signalHistogramPlot(parent, manager, key) displays a 
+%     histogram of the signal values along with an aligned horizontal
+%     plot to give two views of the data.
 %
-% % Outputs:
-%    obj        handle to the newly created object
+%     The parent is a graphics handle to the container for this plot. The
+%     manager is an viscore.dataManager object containing managed objects
+%     for the configurable properties of this object, and key is a string
+%     identifying this object in the property manager GUI.
+% 
+% obj = visviews.signalHistogramPlot(parent, manager, key) returns a handle to
+%     the newly created object.
+%
+% visviews.signalHistogramPlot is configurable, resizable, clickable, and 
+% cursor explorable.
+%
+% Configurable properties:
+% The visviews.signalHistogramPlot has three configurable properties: 
+%
+% HistogramColor is a 1 x 3 color vector giving the color of the 
+%                histogram bars. The default color is light gray.
+%
+% NumberBins     specifies the number of bins in the histogram. The
+%                default number of bins is 20.
+%
+% RemoveMean     logical value specifying whether to display the signal
+%                after the signal mean for each element has been removed.
+%
+% The visualization is not linkable or clickable.
+%
+% Example:
+% Create a histogram summary 32 exponentially distributed channels
+%
+%   % Create a element box plot
+%   sfig = figure('Name', '32 exponentially distributed channels');
+%   hp = visviews.signalHistogramPlot(sfig, [], []);
+%
+%   % Generate some data to plot
+%   data = random('exp', 1, [32, 1000, 20]);
+%   testVD = viscore.blockedData(data, 'Exponenitally distributed');
+%    
+%   % Create a kurtosis block function object
+%   defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%              visfuncs.functionObj.getDefaultFunctions());
+%   thisFunc = defaults{1};
+%   thisFunc.setData(testVD);
+%    
+%   % Plot the signal histogram
+%   hp.plot(testVD, thisFunc, []);
+%   
+%   % Adjust the margins
+%   gaps = hp.getGaps();
+%   hp.reposition(gaps);
 %
 % Notes:
-%   - If manager is empty, use the class defaults.
-%   - If key is empty, use the class name
-%   - Many summaries supported by this viewer are window or epoch oriented.
-%   - Some displays treat epoched data differently than non-epoched data.
-%   - Epoched data may not be continuous and cannot be reblocked by
-%     changing the block size.
+% - If manager is empty, the class defaults are used to initialize.
+% - If key is empty, the class name is used to identify in GUI
+%   configuration.
 %
-% Author: Kay Robbins, UTSA,
+% Class documentation:
+% Execute the following in the MATLAB command window to view the class 
+% documentation for visviews.signalHistogramPlot:
 %
-% See also: visviews.dualView(), visviews.cursorExplorable()
+%    doc visviews.signalHistogramPlot
+%
+% See also: visviews.axesPanel, visviews.blockBoxPlot, visviews.clickable, 
+%           visprops.configurable, visviews.elementBoxPlot, and 
+%           visviews.resizable 
 %
 
 % Copyright (C) 2011  Kay Robbins, UTSA, krobbins@cs.utsa.edu
@@ -47,33 +96,25 @@
 %
 
 classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable 
- 
+    
     properties
+        BoxColor = [0, 0, 0];                % color used for the box plot
         DefaultColor = [0.7, 0.7, 0.7];      % color used in various places
-        HistogramColor = [0.85, 0.85, 0.85]; %
-        NumBins = 20;                        % number of bins used
-        SignalLabel = '{\mu}V';              % label used for the signals
-    end % public properties
+        HistogramColor = [0.85, 0.85, 0.85]; % color used for histogram faces
+        NumberBins = 20;                     % number of bins used
+        RemoveMean = true;                   % remove signal means before plotting
+    end % public properties 
     
-    properties(Access = private)
-        BlockSize = 1;
-        Colors = [];
-        CurrentSource = [];
-        CurrentElement = [];
-        CurrentWindow = [];
-        EpochTimes = [];
-        PlotWindow = true;
-        SampleRate = 1;
-        Selected = [];
-        SelectedHandle = [];          % handle of selected signal or empty
-        SelectedSignal = [];          % data in selected signal or empty
-        SignalHistogram = []          % panel with signal histogram
-        Signals = [];
-        SignalScale = 1;
-        XValues = [];
-    end % private properties
+    properties (Access = private)
+        BoxPlot                 % handle to boxplot for display purposes
+        CurrentSlice = [];      % current slice of data
+        NumberBlocks = 1;       % number of blocks being plotted
+        NumberElements = 1;     % number of elements being plotted
+        StartBlock = 1;         % starting block of currently plotted slice
+        StartElement = 1;       % starting block of currently plotted slice
+    end % private properties 
     
-    methods 
+    methods
         
         function obj = signalHistogramPlot(parent, manager, key)
             % Constructor must have parent for axesPanel
@@ -83,129 +124,131 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
             if isa(manager, 'viscore.dataManager')
                 visprops.property.updateProperties(obj, manager);
             end
-            set(obj.MainAxes, 'Box', 'on',  'Tag', 'signalHistogramAxes', ...
+            set(obj.MainAxes, 'Box', 'on',  'Tag', 'blockHistogramAxes', ...
                 'ActivePositionProperty', 'position');
-        end % signalHistogramPlot constructor
+        end % blockHistogramPlot constructor
         
-        function plot(obj, visData, bFunction, dslice)
-            % Plot the specified slice of visData
-            obj.CurrentSource = visData; 
-            bFunction.setData(visData);
-            [nElements, nSamples, nBlocks] = visData.getDataSize(); %#ok<NASGU,ASGLU>
-            [slices, names, cDims] = dslice.getParameters([]);
-            obj.Signals = squeeze(viscore.dataSlice.getDataSlice(visData.getData(), [], [], []));
-            if isempty(obj.Signals)
-                warning('signalHistogramPlot:plotSlice', ...
-                    'must have at least 2 samples to plot');
-                return;
-            end  
-            if isempty(cDims) || ~isempty(intersect(cDims, 3))  % Plot all elements for a window
-                xBaseString = [names{3} ' ' slices{3}];
-                yBaseString = names{1};
-                obj.CursorString = '';
-                obj.PlotWindow = true;
-                obj.CurrentWindow = str2double(slices{3});
-                obj.CurrentElement = [];
-                obj.XLimOffset = (obj.CurrentWindow - 1)*size(obj.Signals, 2)/visData.SampleRate;
-            elseif ~isempty(intersect(cDims, 1))  % Plot all windows for an element
-                obj.Signals = (obj.Signals)';
-                xBaseString  = [names{1} ' ' slices{1}];
-                yBaseString = names{3};
-                obj.PlotWindow = false;
-                obj.CurrentWindow = [];
-                obj.CurrentElement = str2double(slices{1});
-                obj.XLimOffset = 0;
-            else
-                warning('signalHistogramPlot:plotSlice', ...
-                    'array slice is empty and cannot be plotted');
-                return;
-            end
-            obj.Colors = bFunction.getBlockColorsSlice(dslice);
-            obj.CursorString = '';
-            obj.BlockSize = size(obj.Signals, 2);
-            obj.SampleRate = visData.SampleRate;
-            obj.EpochTimes = visData.EpochTimes;
-           if visData.isEpoched()    % add time scale to x label
-                obj.EpochTimes = visData.EpochTimes(...
-                    dimStarts(2):obj.BlockSize - 1);
-                obj.XValues = obj.EpochTimes;
-                xBaseString = ['Time (ms) [' xBaseString ']'];
-            else
-                obj.EpochTimes = [];
-                obj.XValues = obj.XLimOffset + ...
-                    (0:(obj.BlockSize - 1))/visData.SampleRate;
-                xBaseString = ['Time (s) [' xBaseString ']'];
-            end
-            obj.SelectedHandle = [];
-            obj.SelectedSignal = [];
-            obj.YString = yBaseString;
-            obj.XString = xBaseString;
-            obj.displayPlot();
-        end % plotSlice
-               
-        function s = updateString(obj, point)
-            %  Translate point to data units and make a string
-            s = '';   % string to be returned
-            [x, y, xInside, yInside] = getDataCoordinates(obj, point);
-            if ~xInside || ~yInside
-                return;
-            end
-            c = ceil([x, y] - 0.5);
-            z = obj.CurrentFunction.BlockValues(c(2), c(1));
-            s = {[obj.CursorString{1} num2str(c(1))]; ...
-                [obj.CursorString{2} num2str(c(2))]; ...
-                [obj.CursorString{3} num2str(z)]};
-        end % updateString
- 
-    end % public methods
-    
-    methods(Access = private)
-       function displayPlot(obj) 
-            % Plot the histogram and boxplot
+        function plot(obj, visData, bFunction, dSlice) 
+            % Plot the signal, ignoring the block function
             obj.reset();
             set(obj.MainAxes, 'Box', 'on',  'Tag', 'signalHistogramPlot', ...
-                'ActivePositionProperty', 'position'); 
-            d = obj.Signals(:);
-            [hHeight, xout] = hist(d, obj.NumBins);
-            hHeight = hHeight/length(d);  % probability
-            hFact = floor(1/max(hHeight));
-            hTop = ceil(max(hHeight)*hFact)/hFact;      % top scale of histogram
-            boxplot(obj.MainAxes, d, 'Notch', 'on', ...
+                'ActivePositionProperty', 'position');
+            hold(obj.MainAxes, 'on');
+  
+            if isempty(dSlice)
+                obj.CurrentSlice = viscore.dataSlice();
+            else
+                obj.CurrentSlice = dSlice;
+            end
+            
+            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
+            [data, s] = bFunction.getBlockValuesSlice(obj.CurrentSlice);
+            obj.StartBlock = s(2);
+            obj.StartElement = s(1);
+            [obj.NumberElements, obj.NumberBlocks] = size(data);
+
+            [hHeight, xout] = hist(data(:), obj.NumberBins);
+            xout = double(xout);
+            hHeight = hHeight/length(data(:));  % Probability
+            hFact = floor(1./max(hHeight));
+            hTop = ceil(max(hHeight)*hFact)/hFact;      % Top scale of histogram
+            obj.BoxPlot = boxplot(obj.MainAxes, data(:), 'Notch', 'on', ...
                 'Positions', 1.5*hTop, 'Widths', 0.25*hTop, ...
-                'orientation', 'horizontal', 'Labels', {});
+                'Color', obj.BoxColor, ...
+                'Orientation', 'horizontal', 'Labels', {});
             bar(obj.MainAxes, xout, hHeight, 1.0, ...
                 'Facecolor', obj.HistogramColor);
             set(obj.MainAxes, 'YLimMode', 'manual', 'YLim', [0, 2*hTop], ...
                 'YTickMode', 'manual', 'YTick', [0, hTop/2, hTop], ...
                 'YTickLabelMode', 'manual', ...
-                'YTickLabel', {'0', '', num2str(hTop)});
-            obj.XString = obj.SignalLabel;
-            obj.CursorString = {'Val: '};  
+                'YTickLabel', {'0', '', ''}); %{'0', '', num2str(hTop)});
+            obj.XString = bFunction.getValue(1, 'DisplayName');
+            obj.XStringBase = [obj.XString ' ' getAxesLabels(obj, names{3}, names{1})];
+            obj.XString = obj.XStringBase;
+            obj.CursorString = {[bFunction.getValue(1, 'ShortName') ': ']};
+            xLims = get(obj.MainAxes, 'XLim');            
+            % Label the probability over the maximum bar
+            [mValue, pos] = max(hHeight); %#ok<ASGLU>
+            line(xLims, [hTop, hTop], 'Parent', obj.MainAxes, ...
+                'Color', obj.DefaultColor);
+            textString = strtrim(sprintf('%5.2g', hTop));
+            text(xout(pos(1)), hTop, textString, 'Parent', obj.MainAxes, ...
+                'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+            hold(obj.MainAxes, 'off');
             obj.YString =  '';
+            obj.YStringBase = obj.YString;
+            if ~isempty(names{1})
+                obj.CursorString{2} = [names{1}(1) ': '];
+            end
             obj.redraw();
         end % plot
         
-    end % private methods
- 
-    methods (Static = true)  
+        function s = updateString(obj, point)
+            % Return [Block, Element, Function] value string for point
+            s = '';   % String to be returned
+            try   % Use exception handling for small round-off errors
+                p = getpixelposition(obj.MainAxes, true);
+                if point(1) < p(1) || point(2) < p(2) || ...
+                        point(1) >= p(1) + p(3) || point(2) >= p(2) + p(4)
+                    return    % not on this graph so return an empty string
+                end
+                % Translate point to data units and make a string
+                a = get(obj.MainAxes,  'XLim');
+                x = (a(2) - a(1))*(point(1) - p(1))/p(3) + a(1);
+                s = {[obj.CursorString{1} num2str(x)]};
+            catch  %#ok<CTCH>
+            end
+        end % updateString
         
-        function settings = getDefaultProperties()
-            % Structure specifying how to set configurable public properties
-            cName = 'visviews.signalHistogramPlot';
-            settings = struct( ...
-                 'Enabled',       {true}, ...
-                 'Category',      {cName}, ...
-                 'DisplayName',   {'Histogram bar color'}, ...
-                 'FieldName',     {'HistogramColor'}, ... 
-                 'Value',         {[0.8, 0.8, 0.8]}, ...
-                 'Type',          {'visprops.colorProperty'}, ...
-                 'Editable',      {true}, ...
-                 'Options',       {''}, ...
-                 'Description',   {'Color of the histogram bars'} ...
-                                   );
-       end % getDefaultProperties
+    end % public methods
     
+    methods (Access = private)
+           
+        function xStringBase = getAxesLabels(obj, blockName, elementName)
+            % Calculate the string for the xaxis label
+            if  obj.NumberElements == 1
+                xStringBase = [elementName ' ' num2str(obj.StartElement)];
+            else
+                xStringBase = [elementName 's ' ...
+                    num2str(obj.StartElement) ':' ...
+                    num2str(obj.StartElement + obj.NumberElements -1)];
+            end
+            
+            % Add an indicator of which elements being plotted
+            if obj.NumberBlocks > 1
+                xStringBase = [ '[' xStringBase '] [' blockName 's ' ...
+                    num2str(obj.StartBlock) ':' ...
+                    num2str(obj.NumberBlocks + obj.StartBlock - 1) ']'];
+            else
+                xStringBase = [ '[' xStringBase '] [' blockName ' ' ...
+                    num2str(obj.StartBlock) ']'];
+            end
+        end % getAxesLabels
+    end
+    
+    methods (Static = true)
+        
+       function settings = getDefaultProperties()
+            % Structure specifying how to set configurable public properties
+            cName = 'visviews.blockHistogramPlot';
+            settings = struct( ...
+                'Enabled',       {true,                     true}, ...
+                'Category',      {cName,                    cName}, ...
+                'DisplayName',   {'Histogram bar color',    'Number of bins'}, ...
+                'FieldName',     {'HistogramColor',         'NumberBins'}, ...
+                'Value',         {[0.8, 0.8, 0.8],          20}, ...
+                'Type',          { ...
+                'visprops.colorProperty', ...
+                'visprops.unsignedIntegerProperty'}, ...
+                'Editable',      {true,                     true}, ...
+                'Options',       {'',                       ''}, ...
+                'Description',   { ...
+                'Color of the histogram bars', ...
+                'Number of bins in the histogram'} ...
+                );
+        end % getDefaultProperties
+        
     end % static methods
- 
-end % signalHistogramPlot
+    
+end % blockHistogramPlot
 

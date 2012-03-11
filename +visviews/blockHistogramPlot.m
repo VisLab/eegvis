@@ -6,7 +6,7 @@
 %
 % Description:
 % obj = visviews.blockHistogramPlot(parent, manager, key) displays a 
-%     histogram of the summary values along with an aligned horizontal
+%     histogram of the summary values along with an aligned horizontal box
 %     plot to give two views of the data.
 %
 %     The parent is a graphics handle to the container for this plot. The
@@ -29,18 +29,12 @@
 % NumberBins     specifies the number of bins in the histogram. The
 %                default number of bins is 20.
 %
-% IsClickable    is a boolean specifying whether this plot should respond to
-%                user mouse clicks when incorporated into a linkable figure. 
-%                The default value is true.
-%
-% LinkDetails    is a boolean specifying whether clicking this plot in a
-%                linkable figure should cause detail views to display the clicked
-%                slice. The default value is true.
+% The visualization is not linkable or clickable.
 %
 % Example:
 % Create a histogram summary of kurtosis of 32 exponentially distributed channels
 %
-%   % Create a element box plot
+%   % Create a block histogram plot
 %   sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
 %    bp = visviews.blockHistogramPlot(sfig, [], []);
 %
@@ -54,7 +48,7 @@
 %   thisFunc = defaults{1};
 %   thisFunc.setData(testVD);
 %    
-%   % Plot the block function
+%   % Plot the block function histogram
 %   bp.plot(testVD, thisFunc, []);
 %   
 %   % Adjust the margins
