@@ -164,7 +164,7 @@ classdef functionObj < hgsetget & viscore.managedObj
         
         function colors = getBlockColorsSlice(obj, slice)
             % Return the colors corresponding to this slice
-            ds = obj.getBlockValuesSlice(slice);
+            ds = obj.getBlockSlice(slice);
             colors = obj.getBlockColors(ds);
         end % getBlockColorsSlice
         
@@ -188,7 +188,7 @@ classdef functionObj < hgsetget & viscore.managedObj
             values = obj.CurrentValues;
         end  % getBlockValues
         
-        function [values, sValues] = getBlockValuesSlice(obj, dSlice)
+        function [values, sValues] = getBlockSlice(obj, dSlice)
             % Return function values and starting indices corresponding to this slice
             if ~isempty(dSlice)
                 slices = dSlice.getParameters(3);
@@ -198,7 +198,7 @@ classdef functionObj < hgsetget & viscore.managedObj
             end
             [values, sValues] = viscore.dataSlice.getDataSlice(...
                                       obj.CurrentValues, slices, [], []);
-        end % getBlockValuesSlice
+        end % getBlockSlice
         
         function source = getData(obj)
             % Return underlying blockData object for this function

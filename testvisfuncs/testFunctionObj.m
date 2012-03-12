@@ -108,9 +108,9 @@ fprintf('Definition: %s\n', def);
 assertTrue(ischar(def));
 
 
-function testGetBlockValuesSlice %#ok<DEFNU>
-% Unit test for visfuncs.functionObj for getBlockValuesSlice
-fprintf('\nUnit tests for visfuncs.functionObj getBlockValuesSlice :\n');
+function testGetBlockSlice %#ok<DEFNU>
+% Unit test for visfuncs.functionObj for getBlockSlice
+fprintf('\nUnit tests for visfuncs.functionObj getBlockSlice :\n');
 
 fprintf('It should return 1 value for each element when blocks are sliced\n');
 fs = functionTestClass.getDefaultFunctionsNoSqueeze();
@@ -122,7 +122,7 @@ data = random('exp', 1, [32, 1000, 20]);
 testVD = viscore.blockedData(data, 'Rand1');
 bf.setData(testVD);
 dSlice1 = viscore.dataSlice('Slices', {':', ':', '3'});
-[values, sValues] = bf.getBlockValuesSlice(dSlice1);
+[values, sValues] = bf.getBlockSlice(dSlice1);
 assertEqual(size(values), [32, 1]);
 bValues = bf.getBlockValues();
 assertVectorsAlmostEqual(values, bValues(:, 3));
@@ -130,7 +130,7 @@ assertVectorsAlmostEqual(sValues, [1, 3, 1]);
 
 fprintf('It should return 1 value for each block when elements are sliced\n');
 dSlice2 = viscore.dataSlice('Slices', {'5', ':', ':'});
-[values, sValues] = bf.getBlockValuesSlice(dSlice2);
+[values, sValues] = bf.getBlockSlice(dSlice2);
 assertVectorsAlmostEqual(size(values), [1, 20]);
 assertVectorsAlmostEqual(values, bValues(5, :));
 assertVectorsAlmostEqual(sValues, [5, 1, 1]);
@@ -150,7 +150,7 @@ assertElementsAlmostEqual(z, 1);
 bValues = bf.getBlockValues();
 assertVectorsAlmostEqual(size(bValues),  [32 1]);
 dSlice1 = viscore.dataSlice('Slices', {'2', ':', ':'});
-[values, sValues] = bf.getBlockValuesSlice(dSlice1);
+[values, sValues] = bf.getBlockSlice(dSlice1);
 assertEqual(size(values, 1), 1);
 assertEqual(size(values, 2), 1);
 assertVectorsAlmostEqual(values, bValues(2, :));
@@ -170,7 +170,7 @@ bf.printObject();
 
 fprintf('It should return 1 value when blocks are sliced\n');
 dSlice1 = viscore.dataSlice('Slices', {':', ':', '3'});
-[values, sValues] = bf.getBlockValuesSlice(dSlice1);
+[values, sValues] = bf.getBlockSlice(dSlice1);
 assertEqual(size(values), [1, 1]);
 bValues = bf.getBlockValues();
 assertVectorsAlmostEqual(values, bValues(:, 3));
@@ -179,7 +179,7 @@ assertVectorsAlmostEqual(sValues, [1, 3, 1]);
 
 fprintf('It should return 1 value for each block when elements are sliced\n');
 dSlice2 = viscore.dataSlice('Slices', {'1', ':', ':'});
-[values, sValues] = bf.getBlockValuesSlice(dSlice2);
+[values, sValues] = bf.getBlockSlice(dSlice2);
 assertVectorsAlmostEqual(size(values), [1, 20]);
 assertVectorsAlmostEqual(values, bValues(1, :));
 assertVectorsAlmostEqual(sValues, [1, 1, 1]);
@@ -195,7 +195,7 @@ assertElementsAlmostEqual(z, 1);
 bValues = bf.getBlockValues();
 assertVectorsAlmostEqual(size(bValues),  [32 1]);
 dSlice1 = viscore.dataSlice('Slices', {'2', ':', ':'});
-[values, sValues] = bf.getBlockValuesSlice(dSlice1);
+[values, sValues] = bf.getBlockSlice(dSlice1);
 assertEqual(size(values, 1), 1);
 assertEqual(size(values, 2), 1);
 assertVectorsAlmostEqual(values, bValues(2, :));

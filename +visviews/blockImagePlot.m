@@ -199,7 +199,7 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             end
             
             [slices, names] = obj.CurrentSlice.getParameters(3);  %#ok<ASGLU>
-            [data, s] = bFunction.getBlockValuesSlice(obj.CurrentSlice);
+            [data, s] = bFunction.getBlockSlice(obj.CurrentSlice);
             obj.StartBlock = s(2);
             obj.StartElement = s(1);
             [obj.NumberElements, obj.NumberBlocks] = size(data);

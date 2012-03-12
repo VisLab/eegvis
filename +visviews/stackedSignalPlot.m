@@ -196,7 +196,7 @@ classdef stackedSignalPlot < visviews.axesPanel  & visprops.configurable
             
             combDim = 0;           % Don't combine
             [slices, names, cDims, combMethod] = obj.CurrentSlice.getParameters(3);
-            bValues = bFunction.getBlockValuesSlice(dSlice); % determines line color
+            bValues = bFunction.getBlockSlice(dSlice); % determines line color
             [obj.TotalElements, obj.TotalBlocks] = size(bValues); % Capture size before combining
             if isempty(cDims) || ~isempty(intersect(cDims, 3))  % Plot all elements for a window
                 if (size(bValues, 2) > 1) && obj.VisData.isEpoched()
