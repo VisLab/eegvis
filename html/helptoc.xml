@@ -83,8 +83,9 @@
                 <tocitem target="plotConfig_help.html" image="HelpIcon.FUNCTION">plotConfig</tocitem>
                 <tocitem target="plotObj_help.html" image="HelpIcon.FUNCTION">plotObj</tocitem>
                 <tocitem target="resizable_help.html" image="HelpIcon.FUNCTION">resizable</tocitem>
-                <tocitem target="shadowSignalPlot_help.html" image="HelpIcon.FUNCTION">shadowSignalPlot</tocitem>                
-                <tocitem target="stackedSignalPlot_help.html" image="HelpIcon.FUNCTION">signalHistogramPlot</tocitem>
+                <tocitem target="signalHistogramPlot_help.html" image="HelpIcon.FUNCTION">signalHistogramPlot</tocitem>
+                <tocitem target="signalShadowPlot_help.html" image="HelpIcon.FUNCTION">signalShadowPlot</tocitem>                
+                <tocitem target="signalStackedPlot_help.html" image="HelpIcon.FUNCTION">signalStackedPlot</tocitem>
                 <tocitem target="tabPanel_help.html" image="HelpIcon.FUNCTION">tabPanel</tocitem> 
                 <tocitem target="verticalPanel_help.html" image="HelpIcon.FUNCTION">verticalPanel</tocitem>                  
             </tocitem>

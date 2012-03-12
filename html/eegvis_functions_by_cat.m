@@ -57,8 +57,9 @@
 % * <plotConfig_help.html |plotConfig|> - GUI for configuring list of plots
 % * <plotObj_help.html |plotObj|> - holds definition and and settings for a plot
 % * <resizable_help.html |resizable|> - interface to be implemented to give components fixed margins
-% * <shadowSignalPlot_help.html |shadowSignalPlot|> - displays element or window signals using shadow outline
-% * <stackedSignalPlot_help.html |stackedSignalPlot|> - displays stacked view of individual element or window signals
+% * <signalHistogramPlot_help.html |signalHistogramPlot|> - display stacked view of individual element or window signals
+% * <signalShadowPlot_help.html |signalShadowPlot|> - display element or window signals using shadow outline
+% * <signalStackedPlot_help.html |signalStackedPlot|> - display stacked view of individual element or window signals
 % * <tabPanel_help.html |tabPanel|> - tabbed panel for holding multiple summary views
 % * <verticalPanel_help.html |verticalPanel|> - grid of vertically arranged resizable panels
 %

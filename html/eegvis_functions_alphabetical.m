@@ -43,9 +43,9 @@
 % * <property_help.html |property|> - base class for configurable properties
 % * <propertyConfig_help.html |propertyConfig|> - GUI for configuring properties
 % * <resizable_help.html |resizable|> - interface to be implemented to give components fixed margins
-% * <shadowSignalPlot_help.html |shadowSignalPlot|> - display element or window signals using shadow outline
-% * <stackedSignalPlot_help.html |stackedSignalPlot|> - display stacked view of individual element or window signals
-% * <stackedSignalPlot_help.html |stackedSignalPlot|> - display stacked view of individual element or window signals
+% * <signalHistogramPlot_help.html |signalHistogramPlot|> - display stacked view of individual element or window signals
+% * <signalShadowPlot_help.html |signalShadowPlot|> - display element or window signals using shadow outline
+% * <signalStackedPlot_help.html |signalStackedPlot|> - display stacked view of individual element or window signals
 % * <stringListProperty_help.html |stringListProperty|> - property object representing a cell array of strings
 % * <stringProperty_help.html |stringProperty|> -  property object representing a simple string
 % * <tableConfig_help.html |tableConfig|> - manages blocked data for visualization
