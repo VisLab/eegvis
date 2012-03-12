@@ -1,4 +1,4 @@
-% visviews.blockHistogramPlot() display histogram of block function values
+% visviews.blockHistogramPlot() display histogram and boxplot of block function values
 %
 % Usage:
 %   >>  visviews.blockHistogramPlot(parent, manager, key)

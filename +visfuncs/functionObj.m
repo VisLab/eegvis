@@ -173,6 +173,18 @@ classdef functionObj < hgsetget & viscore.managedObj
             limits = obj.CurrentLimits;
         end % getBlockLimits
         
+        function [values, sValues] = getBlockSlice(obj, dSlice)
+            % Return function values and starting indices corresponding to this slice
+            if ~isempty(dSlice)
+                slices = dSlice.getParameters(3);
+                slices(2) = [];
+            else
+                slices = [];
+            end
+            [values, sValues] = viscore.dataSlice.getDataSlice(...
+                                      obj.CurrentValues, slices, [], []);
+        end % getBlockSlice
+        
         function value = getBlockValue(obj, row, col)
             % Return block value in (row, col) or empty if out of range
             % Note: used for cursor exploration
@@ -186,19 +198,7 @@ classdef functionObj < hgsetget & viscore.managedObj
         function values = getBlockValues(obj)
             % Return the current values for this block function
             values = obj.CurrentValues;
-        end  % getBlockValues
-        
-        function [values, sValues] = getBlockSlice(obj, dSlice)
-            % Return function values and starting indices corresponding to this slice
-            if ~isempty(dSlice)
-                slices = dSlice.getParameters(3);
-                slices(2) = [];
-            else
-                slices = [];
-            end
-            [values, sValues] = viscore.dataSlice.getDataSlice(...
-                                      obj.CurrentValues, slices, [], []);
-        end % getBlockSlice
+        end  % getBlockValues     
         
         function source = getData(obj)
             % Return underlying blockData object for this function

@@ -1,4 +1,4 @@
-% visviews.signalHistogramPlot() display histogram of signal values
+% visviews.signalHistogramPlot() display histogram and boxplot of signal values
 %
 % Usage:
 %   >>  visviews.signalHistogramPlot(parent, manager, key)
@@ -21,7 +21,7 @@
 % cursor explorable.
 %
 % Configurable properties:
-% The visviews.signalHistogramPlot has three configurable properties: 
+% The visviews.signalHistogramPlot has four configurable properties: 
 %
 % HistogramColor is a 1 x 3 color vector giving the color of the 
 %                histogram bars. The default color is light gray.
@@ -31,6 +31,9 @@
 %
 % RemoveMean     logical value specifying whether to display the signal
 %                after the signal mean for each element has been removed.
+%
+% SignalLabel   is a string identifying the units of the signal. 
+%
 %
 % The visualization is not linkable or clickable.
 %
@@ -45,14 +48,8 @@
 %   data = random('exp', 1, [32, 1000, 20]);
 %   testVD = viscore.blockedData(data, 'Exponenitally distributed');
 %    
-%   % Create a kurtosis block function object
-%   defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-%              visfuncs.functionObj.getDefaultFunctions());
-%   thisFunc = defaults{1};
-%   thisFunc.setData(testVD);
-%    
 %   % Plot the signal histogram
-%   hp.plot(testVD, thisFunc, []);
+%   hp.plot(testVD, [], []);
 %   
 %   % Adjust the margins
 %   gaps = hp.getGaps();
@@ -69,7 +66,8 @@
 %
 %    doc visviews.signalHistogramPlot
 %
-% See also: visviews.axesPanel, visviews.blockBoxPlot, visviews.clickable, 
+% See also: visviews.axesPanel, visviews.blockBoxPlot, 
+%           visviews.BlockHistogramPlot, visviews.clickable, 
 %           visprops.configurable, visviews.elementBoxPlot, and 
 %           visviews.resizable 
 %
@@ -103,6 +101,7 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
         HistogramColor = [0.85, 0.85, 0.85]; % color used for histogram faces
         NumberBins = 20;                     % number of bins used
         RemoveMean = true;                   % remove signal means before plotting
+        SignalLabel = '{\mu}V';              % label indicating signal units
     end % public properties 
     
     properties (Access = private)
@@ -128,7 +127,7 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
                 'ActivePositionProperty', 'position');
         end % blockHistogramPlot constructor
         
-        function plot(obj, visData, bFunction, dSlice) 
+        function plot(obj, visData, bFunction, dSlice)  %#ok<INUSL>
             % Plot the signal, ignoring the block function
             obj.reset();
             set(obj.MainAxes, 'Box', 'on',  'Tag', 'signalHistogramPlot', ...
@@ -142,10 +141,10 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
             end
             
             [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
-            [data, s] = bFunction.getBlockSlice(obj.CurrentSlice);
-            obj.StartBlock = s(2);
+            [data, s] = visData.getDataSlice(obj.CurrentSlice);
+            obj.StartBlock = s(3);
             obj.StartElement = s(1);
-            [obj.NumberElements, obj.NumberBlocks] = size(data);
+            [obj.NumberElements, bSize, obj.NumberBlocks] = size(data); %#ok<ASGLU>
 
             [hHeight, xout] = hist(data(:), obj.NumberBins);
             xout = double(xout);
@@ -162,10 +161,9 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
                 'YTickMode', 'manual', 'YTick', [0, hTop/2, hTop], ...
                 'YTickLabelMode', 'manual', ...
                 'YTickLabel', {'0', '', ''}); %{'0', '', num2str(hTop)});
-            obj.XString = bFunction.getValue(1, 'DisplayName');
-            obj.XStringBase = [obj.XString ' ' getAxesLabels(obj, names{3}, names{1})];
+            obj.XStringBase = [obj.SignalLabel ' ' getAxesLabels(obj, names{3}, names{1})];
             obj.XString = obj.XStringBase;
-            obj.CursorString = {[bFunction.getValue(1, 'ShortName') ': ']};
+            obj.CursorString = {obj.SignalLabel};
             xLims = get(obj.MainAxes, 'XLim');            
             % Label the probability over the maximum bar
             [mValue, pos] = max(hHeight); %#ok<ASGLU>
@@ -232,19 +230,23 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
             % Structure specifying how to set configurable public properties
             cName = 'visviews.blockHistogramPlot';
             settings = struct( ...
-                'Enabled',       {true,                     true}, ...
-                'Category',      {cName,                    cName}, ...
-                'DisplayName',   {'Histogram bar color',    'Number of bins'}, ...
-                'FieldName',     {'HistogramColor',         'NumberBins'}, ...
-                'Value',         {[0.8, 0.8, 0.8],          20}, ...
+                'Enabled',       {true,                     true,               true,          true}, ...
+                'Category',      {cName,                    cName,              cName,         cName}, ...
+                'DisplayName',   {'Histogram bar color',    'Number of bins',   'Remove mean', 'Signal label'}, ...
+                'FieldName',     {'HistogramColor',         'NumberBins',       'RemoveMean',  'SignalLabel' }, ...
+                'Value',         {[0.8, 0.8, 0.8],          20,                 'false',       '{\mu}V'}, ...
                 'Type',          { ...
                 'visprops.colorProperty', ...
-                'visprops.unsignedIntegerProperty'}, ...
-                'Editable',      {true,                     true}, ...
-                'Options',       {'',                       ''}, ...
+                'visprops.unsignedIntegerProperty', ...
+                'visprops.logicalProperty', ...
+                'visprops.stringProperty'}, ...
+                'Editable',      {true,                     true                true           true}, ...
+                'Options',       {'',                       '',                 '',            ''}, ...
                 'Description',   { ...
                 'Color of the histogram bars', ...
-                'Number of bins in the histogram'} ...
+                'Number of bins in the histogram', ...
+                'If true, remove the signal mean before display', ...
+                'Label for units of the signal'} ...
                 );
         end % getDefaultProperties
         

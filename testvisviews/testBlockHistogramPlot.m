@@ -1,5 +1,5 @@
 function test_suite = testBlockHistogramPlot %#ok<STOUT>
-% Unit tests for blockHistogramPlot
+% Unit tests for visviews.blockHistogramPlot
 initTestSuite;
 
 function testNormalConstructor %#ok<DEFNU>
@@ -58,7 +58,7 @@ ip.plot(testVD, thisFunc, slice1);
 drawnow
 
 fprintf('It should allow its public parameters to be changed (bars are red)\n');
-sfig1 = figure('Name', 'visviews.BlockHistogramPlot: bar colors changed to red');
+sfig1 = figure('Name', 'visviews.blockHistogramPlot: bar colors changed to red');
 hp = visviews.blockHistogramPlot(sfig1, [], []);
 hp.HistogramColor = [1, 0, 0];
 assertTrue(isvalid(hp));

@@ -265,8 +265,8 @@ delete(sfig);
 delete(sfig1)
 
 function testSmallDataSize %#ok<DEFNU>
-% test elementBoxPlot plot uneven grouping of elements
-fprintf('\nUnit tests for visviews.elementBoxPlot plot method uneven grouping\n')
+% test visviews.blockImagePlot plot uneven grouping of elements
+fprintf('\nUnit tests for visviews.blockImagePlot plot method uneven grouping\n')
 fprintf('It should produce a plot for identity slice with uneven grouping\n');
 
 % Generate some data to plot

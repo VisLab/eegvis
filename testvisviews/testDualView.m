@@ -105,7 +105,7 @@ delete(bv2)
 delete(bv3)
 delete(bv4)
 delete(bv5)
-delete(bv6)
+%delete(bv6)
 
 function testLinkageBoxPlot %#ok<DEFNU>
 % Unit test for normal dualView normal constructor
@@ -184,6 +184,6 @@ for k = 1:length(uKeys)
       visviews.clickable.printStructure(s);  
     end
 end
-delete(bv3)
-delete(bv4)
+%delete(bv3)
+%delete(bv4)
 

@@ -112,6 +112,10 @@ classdef horizontalPanel < uiextras.Panel & visprops.configurable & ...
         end % getGaps
         
         function plot(obj, visData, bFunction, dslice)
+            % Plot the individual items in the panel
+            
+            % Make sure the units are set for resizing
+            set(obj, 'Units', 'normalized', 'Position', [0, 0, 1, 1]);
             % Plot each panel 
             for k = 1:length(obj.PlotList);
                    plotObj = obj.PlotList{k};

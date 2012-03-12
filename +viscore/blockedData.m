@@ -132,6 +132,17 @@ classdef blockedData < hgsetget
             [nElements, nSamples, nBlocks] = size(obj.Data);
         end % getDataSize
         
+        function [values, sValues] = getDataSlice(obj, dSlice)
+            % Return function values and starting indices corresponding to this slice
+            if ~isempty(dSlice)
+                slices = dSlice.getParameters(3);
+            else
+                slices = [];
+            end
+            [values, sValues] = viscore.dataSlice.getDataSlice(...
+                                      obj.Data, slices, [], []);
+        end % getDataSlice
+        
         function oMean = getOriginalMean(obj)
             % Return the overall mean of original data
             oMean = obj.OriginalMean;

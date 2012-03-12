@@ -96,7 +96,7 @@ testVD4 = viscore.blockedData(data2, 'Numeric3', 'BlockDim', 3);
 assertVectorsAlmostEqual([x, y, z], [1000, 20, 1]);
 
 function testConstructorWithEpochs %#ok<DEFNU>
-% Unit test for blockedData epoch parameters
+% Unit test for viscore.blockedData epoch parameters
 fprintf('\nUnit tests for viscore.blockedData epoch start times\n');
 data = random('exp', 1, [1, 1000, 20]);
 
@@ -188,3 +188,64 @@ ds = vd.getOriginalStd();
 assertTrue(isnumeric(ds));
 assertEqual(length(ds), 1);
 
+function testGetDataSlice %#ok<DEFNU>
+% Unit test for viscore.blockedData for getBlockSlice
+fprintf('\nUnit tests for viscore.blockedData getDataSlice :\n');
+
+fprintf('It should return 1 block of values for each element when blocks are sliced\n');
+data = random('exp', 1, [32, 1000, 20]);
+testVD = viscore.blockedData(data, 'Rand1');
+dSlice1 = viscore.dataSlice('Slices', {':', ':', '3'});
+[values, sValues] = testVD.getDataSlice(dSlice1);
+assertEqual(size(values), [32, 1000]);
+assertVectorsAlmostEqual(values, data(:, :, 3));
+assertVectorsAlmostEqual(sValues, [1, 1, 3]);
+
+fprintf('It should return all blocks of value for each element when elements are sliced\n');
+dSlice2 = viscore.dataSlice('Slices', {'5', ':', ':'});
+[values, sValues] = testVD.getDataSlice(dSlice2);
+assertVectorsAlmostEqual(size(values), [1, 1000, 20]);
+assertVectorsAlmostEqual(values, data(5, :, :));
+assertVectorsAlmostEqual(sValues, [5, 1, 1]);
+
+fprintf('It should return a single value when data is 2D and slice is by element\n');
+data = random('exp', 1, [32, 1000]);
+testVD = viscore.blockedData(data, 'Rand1');
+dSlice1 = viscore.dataSlice('Slices', {'2', ':', ':'});
+[values, sValues] = testVD.getDataSlice(dSlice1);
+assertEqual(size(values, 1), 1);
+assertEqual(size(values, 2), 1000);
+assertVectorsAlmostEqual(values, data(2, :));
+assertVectorsAlmostEqual(sValues, [2, 1, 1]);
+
+function testGetDataSliceOneElement %#ok<DEFNU>
+% Unit test for viscore.blockedData for getDataSlice
+fprintf('\nUnit tests for viscore.blockedData getDataSlice when data has one element:\n');
+
+data = random('exp', 1, [1, 1000, 20]);
+testVD = viscore.blockedData(data, 'Rand1');
+
+fprintf('It should return 1 value when blocks are sliced\n');
+dSlice1 = viscore.dataSlice('Slices', {':', ':', '3'});
+[values, sValues] = testVD.getDataSlice(dSlice1);
+assertEqual(size(values), [1, 1000]);
+assertVectorsAlmostEqual(values, data(1, :, 3));
+assertVectorsAlmostEqual(sValues, [1, 1, 3]);
+
+
+fprintf('It should return 1 value for each block when elements are sliced\n');
+dSlice2 = viscore.dataSlice('Slices', {'1', ':', ':'});
+[values, sValues] = testVD.getDataSlice(dSlice2);
+assertVectorsAlmostEqual(size(values), [1, 1000, 20]);
+assertVectorsAlmostEqual(values, data(1, :, :));
+assertVectorsAlmostEqual(sValues, [1, 1, 1]);
+
+fprintf('It should return a single value when data is 2D and slice is by element\n');
+data = random('exp', 1, [32, 1000]);
+testVD = viscore.blockedData(data, 'Rand1');
+dSlice1 = viscore.dataSlice('Slices', {'2', ':', ':'});
+[values, sValues] = testVD.getDataSlice(dSlice1);
+assertEqual(size(values, 1), 1);
+assertEqual(size(values, 2), 1000);
+assertVectorsAlmostEqual(values, data(2, :));
+assertVectorsAlmostEqual(sValues, [2, 1, 1]);
