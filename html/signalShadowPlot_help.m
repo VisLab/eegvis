@@ -102,7 +102,7 @@
  
     % Create the figure and plot the data
     sfig = figure('Name', 'Plot with smoothed signals');
-    sp = visviews.shadowSignalPlot(sfig, [], []);
+    sp = visviews.signalShadowPlot(sfig, [], []);
     sp.CutoffScore = 2.0;
     sp.plot(testVD, thisFunc, thisSlice);
    

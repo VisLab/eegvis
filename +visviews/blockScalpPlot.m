@@ -1,28 +1,31 @@
-% visviews.blockBoxPlot display a boxplot of blocked function values by window
+% visviews.blockBoxPlot display a scalp map of blocked function values by window
 %
 % Usage:
-%   >>   visviews.blockBoxPlot(parent, manager, key)
-%   >>   obj = visviews.blockBoxPlot(parent, manager, key)
+%   >>   visviews.blockScalpPlot(parent, manager, key)
+%   >>   obj = visviews.blockScalpPlot(parent, manager, key)
 %
 % Description:
-% obj = visviews.blockBoxPlot(parent, manager, key) displays a series of 
-%    vertical box plots using a compressed style. The block box plot 
-%    displays the distribution of values of a summarizing function for 
-%    a clump of consecutive time windows or epochs for all channels. 
-%    Each window or epoch produces a single value for each element. 
+% obj = visviews.blockScalpPlot(parent, manager, key) displays a scalp map
+%    of verage block function values for a specified slice of time. 
+%    The display includes a contour map of the average values over the
+%    time and either points, labels, or numbers identifying the positions
+%    of the elements. The block scalp plot assumes that the elements
+%    correspond to eeg channels positioned on a scalp. If no channel
+%    locations are provided, the scalp map arrays the elements in a circle
+%    and does not draw a contour map. 
 % 
 %    The parent is a graphics handle to the container for this plot. The
 %    manager is an viscore.dataManager object containing managed objects
 %    for the configurable properties of this object, and key is a string
 %    identifying this object in the property manager GUI.
 % 
-% obj = visviews.blockBoxPlot(parent, manager, key) returns a handle to
+% obj = visviews.blockScalpPlot(parent, manager, key) returns a handle to
 %    the newly created object.
 %
-% visviews.blockBoxPlot is configurable, resizable, clickable, and cursor explorable.
+% visviews.blockScalpPlot is configurable, resizable, clickable, and cursor explorable.
 %
 % Configurable properties:
-% The visviews.blockBoxPlot has five configurable properties: 
+% The visviews.blockScalpPlot has five configurable properties: 
 %
 % BoxColors provides a list of colors used to alternate through in 
 %     displaying the boxes. For data with lots of clumps, the 
@@ -53,7 +56,7 @@
 %    colors for the slice. 
 %
 %    Usually signal plots combine signals using mean or median, while 
-%    summary plots such as blockBoxPlot use the max, although users may 
+%    summary plots such as blockScalpPlot use the max, although users may 
 %    choose other combinations.
 %
 % IsClickable is a boolean specifying whether this plot should respond to
@@ -70,7 +73,7 @@
 %
 %    % Create a block box plot
 %    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-%    bp = visviews.blockBoxPlot(sfig, [], []);
+%    bp = visviews.blockScalpPlot(sfig, [], []);
 %
 %    % Generate some data to plot
 %    data = random('exp', 1, [32, 1000, 20]);
@@ -96,9 +99,9 @@
 %
 % Class documentation:
 % Execute the following in the MATLAB command window to view the class 
-% documentation for visviews.blockBoxPlot:
+% documentation for visviews.blockScalpPlot:
 %
-%    doc visviews.blockBoxPlot
+%    doc visviews.blockScalpPlot
 %
 %
 % See also: visviews.axesPanel, visviews.blockImagePlot, visviews.clickable,
@@ -122,12 +125,12 @@
 % along with this program; if not, write to the Free Software
 % Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-% $Log: blockBoxPlot.m,v $
+% $Log: blockScalpPlot.m,v $
 % Revision: 1.00  04-Dec-2011 09:11:20  krobbins $
 % Initial version $
 %
 
-classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
+classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
     
     properties
         % configurable properties
@@ -149,7 +152,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
     
     methods
         
-        function obj = blockBoxPlot(parent, manager, key)
+        function obj = blockScalpPlot(parent, manager, key)
             % Parent is non-empty handle to container for axes panel but manager can be empty
             obj = obj@visviews.axesPanel(parent);
             obj = obj@visprops.configurable(key);
@@ -158,7 +161,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 visprops.property.updateProperties(obj, manager);
             end
             set(obj.MainAxes, 'Tag', 'blockBoxAxes');
-        end % blockBoxPlot constructor
+        end % blockScalpPlot constructor
         
         function [dSlice, bFunction] = getClicked(obj)
             % Clicking on the boxplot always causes plot of group of blocks
@@ -225,6 +228,17 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             
             % Calculate the number of clumps and adjust for uneven clumps
             obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
+            %leftOvers = obj.NumberClumps*obj.ClumpFactor - obj.NumberBlocks;
+%             if leftOvers > 0
+%                 data = reshape([data, nan(obj.NumberElements, leftOvers)], ...
+%                     obj.NumberElements*obj.ClumpFactor, obj.NumberClumps);
+%             end
+%             groups = repmat(1:obj.NumberClumps, obj.NumberElements*obj.ClumpFactor, 1);
+%             data = data(:);
+%             groups = groups(:);
+%             nanData = isnan(data);   % Remove NaNs to process MATLAB bug
+%             data(nanData) = [];
+%             groups(nanData) = [];
             data = data(:);
             groups = repmat(1:obj.NumberClumps, obj.NumberElements*obj.ClumpFactor, 1);
             groups = groups(:);
@@ -243,7 +257,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                     'Jitter', 0.1, 'datalim', limits, ...
                     'extrememode', 'compress');
             catch ME
-                warning('blockBoxPlot:plot', ...
+                warning('blockScalpPlot:plot', ...
                     ['boxplot ' obj.getObjectID() ' for function ' ...
                     obj.CurrentFunction.getDisplayName(1) ...
                     ' doesn''t have enough room to plot: (' ME.message ...
@@ -362,7 +376,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
         
         function settings = getDefaultProperties()
             % Structure specifying how to set configurable public properties
-            cName = 'visviews.blockBoxPlot';
+            cName = 'visviews.blockScalpPlot';
             settings = struct( ...
                 'Enabled',       {true, true,   true,  true}, ...
                 'Category',      {cName, cName, cName, cName}, ...
@@ -385,7 +399,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 'Editable',      {true, true, true, true}, ...
                 'Options',       {'', [1, inf], {'max', 'min', 'mean', 'median'}, ''}, ...
                 'Description',   {...
-                'blockBoxPlot alternating box colors (cannot be empty)', ...
+                'blockScalpPlot alternating box colors (cannot be empty)', ...
                 'Number of blocks grouped into a clump represented by one box plot', ...
                 'Method for combining blocks in a clump', ...
                 'If true, click causes detail plot redisplay'} ...
@@ -394,5 +408,4 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
         
     end % static methods
     
-end  % blockBoxPlot
-
+end  % blockScalpPlot

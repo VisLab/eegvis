@@ -145,6 +145,12 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
             obj.StartBlock = s(3);
             obj.StartElement = s(1);
             [obj.NumberElements, bSize, obj.NumberBlocks] = size(data); %#ok<ASGLU>
+            
+            % Remove the mean if necessary
+            if obj.RemoveMean
+                m = mean(data, 2);
+                data = data - repmat(m, 1, size(data, 2));
+            end
 
             [hHeight, xout] = hist(data(:), obj.NumberBins);
             xout = double(xout);

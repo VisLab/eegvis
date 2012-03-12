@@ -67,7 +67,7 @@
  
     % Create the figure and plot the data
     sfig  = figure('Name', 'Stacked signal plot with random data');
-    sp = visviews.stackedSignalPlot(sfig, [], []);
+    sp = visviews.signalStackedPlot(sfig, [], []);
     sp.SignalScale = 2.0;
     sp.plot(testVD, thisFunc, thisSlice);
    
