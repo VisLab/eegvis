@@ -69,8 +69,8 @@ sp.plot(testVD, [], slice1);
 gaps = sp.getGaps();
 sp.reposition(gaps);
 drawnow
-%delete(sfig);
-%delete(sfig1)
+delete(sfig);
+delete(sfig1)
 
 
 function testPlotOneValue %#ok<DEFNU>
@@ -91,7 +91,25 @@ sp.plot(testVD, [], slice1);
 drawnow
 gaps = sp.getGaps();
 sp.reposition(gaps);
-%delete(sfig)
+
+fprintf('It should produce a valid plot for when mean is not removed\n');
+% test signalHistogramPlot plot
+sfig1 = figure('Name', 'One value no mean removed');
+sp1 = visviews.signalHistogramPlot(sfig1, [], []);
+assertTrue(isvalid(sp1));
+% Generate some data to plot
+data = random('exp', 1, [32, 1000, 20]);
+testVD = viscore.blockedData(data, 'Rand1');
+
+slice1 = viscore.dataSlice('Slices', {'3', ':', '2'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sp1.RemoveMean = false;
+sp1.plot(testVD, [], slice1);
+drawnow
+gaps = sp1.getGaps();
+sp1.reposition(gaps);
+delete(sfig)
+delete(sfig1)
 
 function testPlotSlice %#ok<DEFNU>
 % Unit test of visviews.signalHistogramPlot for plotting a slice
@@ -110,4 +128,4 @@ sp.plot(testVD, [], slice1);
 drawnow
 gaps = sp.getGaps();
 sp.reposition(gaps);
-%delete(sfig);
+delete(sfig);
