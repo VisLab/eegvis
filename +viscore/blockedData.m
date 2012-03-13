@@ -252,9 +252,6 @@ classdef blockedData < hgsetget
     
     methods(Access = private)
         
-%         function data = padEnd(data, ...
-%                     [aPadStart, leftOver, aPadEnd], obj.PadValue, 'post');
-        
         function parseParameters(obj, data, dataID, varargin)
             % Parse parameters provided by user in constructor
             parser = viscore.blockedData.getParser();
