@@ -27,41 +27,43 @@
 % Configurable properties:
 % The visviews.blockScalpPlot has five configurable properties:
 %
-% BoxColors provides a list of colors used to alternate through in
-%     displaying the boxes. For data with lots of clumps, the
-%     boxes appear highly compressed due to limited viewing space and
-%     alternating colors help users distinguish the individual boxes. The
-%     default is |[0.7, 0.7, 0.7; 1, 0, 1]|.
-%
-% ClumpFactor specifies the number of consecutive windows or epochs
-%    represented by each box. When the |ClumpFactor| is one (the default),
-%    each box represents a signle window or element. If |ClumpFactor| is greater than
-%    one, each box represents several consecutive blocks.
-%    Users can trade-off clump size versus block size to see different
-%    representations of the data.
-%
 % CombineMethod specifies how to combine multiple blocks into a
 %    single block to determine an overall block value. The value can be
 %   'max'  (default), 'min', 'mean', or  'median'. Detail plots use the
 %    combined block value to determine slice colors.
 %
-%    Suppose the plot has 128 channels, a clump size of 3, and a block size of
-%    1000 samples, and 100 windows. A user click delivers a slice representing
-%    3×1000 worth of data. A detail plot such as stackedSignalPlot
-%    combines this data based on its own CombineMethod property,
-%    say by taking the mean to plot 32×1000 data points on 32 line graphs.
-%    However, we would like to use line colors for the signals based
-%    on the block function values in the box plot. The detail plots use
-%    box plot's CombineMethod to combine the blocks to get appropriate
-%    colors for the slice.
+%    Suppose the plot has 128 elements and 100 windows. The block scalp
+%    map requires a single value for each element and must combine the
+%    block values over the 100 windows to obtain a single value for each
+%    element. Possible combination methods include max, min, mean, or
+%    median. The default is the max.
 %
-%    Usually signal plots combine signals using mean or median, while
-%    summary plots such as blockScalpPlot use the max, although users may
-%    choose other combinations.
+% ElementColor specifies the color used for an element and its
+%     corresponding label when the electrode is in the current slice. The
+%     default is |[0, 0, 0]|.
+%
+% HeadColor specifies the color for the head outline. The plot function
+%     uses the same color for electrodes and their corresponding labels
+%     when the electrodes are not in the current slice. The
+%     default is |[0.75, 0.75, 0.75]|.
+%
+% InterpolationMethod specifies the method used to produce the shaded
+%     map of block values on the scalp. The default value is 'square' which
+%     specifies that the block values be interpolated on a grid that is 
+%     2 x the HeadRadius. After interpolation, the plot masks values 
+%     the values that fall outside the inscribed circle with radius
+%     HeadRadius. This method is the default method used by EEGLAB
+%     topolot. Since some of the outer grid points on the square are
+%     outside the convex hull of the elements, values along the edges
+%     are extrapolated rather than interpolated. This can result in
+%     contours maps that are visually pleasing but can be misleading.
+%
+%     An alternative interpolation method 'convex', only creates the
+%     map within the convex hull. All map values are then interpolated.
 %
 % IsClickable is a boolean specifying whether this plot should respond to
 %    user mouse clicks when incorporated into a linkable figure. The
-%    default value is true.
+%    default value is true. 
 %
 % LinkDetails is a boolean specifying whether clicking this plot in a
 %    linkable figure should cause detail views to display the clicked
@@ -135,7 +137,7 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
     properties
         % configurable properties
         CombineMethod = 'max';         % method of combining blocks
-        ElectrodeColor = [0, 0, 0];    % electrode color
+        ElementColor = [0, 0, 0];    % electrode color
         HeadColor = [0.75, 0.75, 0.75];   % color for plotting the head
         InterpolationType = 'square';  % method
     end % public properties
@@ -254,10 +256,24 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
             obj.setBackgroundColor([1, 1, 1]);
             obj.plotMap(x, y, values)
             obj.plotHead();
-            obj.plotElectrodes(x, y, labels);  
+            obj.plotElements(x, y, labels); 
+            obj.CursorString = {'y:'; 'x:'};
             hold off
             obj.redraw();
         end % plot
+        
+        function s = updateString(obj, point)
+            % Return a cursor string corresponding to point
+            s = '';   % String to be returned
+            [x, y, xInside, yInside] = getDataCoordinates(obj, point);
+            if ~xInside || ~yInside
+                return;
+            end
+    
+            s = {[obj.CursorString{1} num2str(y/obj.SqueezeFactor)]; ...
+                [obj.CursorString{2} num2str(x/obj.SqueezeFactor)]}; ...
+                
+        end % updateString
         
     end % public methods
     
@@ -320,9 +336,9 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
             set(src, 'userdata', labelNum);
         end % labelCallback
         
-        function plotElectrodes(obj, x, y, labels)
-            % Plot electrode points and positions, setting callbacks
-            if isempty(x)  % don't plot anything if no electrodes
+        function plotElements(obj, x, y, labels)
+            % Plot elements points and positions, setting callbacks
+            if isempty(x)  % don't plot anything if no elements
                 return;
             end
             mSize = obj.getMarkerSize(length(x));
@@ -335,12 +351,12 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
             for k = 1:length(x)
                 if elementMask(k)    % Element in the slice
                     obj.SliceElectrodes{sPos} = ...
-                        plot3(y(k), x(k), 2.1, '.', 'Color', obj.ElectrodeColor, ...
+                        plot3(y(k), x(k), 2.1, '.', 'Color', obj.ElementColor, ...
                         'markersize', mSize, 'Tag', num2str(k));
                     % Element labels switch
                     h = text(double(y(k)+0.01),double(x(k)),...
                         2.1, num2str(k),'HorizontalAlignment','left',...
-                        'VerticalAlignment','middle','Color', [0, 0, 0], ...
+                        'VerticalAlignment','middle','Color', obj.ElementColor, ...
                         'userdata', 1 , ...
                         'FontSize', get(0,'DefaultAxesFontSize'));
                     set(h, 'ButtonDownFcn', {@obj.labelCallback, h, ...
@@ -358,7 +374,7 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
                 end
             end
             
-        end % plotElectrodes
+        end % plotElements
         
         function plotHead(obj)
             % Plot head outline and label the graph
@@ -443,7 +459,7 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
             if obj.SqueezeFactor < 0.92 && obj.PlotRadius-obj.HeadRadius > 0.05  % (size of head in axes)
                 AXHEADFAC = 1.05;     % do not leave room for external ears if head cartoon
             end
-            set(gca, 'Color', [1, 1, 1], ...
+            set(gca, ...
                 'Xlim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC, ...
                 'Ylim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC);
             surface(Xi - delta/2, Yi - delta/2, zeros(size(Zi)), ...
@@ -460,27 +476,27 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
             % Structure specifying how to set configurable public properties
             cName = 'visviews.elementBoxPlot';
             settings = struct( ...
-                'Enabled',       {true, true, true}, ...
-                'Category',      {cName, cName, cName}, ...
+                'Enabled',       {true, true, true, true}, ...
+                'Category',      {cName, cName, cName, cName}, ...
                 'DisplayName',   {...
-                'Box plot colors', ...
-                'Elements per clump (boxplot)', ...
-                'Combination method'}, ...
-                'FieldName',     {'BoxColors', 'ClumpFactor', 'CombineMethod'}, ...
-                'Value',         { ...
-                [0.7, 0.7, 0.7; 0, 0, 1], ...
-                1, ...
-                'max'}, ...
+                'Combination method', ...
+                'Element color', ...
+                'Head color', ...
+                'Interpolation method'}, ...
+                'FieldName',     {'CombineMethod', 'ElementColor', 'HeadColor',         'InterpolationMethod'}, ...
+                'Value',         {'max',            [0, 0, 0],     [0.75, 0.75, 0.75],  'square'}, ...
                 'Type',          {...
-                'visprops.colorListProperty', ...
-                'visprops.unsignedIntegerProperty', ...
+                'visprops.enumeratedProperty', ...
+                'visprops.colorProperty', ...
+                'visprops.colorProperty', ...
                 'visprops.enumeratedProperty'}, ...
-                'Editable',      {true, true, true}, ...
-                'Options',       {'', [1, inf], {'max', 'min', 'mean', 'median'}}, ...
+                'Editable',      {true, true, true, true}, ...
+                'Options',       {{'max', 'min', 'mean', 'median'}, '', '', {'square', 'convex'}}, ...
                 'Description',   {...
-                'elementBoxPlot alternating box colors (cannot be empty)', ...
-                'Number of elements grouped into a clump represented by one box plot', ...
-                'Method for combining elements in a clump'} ...
+                'Method for combining windows to produce single value for each element', ...
+                'Color for plotting elements in current slice', ...
+                'Color for plotting head outline and elements not in current slice', ...
+                'Method for interpolating block data onto the head map'} ...
                 );
             
         end % getDefaultProperties

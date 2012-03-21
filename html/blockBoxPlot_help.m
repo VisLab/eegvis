@@ -26,26 +26,26 @@
 % The |visviews.blockBoxPlot| has five configurable properties: 
 %
 % |BoxColors| provides a list of colors used to alternate through in 
-%     displaying the boxes. For data with lots of clumps, the 
-%     boxes appear highly compressed due to limited viewing space and 
-%     alternating colors help users distinguish the individual boxes. The
-%     default is |[0.7, 0.7, 0.7; 1, 0, 1]|.
+% displaying the boxes. For data with lots of clumps, the 
+% boxes appear highly compressed due to limited viewing space and 
+% alternating colors help users distinguish the individual boxes. The
+% default is |[0.7, 0.7, 0.7; 1, 0, 1]|.
 %
 % |ClumpFactor| specifies the number of consecutive windows or epochs 
-%    represented by each box. When the |ClumpFactor| is one (the default), 
-%    each box represents its own window. If |ClumpFactor| is greater than 
-%    one, each box represents several consecutive blocks. 
-%    Users can trade-off clump size versus block size to see different 
-%    representations of the data.
+% represented by each box. When the |ClumpFactor| is one (the default), 
+% each box represents its own window. If |ClumpFactor| is greater than 
+% one, each box represents several consecutive blocks. 
+% Users can trade-off clump size versus block size to see different 
+% representations of the data.
 %
 % |CombineMethod| specifies how to combine multiple blocks into a 
-%    single block to determine an overall block value. The value can be 
-%   |'max'|  (default), |'min'|, |'mean'|, or  |'median'|. Detail plots use 
-%   the combined block value to determine slice colors. 
+% single block to determine an overall block value. The value can be 
+% |'max'|  (default), |'min'|, |'mean'|, or  |'median'|. Detail plots use 
+% the combined block value to determine slice colors. 
 %
-% Suppose the plot has 128 channels, a clump size of 3, and a block size of 
+% Suppose the plot has 128 channels, a clump size of 3, a block size of 
 % 1000 samples, and 100 windows. A user click delivers a slice representing 
-% 3×1000 worth of data. A detail plot such as |stackedSignalPlot| 
+% 3×1000 worth of data. A detail plot such as |signalStackedPlot| 
 % combines this data based on its own |CombineMethod| property, 
 % say by taking the mean to plot 32×1000 data points on 32 line graphs. 
 % However, we would like to use line colors for the signals based 
@@ -58,12 +58,12 @@
 % choose other combinations.
 %
 % |IsClickable| is a boolean specifying whether this plot should respond to
-%    user mouse clicks when incorporated into a linkable figure. The
-%    default value is |true|.
+% user mouse clicks when incorporated into a linkable figure. The
+% default value is |true|.
 %
 % |LinkDetails| is a boolean specifying whether clicking this plot in a
-%    linkable figure should cause detail views to display the clicked
-%    slice. The default value is |true|.
+% linkable figure should cause detail views to display the clicked
+% slice. The default value is |true|.
 %
 
 %% Example 1

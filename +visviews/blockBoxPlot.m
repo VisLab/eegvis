@@ -285,11 +285,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 'YLimMode', 'manual', 'YLim', yLimits, ...
                 'YTickMode','manual', 'YTick', yTickMarks, ...
                 'YTickLabelMode', 'manual', 'YTickLabel', yTickLabels);
-            
-           % % Precalculate slope of interpolation line for updateString
-           % obj.TotalTime = numSamples*double(obj.NumberBlocks)/visData.SampleRate;
-           % obj.CursorSlope = obj.TotalTime/double(obj.NumberClumps);
-            
+         
             % Set the cursor string for exploration mode
             obj.CursorString = {[wString ': ']; ...
                 [bFunction.getValue(1, 'ShortName') ': ']; };  

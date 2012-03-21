@@ -74,6 +74,7 @@
                 <tocitem target="blockBoxPlot_help.html" image="HelpIcon.FUNCTION">blockBoxPlot</tocitem>
                 <tocitem target="blockHistogramPlot_help.html" image="HelpIcon.FUNCTION">blockHistogramPlot</tocitem>
                 <tocitem target="blockImagePlot_help.html" image="HelpIcon.FUNCTION">blockImagePlot</tocitem>
+                <tocitem target="blockScalpPlot_help.html" image="HelpIcon.FUNCTION">blockScalpPlot</tocitem>
                 <tocitem target="clickable_help.html" image="HelpIcon.FUNCTION">clickable</tocitem>
                 <tocitem target="cursorExplorable_help.html" image="HelpIcon.FUNCTION">cursorExplorable</tocitem>
                 <tocitem target="cursorExplorer_help.html" image="HelpIcon.FUNCTION">cursorExplorer</tocitem>

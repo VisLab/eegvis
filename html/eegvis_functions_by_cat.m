@@ -48,6 +48,7 @@
 % * <blockBoxPlot_help.html |blockBoxPlot|> - displays a boxplot of blocked function values by window
 % * <blockHistogramPlot_help.html |blockHistogramPlot|> - displays histogram of block function values
 % * <blockImagePlot_help.html |blockImagePlot|> - displays element vs block values as an image
+% * <blockScalpPlot_help.html |blockScalpPlot|> - displays scalp map of block values
 % * <clickable_help.html |clickable|> - base class for mouse click linkage among view panels
 % * <cursorExplorable_help.html |cursorExplorable|> - base class for objects used with cursor explorer
 % * <cursorExplorer_help.html |cursorExplorer|> - class that adds and supervises an exploratory data cursor

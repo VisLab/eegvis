@@ -37,27 +37,27 @@
 %   'max'  (default), 'min', 'mean', or  'median'. Detail plots use this 
 %    block value to determine slice colors. 
 %
-%    For example, with 32 channels, a clump size of 3, and a block size of 
+%    For example, with 32 channels, a clump size of 3, a block size of 
 %    1000 samples, the blockImagePlot delivers a slice representing 
-%    32×1000×3 worth of data. A detail plot such as |stackedSignalPlot| 
-%    combines this data based on its own |CombineMethod| property, 
+%    32×1000×3 worth of data. A detail plot such as signalStackedPlot 
+%    combines this data based on its own CombineMethod property, 
 %    say by taking the mean to plot 32×1000 data points on 32 line graphs. 
 %    However, we would like to use line colors for the signals based 
 %    on the block function values in the image plot. The detail plots use 
-%    image plot's |CombineMethod| to combine the blocks to get appropriate 
+%    image plot's CombineMethod to combine the blocks to get appropriate 
 %    colors for the slice. 
 %
 %    Usually signal plots combine signals using mean or median, while 
-%    summary plots such as |blockBoxPlot| use the max, although users may 
+%    summary plots such as blockBoxPlot use the max, although users may 
 %    choose other combinations.
 %
 % IsClickable is a boolean specifying whether this plot should respond to
 %    user mouse clicks when incorporated into a linkable figure. The
-%    default value is |true|.
+%    default value is true.
 %
 % LinkDetails is a boolean specifying whether clicking this plot in a
 %    linkable figure should cause detail views to display the clicked
-%    slice. The default value is |true|.
+%    slice. The default value is true.
 %
 % Example: 
 % Create a block image plot of kurtosis of 32 exponentially distributed channels

@@ -27,20 +27,20 @@
 % The |visviews.blockImagePlot| has four configurable parameters: 
 %
 % |ClumpFactor| specifies the number of consecutive windows or epochs 
-%    represented by each pixel column. When the |ClumpFactor| is one (the default), 
-%    each pixel column represents its own window. If |ClumpFactor| is greater than 
-%    one, each pixel column represents several consecutive blocks. 
-%    Users can trade-off clump size versus block size to see different 
-%    representations of the data.
+% represented by each pixel column. When the |ClumpFactor| is one (the default), 
+% each pixel column represents its own window. If |ClumpFactor| is greater than 
+% one, each pixel column represents several consecutive blocks. 
+% Users can trade-off clump size versus block size to see different 
+% representations of the data.
 %
 % |CombineMethod| specifies how to combine multiple blocks into a 
-%    single block to determine an overall block value. The value can be be
-%   |'max'|  (default), |'min'|, |'mean'|, or  |'median'|. Detail plots use this 
-%    block value to determine slice colors. 
+% single block to determine an overall block value. The value can be be
+% |'max'|  (default), |'min'|, |'mean'|, or  |'median'|. Detail plots use this 
+% block value to determine slice colors. 
 %
-% For example, with 32 channels, a clump size of 3, and a block size of 
+% For example, with 32 channels, a clump size of 3, a block size of 
 % 1000 samples, the blockImagePlot delivers a slice representing 
-% 32×1000×3 worth of data. A detail plot such as |stackedSignalPlot| 
+% 32×1000×3 worth of data. A detail plot such as |signalStackedPlot| 
 % combines this data based on its own |CombineMethod| property, 
 % say by taking the mean to plot 32×1000 data points on 32 line graphs. 
 % However, we would like to use line colors for the signals based 
@@ -53,12 +53,12 @@
 % choose other combinations.
 %
 % |IsClickable| is a boolean specifying whether this plot should respond to
-%    user mouse clicks when incorporated into a linkable figure. The
-%    default value is |true|.
+% user mouse clicks when incorporated into a linkable figure. The
+% default value is |true|.
 %
 % |LinkDetails| is a boolean specifying whether clicking this plot in a
-%    linkable figure should cause detail views to display the clicked
-%    slice. The default value is |true|.
+% linkable figure should cause detail views to display the clicked
+% slice. The default value is |true|.
 %
 
 %% Example 1

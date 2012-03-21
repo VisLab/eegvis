@@ -13,7 +13,9 @@ assertTrue(isvalid(bv0));
 
 fprintf('It should plot data when blockedData is in the constructor\n')
 data = random('exp', 2, [32, 1000, 20]);
-testVD = viscore.blockedData(data, 'Testing data passed in constructor');
+load chanlocs.mat;
+testVD = viscore.blockedData(data, 'Testing data passed in constructor', ...
+     'ElementLocations', chanlocs);
 bv1 = visviews.dualView('VisData', testVD);
 drawnow
 assertTrue(isvalid(bv1));
@@ -36,7 +38,8 @@ end
 fprintf('It should produce a valid plot when a Plots argument with linked summary is passed\n');
 pS = viewTestClass.getDefaultPlotsLinkedSummary();
 assertEqual(length(pS), 4);
-testVD2 = viscore.blockedData(data, 'Testing data and plots passed in constructor');
+testVD2 = viscore.blockedData(data, 'Testing data and plots passed in constructor', ...
+    'ElementLocations', chanlocs);
 bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS);
 drawnow
 assertTrue(isvalid(bv2));
@@ -165,7 +168,9 @@ end
 fprintf('It should produce a valid plot when a imageBoxplot is linked to two boxBoxPlots\n');
 pS = viewTestClass.getPlotsBlockImageMultipleLinked();
 assertEqual(length(pS), 5);
-testVD4 = viscore.blockedData(data, 'Image plot linking two different box plots');
+load chanlocs.mat;
+testVD4 = viscore.blockedData(data, 'Image plot linking two different box plots', ...
+    'ElementLocations', chanlocs);
 bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
 drawnow
 assertTrue(isvalid(bv4));
@@ -184,6 +189,31 @@ for k = 1:length(uKeys)
       visviews.clickable.printStructure(s);  
     end
 end
+
+fprintf('It should produce a valid plot when a blockScalpPlot is linked to two boxBoxPlots\n');
+pS = viewTestClass.getDefaultPlotsScalpLinked();
+assertEqual(length(pS), 8);
+testVD5 = viscore.blockedData(data, 'Scalp plot linking two different box plots', ...
+    'ElementLocations', chanlocs);
+bv5 = visviews.dualView('VisData', testVD5, 'Plots', pS');
+drawnow
+assertTrue(isvalid(bv5));
+keys = bv5.getSourceMapKeys();
+fprintf('\nSources:\n');
+for k = 1:length(keys)
+    visviews.clickable.printStructure(bv5.getSourceMap(keys{k}));
+end
+fprintf('\nUnmapped sources:\n')
+uKeys = bv5.getUnmappedKeys();
+for k = 1:length(uKeys)
+    fprintf('%s: \n', uKeys{k} );
+    values = bv5.getUnmapped(uKeys{k});
+    for j = 1:length(values)
+      s = bv5.getSourceMap(values{j});
+      visviews.clickable.printStructure(s);  
+    end
+end
 %delete(bv3)
 %delete(bv4)
+%delete(bv5)
 

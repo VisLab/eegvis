@@ -21,7 +21,13 @@
 % visviews.elementBoxPlot is configurable, resizable, clickable, and cursor explorable.
 %
 % Configurable properties:
-% The visviews.elementBoxPlot has four configurable parameters: 
+% The visviews.elementBoxPlot has five configurable parameters: 
+%
+% BoxColors provides a list of colors used to alternate through in 
+%     displaying the boxes. For data with lots of clumps, the 
+%     boxes appear highly compressed due to limited viewing space and 
+%     alternating colors help users distinguish the individual boxes. The
+%     default is |[0.7, 0.7, 0.7; 1, 0, 1]|.
 %
 % ClumpFactor specifies the number of consecutive elements 
 %    represented by each box. When the ClumpFactor is one (the default), 
@@ -33,9 +39,9 @@
 %   'max'  (default), 'min', 'mean', or  'median'. Detail plots use this 
 %    block value to determine slice colors. 
 %
-%    For example, with 128 channels, a clump size of 3, and a block size of 
+%    For example, with 128 channels, a clump size of 3, a block size of 
 %    1000 samples, and 20 windows, the elementBoxPlot delivers a slice representing 
-%    3×1000×20 worth of data. A detail plot such as stackedSignalPlot 
+%    3×1000×20 worth of data. A detail plot such as signalStackedPlot 
 %    combines this data based on its own CombineMethod property, 
 %    say by taking the mean to plot 20×1000 data points on 20 line graphs. 
 %    However, we would like to use line colors for the signals based 

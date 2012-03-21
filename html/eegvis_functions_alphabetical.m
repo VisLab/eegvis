@@ -9,6 +9,7 @@
 % * <blockedData_help.html |blockedData|> - manages blocked data for visualization
 % * <blockHistogramPlot_help.html |blockHistogramPlot|> - display histogram of block function values
 % * <blockImagePlot_help.html |blockImagePlot|> - displays element vs block values as an image
+% * <blockScalpPlot_help.html |blockScalpPlot|> - displays scalp map of block values
 % * <clickable_help.html |clickable|> - base class for mouse click linkage among view panels
 % * <colorListProperty_help.html |colorListProperty|> - property object representing a list of colors
 % * <colorProperty_help.html |colorProperty|> - property object representing a single color
