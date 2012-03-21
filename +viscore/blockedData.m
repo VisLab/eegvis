@@ -53,6 +53,17 @@
 %  - The BlockDim is set in the constructor and later changes do not affect
 %    the blocking.
 %
+% The ElementLocations structure follows the standard EEGLAB chanlocs
+% structure with the following fields:
+%    theta    polar coordinates theta for flattened scalp
+%    radius   polar-coordinate radii (arc_lengths) for flattened scalp 
+%    labels   short label of element name
+%    X        x coordinate of element location (nose is +X direction)
+%    Y        y coordinate of element location
+%    Z        z coordinate of element location
+%  
+%
+%
 % Class documentation:
 % Execute the following in the MATLAB command window to view the class
 % documentation for viscore.blockedData:
@@ -90,7 +101,6 @@ classdef blockedData < hgsetget
     properties
         BlockDim              % dimension used for reblocking (default 2)
         DataID                % ID of the data contained in this object
-        ElementLocations      % element
         EpochStartTimes = []  % start times of epochs in seconds
         EpochTimes = [];      % time offsets in ms for epoch samples
         PadValue = 0;         % use to pad data if not divisible by BlockSize
@@ -101,12 +111,17 @@ classdef blockedData < hgsetget
         ActualBlockDim        % block dimension currently being used
         BlockSize = [];       % window size to use when data is reshaped
         Data                  % 2D or 3D array of data, first dim for elements
+        ElementLocations = [];  % element locations structure with ElementFields
         Epoched               % true if the data is epoched
         OriginalMean          % overall mean of data set (before padding)
         OriginalStd           % overall std of data set (before padding)
         TotalValues           % total number of values in original data
         VersionID             % version ID of this data
     end % private properties
+    
+    properties (Constant)
+        ElementFields = {'radius', 'theta', 'labels', 'X', 'Y', 'Z'};
+    end
     
     methods
         
@@ -142,6 +157,10 @@ classdef blockedData < hgsetget
             [values, sValues] = viscore.dataSlice.getDataSlice(...
                                       obj.Data, slices, [], []);
         end % getDataSlice
+        
+        function elocs = getElementLocations(obj)
+            elocs = obj.ElementLocations;
+        end % getElementLocations
         
         function oMean = getOriginalMean(obj)
             % Return the overall mean of original data
@@ -271,6 +290,23 @@ classdef blockedData < hgsetget
             obj.BlockSize = pdata.BlockSize;
             obj.Epoched = pdata.Epoched;
             
+            % Element locations
+            obj.ElementLocations = [];
+            if isfield(pdata, 'ElementLocations') && ~isempty(pdata.ElementLocations)
+                eFields = fieldnames(pdata.ElementLocations);
+                intFields = intersect(eFields, obj.ElementFields);
+                diffFields = setdiff(obj.ElementFields, intFields);
+                if ~isempty(diffFields)
+                   sString = diffFields{1};
+                   for k = 2:length(diffFields)
+                       sString = [sString ' ' diffFields{k}]; %#ok<AGROW>
+                   end
+                   error('blockedData:ElementLocationIssue', ...
+                    ['The following required fields are missing:' sString '\n']);
+                end
+                obj.ElementLocations = pdata.ElementLocations;       
+            end
+            
             % Now handle the data
             obj.Data = pdata.Data;
             obj.OriginalMean = mean(obj.Data(:));
@@ -315,6 +351,7 @@ classdef blockedData < hgsetget
                     length(pdata.EpochStartTimes), obj.BlockDim, obj.BlockSize);
             end
         end % parseParameters
+        
         
     end % private methods
     

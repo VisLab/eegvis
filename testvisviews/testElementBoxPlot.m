@@ -67,7 +67,7 @@ drawnow
 gaps = bp.getGaps();
 bp.reposition(gaps);
 fprintf('It should allow callbacks to be registered\n')
-bp.registerCallbacks(bp);
+bp.registerCallbacks([]);
 
 fprintf('It should produce a plot for empty slice\n');
 sfig1 = figure('Name', 'Empty slice');

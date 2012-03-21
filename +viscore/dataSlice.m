@@ -239,7 +239,7 @@ classdef dataSlice < hgsetget
             end
         end % createSlices
         
-        function [sData, sStart] = getDataSlice(data, slices, cDims, method)
+        function [sData, sStart, sSizes] = getDataSlice(data, slices, cDims, method)
             % Returns data subarray of data for specified slice
             %
             % Input:
@@ -254,50 +254,27 @@ classdef dataSlice < hgsetget
             %   
             % Output:
             %    sData   resulting subarray
-            %    sStart
+            %    sStart  starting indices in original array
+            %    sSizes  sizes of the slices before combination
             sData = data;
             sStart = [];
             if isempty(data) 
                 return;
             end
             
-       
             nd = max(ndims(data), 3); % Always return slice starts at least 3
-%             sStart = ones(1, nd);
-%             if isempty(slices) 
-%                 return;
-%             end
             sizes = ones(1, nd);
             s = size(data);
             sizes(1:length(s)) = size(data);
-            [dSlice, sStart] = viscore.dataSlice.getSliceEvaluation(sizes, slices);
+            [dSlice, sStart, sSizes] = ...
+                    viscore.dataSlice.getSliceEvaluation(sizes, slices);
             if isempty(slices)
                 return;
             elseif isempty(sStart)
                 sData = '';
                 return;
             end
-%             dSlice = '';
-%             nSlices = length(slices);
-%             for k = 1:nd
-%                 nextSlice = ':';
-%                 if nSlices >= k && ~strcmp(slices{k}, ':')  % generic
-%                     sValues = eval(slices{k});
-%                     sValues(sValues > sizes(k)) = [];
-%                     if isempty(sValues)
-%                         sData = '';
-%                         sStart = 0;
-%                         return;
-%                     end
-%                     sStart(k) = min(sValues);
-%                     nextSlice = ['[' num2str(sValues) ']'];
-%                 end
-%                 dSlice = [dSlice ',' nextSlice]; %#ok<AGROW>
-%             end
-%             if ~isempty(dSlice)  % Take off leading comma if needed
-%                 dSlice = dSlice(2:end);
-%             end
-            
+
             sData = eval(['data(' dSlice ')']);
             if ~isempty(cDims) && ~isempty(method)
                 sData = viscore.dataSlice.combineDims(sData, cDims, method);

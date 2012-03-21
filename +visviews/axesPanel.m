@@ -114,6 +114,11 @@ classdef axesPanel < uiextras.Panel & visviews.resizable ...
                 'Units', 'normalized', 'Tag', 'MainAxes');
         end % axesPanel constructor
         
+        function c = getBackgroundColor(obj)
+            % Return the background color of the inner panel
+            c = get(obj.InnerPanel, 'BackgroundColor');
+        end % get BackgroundColor
+        
         function [x, y, xInside, yInside] = getDataCoordinates(obj, point)
             % Return (x, y) data coordinates of point and whether inside axes
             %
@@ -221,6 +226,13 @@ classdef axesPanel < uiextras.Panel & visviews.resizable ...
            set(get(obj, 'MainAxes'), 'NextPlot', 'add'); % set for adding
         end % reset
         
+        function setBackgroundColor(obj, c)
+            % Set the background color to c
+            set(obj, 'BackgroundColor', c);
+            set(obj.InnerPanel, 'BackgroundColor', c);
+            set(obj.MainAxes, 'Color', c);
+        end % setBackgroundColor
+        
     end % public methods
     
     methods( Access = protected )
@@ -272,21 +284,10 @@ classdef axesPanel < uiextras.Panel & visviews.resizable ...
             yLab = get(obj.MainAxes, 'YLabel');
             
             set(yLab, 'String', obj.YString, 'Units', 'pixels', ...
-                     'Position', [-obj.YLabelOffset, round(h/2)]);
-                  
-%             set(yLab, 'String', obj.YString);
-%             if ~isempty(obj.YString)
-%                 set(yLab, 'Position', [-obj.YLabelOffset, round(h/2)]);
-%             end             
+                     'Position', [-obj.YLabelOffset, round(h/2)]);     
             xLab = get(obj.MainAxes, 'XLabel');
             set(xLab, 'String', obj.XString, 'Units', 'pixels', ...
                 'Position', [round(w/2), -obj.XLabelOffset]);
-%             set(xLab, 'String', obj.XString, ...
-%                     'HorizontalAlignment', 'Center', ...
-%                     'VerticalAlignment', 'Top');
-%             if ~isempty(obj.XString)
-%                 set(xLab, 'Position', [round(w/2), -obj.XLabelOffset]);
-%             end 
         end % redraw    
         
     end % protected methods

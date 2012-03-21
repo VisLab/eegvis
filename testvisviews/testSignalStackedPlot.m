@@ -8,7 +8,7 @@ fprintf('\nUnit tests for visviews.stackedSignalPlot valid constructor\n');
 
 fprintf('It should construct a valid stacked signal plot when only parent passed')
 sfig = figure('Name', 'Creates a panel when only parent is passed');
-sp = visviews.stackedSignalPlot(sfig, [], []);
+sp = visviews.signalStackedPlot(sfig, [], []);
 assertTrue(isvalid(sp));
 drawnow
 delete(sfig);

@@ -739,13 +739,15 @@ classdef eegbrowse < hgsetget & visprops.configurable
         
         function visData = getBlockDataFromEEG(EEG, dataID)
             % Create a BlockData object for an EEG structure
-            chLocs = EEG.chanlocs;
-            if ~isa(chLocs, 'struct')
-                chLocs = struct();
+            if isempty(EEG.chanlocs)
+                visData = viscore.blockedData(EEG.data, dataID, ...
+                    'EpochTimes', EEG.times, 'SampleRate', EEG.srate, ...
+                    'Epoched', ~isempty(EEG.times));
+            else
+                visData = viscore.blockedData(EEG.data, dataID, ...
+                    'EpochTimes', EEG.times, 'SampleRate', EEG.srate, ...
+                    'Epoched', ~isempty(EEG.times), 'ElementLocations', EEG.chanlocs);
             end
-            visData = viscore.blockedData(EEG.data, dataID, ...
-                'EpochTimes', EEG.times, 'SampleRate', EEG.srate, ...
-                'Epoched', ~isempty(EEG.times), 'ElementLocations', chLocs);
         end % getBlockDataFromEEG
         
         function settings = getConfigurableDefaults()

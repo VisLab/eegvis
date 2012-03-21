@@ -241,10 +241,19 @@ classdef propertyConfig < hgsetget & viscore.dataConfig
                     categoryModifier = [': ' tObj.CategoryModifier];
                 end
                 for j = 1:length(s)
-                    s(j).Category = [s(j).Category categoryModifier];
-                    p = eval([s(j).Type '(keys{k}, s(j))']);
-                    obj.addProperty(p);
-                    jideList.add(p.getJIDEProperty());
+                    IDString = '';
+                    try
+                       IDString = [s(j).Category ' ' ...
+                           s(j).DisplayName ' ' s(j).Type];
+                       s(j).Category = [s(j).Category categoryModifier];
+                       
+                       p = eval([s(j).Type '(keys{k}, s(j))']);
+                       obj.addProperty(p);
+                       jideList.add(p.getJIDEProperty());
+                    catch ME 
+                        warning('PropertyConfig:InvalidPropertySpecification', ...
+                            [IDString ' is being ignored: ' ME.message]);
+                    end     
                 end
             end
             obj.JIDEModel = com.jidesoft.grid.PropertyTableModel(jideList);

@@ -162,51 +162,57 @@ fprintf('\nTesting getDataSlice static method of dataSlice\n');
 
 fprintf('It should take a data slice when slice is too short\n');
 data = random('normal', 0, 1, [32, 1000, 20]);
-[dSlice, sStart] = viscore.dataSlice.getDataSlice(data, {':', ':'}, [], []);
+[dSlice, sStart, sSizes] = viscore.dataSlice.getDataSlice(data, {':', ':'}, [], []);
 assertVectorsAlmostEqual(size(dSlice), [32, 1000, 20]);
 assertVectorsAlmostEqual(sStart, [1, 1, 1]);
+assertVectorsAlmostEqual(sSizes, [32, 1000, 20]);
 
 fprintf('It should take a data slice when slice is too long\n');
-[dSlice, sStart] =  viscore.dataSlice.getDataSlice(data, {':', ':', '4:5', ':'}, [], []);
+[dSlice, sStart, sSizes] =  viscore.dataSlice.getDataSlice(data, {':', ':', '4:5', ':'}, [], []);
 assertVectorsAlmostEqual(size(dSlice), [32, 1000, 2]);
 assertVectorsAlmostEqual(dSlice, data(:, :, 4:5));
 assertVectorsAlmostEqual(sStart, [1, 1, 4]);
+assertVectorsAlmostEqual(sSizes, [32, 1000, 2]);
 
 fprintf('It should take the right slice when slice falls off the end\n');
-[dSlice, sStart] =  viscore.dataSlice.getDataSlice(data, {'5:38', ':', '4:5', ':'}, [], []);
+[dSlice, sStart, sSizes] =  viscore.dataSlice.getDataSlice(data, {'5:38', ':', '4:5', ':'}, [], []);
 assertVectorsAlmostEqual(size(dSlice), [28, 1000, 2]);
 assertVectorsAlmostEqual(dSlice, data(5:32, :, 4:5));
 assertVectorsAlmostEqual(sStart, [5, 1, 4]);
+assertVectorsAlmostEqual(sSizes, [28, 1000, 2]);
 
 fprintf('It should return original data when slice is empty\n');
-[dSlice, sStart] =  viscore.dataSlice.getDataSlice(data, {}, [], '');
+[dSlice, sStart, sSizes] =  viscore.dataSlice.getDataSlice(data, {}, [], '');
 assertVectorsAlmostEqual(size(dSlice), size(data));
 assertVectorsAlmostEqual(dSlice(:), data(:));
 assertVectorsAlmostEqual(sStart, [1, 1, 1]);
+assertVectorsAlmostEqual(sSizes, [32, 1000, 20]);
 
 fprintf('It should return original data for empty slice when data is 4D\n'); 
 data2 = random('normal', 0, 1, [32, 1000, 20, 36]);
-[dSlice2, sStart2] =  viscore.dataSlice.getDataSlice(data2, '');
+[dSlice2, sStart2, sSizes2] =  viscore.dataSlice.getDataSlice(data2, '');
 assertVectorsAlmostEqual(size(dSlice2), size(data2));
 assertVectorsAlmostEqual(dSlice2(:), data2(:));
 assertVectorsAlmostEqual(sStart2, [1, 1, 1, 1]);
+assertVectorsAlmostEqual(sSizes2, [32, 1000, 20, 36]);
 
 fprintf('It should handle slices in the middle of the data\n');
-[dSlice2, sStart2] = viscore.dataSlice.getDataSlice(data2, {':',  '3', ':'}, [], '');
+[dSlice2, sStart2, sSizes2] = viscore.dataSlice.getDataSlice(data2, {':',  '3', ':'}, [], '');
 assertVectorsAlmostEqual(size(squeeze(dSlice2)), [32, 20, 36]);
 assertVectorsAlmostEqual(squeeze(dSlice2), squeeze(data2(:, 3, :, :)));
 fprintf('It should return slices unsqeezed\n');
 assertVectorsAlmostEqual(size(dSlice2), [32, 1, 20, 36]);
 assertVectorsAlmostEqual(sStart2, [1, 3, 1, 1]);
+assertVectorsAlmostEqual(sSizes2, [32, 1, 20, 36]);
 
 fprintf('It should work when all parameters are non-empty\n');
-[dSlice, sStart] =  viscore.dataSlice.getDataSlice(data, {':', ':', '5:8'}, 3, 'mean');
+[dSlice, sStart, sSizes] =  viscore.dataSlice.getDataSlice(data, {':', ':', '5:8'}, 3, 'mean');
 assertVectorsAlmostEqual(size(dSlice), [32, 1000]);
 dNew = data(:, :, 5:8);
 dNew = mean(dNew, 3);
 assertVectorsAlmostEqual(dSlice(:), dNew(:));
 assertVectorsAlmostEqual(sStart, [1, 1, 5]);
-
+assertVectorsAlmostEqual(sSizes, [32, 1000, 4]);
 
 fprintf('It should return data when slice has multiple elements')
 slice = viscore.dataSlice('Slices', {':', ':', '2:5'}, ...
@@ -214,7 +220,7 @@ slice = viscore.dataSlice('Slices', {':', ':', '2:5'}, ...
 
 [slices, names, cDims] = slice.getParameters(3);
 data = random('normal', 0, 1, [32, 1000, 20]);
-[signals, start] = viscore.dataSlice.getDataSlice(data, ...
+[signals, start, sSizes] = viscore.dataSlice.getDataSlice(data, ...
                    slices, cDims, []);
 assertTrue(~isempty(names));
 assertTrue(~isempty(signals));
@@ -223,6 +229,8 @@ assertEqual(rows, 32);
 assertEqual(cols, 1000);
 assertEqual(dep, 4);
 assertEqual(start(3), 2);
+assertVectorsAlmostEqual(sSizes, [32, 1000, 4]);
+
 
 function testGetSliceEvaluation %#ok<DEFNU>
 % Unit test for dataSlice getSliceEvaluation static method 
