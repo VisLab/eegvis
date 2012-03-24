@@ -139,7 +139,7 @@ initTestSuite;
 % %delete(sfit3)
 
 function testRegisterCallbacks %#ok<DEFNU>
-% Unit test evisviews.blockScalpPlot plot
+% Unit test evisviews.blockScalpPlot register callbacks
 fprintf('\nUnit tests for visviews.blockScalpPlot register callbacks\n');
 fprintf('It should produce respond to callbacks when not all channels in slice\n');
 data = random('exp', 1, [32, 1000, 20]);
@@ -163,4 +163,35 @@ bp.plot(testVD, thisFunc, slice1);
 drawnow
 gaps = bp.getGaps();
 bp.reposition(gaps);
+bp.registerCallbacks([]);
+
+
+function testSetBackgroundColor %#ok<DEFNU>
+% Unit test evisviews.blockScalpPlot setBackgroundColor
+fprintf('\nUnit tests for visviews.blockScalpPlot to set background color\n');
+fprintf('It should correctly set the background color when it changes\n');
+data = random('exp', 1, [32, 1000, 20]);
+load chanlocs.mat;
+testVD = viscore.blockedData(data, 'Rand1', 'ElementLocations', chanlocs);
+defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    viewTestClass.getDefaultFunctionsNoSqueeze());
+slice1 = viscore.dataSlice('Slices', {'2:10', ':', '4:7'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+
+sfig1 = figure('Name', 'Slice with Channels(2:10) Windows 4-7');
+bp = visviews.blockScalpPlot(sfig1, [], []);
+assertTrue(isvalid(bp));
+fMan = viscore.dataManager();
+fMan.putObjects(defaults);
+func = fMan.getEnabledObjects('block');
+thisFunc = func{1};
+thisFunc.setData(testVD);
+
+bp.plot(testVD, thisFunc, slice1);
+drawnow
+gaps = bp.getGaps();
+bp.reposition(gaps);
+bp.setBackgroundColor([1, 0, 0]);
+bp.plot(testVD, thisFunc, slice1);
+drawnow
 bp.registerCallbacks([]);

@@ -272,7 +272,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             obj.plotHead();
             obj.plotElements(x, y, labels);
             hold off
-
+            axis off
             obj.redraw();
         end % plot
         
@@ -308,10 +308,9 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         function setBackgroundColor(obj, c)
             % Set the background color to c
             obj.setBackgroundColor@visviews.axesPanel(c);
-            set(obj.MainAxes, 'Color', 'none', 'Box', 'off', ...
-                'XColor', bColor, 'YColor', bColor, 'ZColor', bColor);
+            set(obj.MainAxes, 'Color', 'none', 'Box', 'off');
             if ~isempty(obj.HeadAxes)
-                set(obj.HeadAxes, 'Color', bColor);
+                set(obj.HeadAxes, 'Color', c);
             end
         end % setBackgroundColor
         
@@ -341,13 +340,11 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 set(obj.HeadAxes, 'Units', 'Pixels');
                 set(obj.MainAxes, 'Units', 'Pixels');
                 mainPos = get(obj.MainAxes, 'Position')
-                oldHeadPos = get(obj.HeadAxes, 'Position')
                 headPos = mainPos;
                 headPos(3) = min(mainPos(3), mainPos(4));
                 headPos(1) = mainPos(1) + mainPos(3)/2 - headPos(3)/2;
                 headPos
-%                 set(obj.HeadAxes, 'Position', headPos, ...
-%                     'DataAspectRatio', [headPos(4)/headPos(3), 1, 1]);
+                % Set position and restore original units
                 set(obj.HeadAxes, 'Position', headPos)
                 set(obj.HeadAxes, 'Units', oldUnitsHead);
                 set(obj.MainAxes, 'Units', oldUnitsMain);

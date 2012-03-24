@@ -292,6 +292,16 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             obj.redraw();
         end % plot
         
+        function setBackgroundColor(obj, c)
+           % Set the background color to c
+            obj.setBackgroundColor@visviews.axesPanel(c);
+            set(obj.MainAxes, 'Color', 'none', 'Box', 'off', ...
+                'XColor', c, 'YColor', c, 'ZColor', c);
+            if ~isempty(obj.HeadAxes)
+                set(obj.HeadAxes, 'Color', c);
+            end
+        end % setBackgroundColor
+        
         function s = updateString(obj, point)
             % Return a cursor string corresponding to point
             s = '';   % String to be returned
