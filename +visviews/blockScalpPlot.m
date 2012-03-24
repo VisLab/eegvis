@@ -132,7 +132,7 @@
 % Initial version $
 %
 
-classdef blockScalpPlot < visviews.axesPanelCB & visprops.configurable
+classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
     
     properties
         % configurable properties
@@ -143,9 +143,11 @@ classdef blockScalpPlot < visviews.axesPanelCB & visprops.configurable
     end % public properties
     
     properties (Access = private)
+        ColorbarAxes = [];       % axis for the color bar
         CurrentElement = [];     % last valid clicked element
         CurrentFunction = [];    % handle to block function for this
         CurrentSlice = [];       % current data slice
+        HeadAxes = []            % axis for the 
         InterpolationRadius = 0.5; % radius for extent of interpolation
         NumberBlocks = 0;        % number of blocks being plotted
         NumberElements = 0;      % number of blocks being plotted
@@ -166,7 +168,7 @@ classdef blockScalpPlot < visviews.axesPanelCB & visprops.configurable
         
         function obj = blockScalpPlot(parent, manager, key)
             % Parent is non-empty handle to container for axes panel but manager can be empty
-            obj = obj@visviews.axesPanelCB(parent);
+            obj = obj@visviews.axesPanel(parent);
             obj = obj@visprops.configurable(key);
             % Update properties if any are available
             if isa(manager, 'viscore.dataManager')
@@ -203,8 +205,8 @@ classdef blockScalpPlot < visviews.axesPanelCB & visprops.configurable
         
         function [cbHandles, hitHandles] = getHitObjects(obj)
             % Return handles that should register callbacks as well has hit handles
-            cbHandles = [{obj.MainAxes}, obj.SliceElectrodes];
-            hitHandles = [{obj.MainAxes}, obj.SliceElectrodes];
+            cbHandles = [{obj.MainAxes, obj.HeadAxes}, obj.SliceElectrodes];
+            hitHandles = [{obj.MainAxes, obj.HeadAxes}, obj.SliceElectrodes];
         end % getHitObjects
         
         function plot(obj, visData, bFunction, dSlice)
@@ -264,8 +266,23 @@ classdef blockScalpPlot < visviews.axesPanelCB & visprops.configurable
             obj.plotElements(x, y, labels);
             obj.CursorString = {'y:'; 'x:'};
             hold off
-            %obj.redraw();
+            obj.redraw();
         end % plot
+        
+       function reset(obj)
+            % Delete the children of the axes and ready for replotting
+            obj.reset@visviews.axesPanel();
+            % Delete the colorbar axes
+            if ~isempty(obj.ColorbarAxes) && ishandle(obj.ColorbarAxes)
+                delete(obj.ColorbarAxes);
+            end
+            obj.ColorbarAxes = [];
+            % Delete the head axes
+            if ~isempty(obj.HeadAxes) && ishandle(obj.HeadAxes)
+                delete(obj.HeadAxes);
+            end
+            obj.HeadAxes = [];
+        end % reset
         
         function s = updateString(obj, point)
             % Return a cursor string corresponding to point
@@ -281,6 +298,14 @@ classdef blockScalpPlot < visviews.axesPanelCB & visprops.configurable
         end % updateString
         
     end % public methods
+    
+    methods( Access = protected )
+        
+        function redraw( obj )
+            obj.redraw@visviews.axesPanel();
+        end % redraw
+        
+    end % protected methods
     
     methods (Access = private)
         
