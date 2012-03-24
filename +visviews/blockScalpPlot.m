@@ -1,4 +1,4 @@
-% visviews.blockScalpPlot display a scalp map of blocked function values by window
+% visviews.blockScalpPlot display scalp map of blocked function values by element
 %
 % Usage:
 %   >>   visviews.blockScalpPlot(parent, manager, key)
@@ -25,7 +25,7 @@
 % visviews.blockScalpPlot is configurable, resizable, clickable, and cursor explorable.
 %
 % Configurable properties:
-% The visviews.blockScalpPlot has five configurable properties:
+% The visviews.blockScalpPlot has seven configurable properties:
 %
 % CombineMethod specifies how to combine multiple blocks into a
 %    single block to determine an overall block value. The value can be
@@ -40,17 +40,17 @@
 %
 % ElementColor specifies the color used for an element and its
 %     corresponding label when the electrode is in the current slice. The
-%     default is |[0, 0, 0]|.
+%     default is [0, 0, 0].
 %
 % HeadColor specifies the color for the head outline. The plot function
 %     uses the same color for electrodes and their corresponding labels
 %     when the electrodes are not in the current slice. The
-%     default is |[0.75, 0.75, 0.75]|.
+%     default is [0.75, 0.75, 0.75].
 %
 % InterpolationMethod specifies the method used to produce the shaded
 %     map of block values on the scalp. The default value is 'square' which
 %     specifies that the block values be interpolated on a grid that is
-%     2 x the HeadRadius. After interpolation, the plot masks values
+%     2 x HeadRadius. After interpolation, the plot masks values
 %     the values that fall outside the inscribed circle with radius
 %     HeadRadius. This method is the default method used by EEGLAB
 %     topolot. Since some of the outer grid points on the square are
@@ -61,17 +61,37 @@
 %     An alternative interpolation method 'convex', only creates the
 %     map within the convex hull. All map values are then interpolated.
 %
-% IsClickable is a boolean specifying whether this plot should respond to
+% IsClickable is a logical value specifying whether this plot should respond to
 %    user mouse clicks when incorporated into a linkable figure. The
 %    default value is true.
 %
-% LinkDetails is a boolean specifying whether clicking this plot in a
+% LinkDetails is a logical value specifying whether clicking this plot in a
 %    linkable figure should cause detail views to display the clicked
 %    slice. The default value is true.
 %
+% ShowColorbar is a logical value specifying whether to display a colorbar
+%    in addition to the scalp map (if the bar fits).
 %
+% Interaction of labels with slices:
+%     The visview.blockScalpMap visualization displays the locations of all 
+%     valid electrodes as points overlaid on the scalp map. The behavior of 
+%     these depends on whether they are in the current slice:
+%   
+%     The visualization displays an electrode in the current 
+%     as a point location and as a label, both displayed in the electrode 
+%     color. When the user clicks on the electrode point, blockScalpMap 
+%     delivers a slice corresponding to the clicked electrode to the downstream 
+%     visualizations through the master. When the user clicks on the
+%     electrode label, the displayed string toggles between electrode
+%     name and number.
+%
+%     When an electrode is not in the current slice, the visualiztion displays
+%     the electrode as a point location in the head color. When the user 
+%     clicks on the electrode point, blockScalpMap toggles a label
+%     associated with the point among name, number and no display.
+%     
 % Example:
-% % Create a boxplot of kurtosis of 32 exponentially distributed channels
+% % Create a scalp map of kurtosis of 32 exponentially distributed channels
 %
 %    % Create a block box plot
 %    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
@@ -79,7 +99,9 @@
 %
 %    % Generate some data to plot
 %    data = random('exp', 1, [32, 1000, 20]);
-%    testVD = viscore.blockedData(data, 'Exponenitally distributed');
+%    load chanlocs.mat;
+%    testVD = viscore.blockedData(data, 'Exponenitally distributed', ...
+%             'ElementLocations', chanlocs);
 %
 %    % Create a kurtosis block function object
 %    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
@@ -98,6 +120,13 @@
 % Notes:
 %   - If manager is empty, the class defaults are used to initialize.
 %   - If key is empty, the class name is used to identify in GUI configuration.
+%   - The block scalp map tries to display as big a scalp map as will fit
+%     vertically in the panel. It does not enforce the axis square
+%     constraint unless there is room, since the goal of resizing is to
+%     make the electrodes available for clicking. If the color doesn't fit
+%     completely, blockScalpMap does not display it, regardless of the
+%     setting of ShowColorbar.
+%  
 %
 % Class documentation:
 % Execute the following in the MATLAB command window to view the class

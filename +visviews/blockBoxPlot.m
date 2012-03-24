@@ -28,7 +28,7 @@
 %     displaying the boxes. For data with lots of clumps, the 
 %     boxes appear highly compressed due to limited viewing space and 
 %     alternating colors help users distinguish the individual boxes. The
-%     default is |[0.7, 0.7, 0.7; 1, 0, 1]|.
+%     default is [0.7, 0.7, 0.7; 1, 0, 1].
 %
 % ClumpFactor specifies the number of consecutive windows or epochs 
 %    represented by each box. When the |ClumpFactor| is one (the default), 

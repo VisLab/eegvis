@@ -125,7 +125,7 @@ confObj2 = visprops.configurableObj('Block box', sNext, 'visviews.blockBoxPlot')
 propList = {confObj, 'Test it', confObj2};
 bv15 = eegbrowse('Properties', propList, 'Title', 'Ignores non configurable objects on property parameter ');
 objs = bv15.PropSelect.getObjects();
-assertEqual(length(objs), 8);
+assertEqual(length(objs), 10);
 
 fprintf('It should create a valid browser when the ''UseEEGLab'' parameter to the constructor is true\n');
 %eeglab()  % See if EEGLAB was already running
