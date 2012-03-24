@@ -83,7 +83,7 @@ classdef axesPanel < uiextras.Panel & visviews.resizable ...
         MinYLabelOffset = 5;       % minimum pixels from y label to axis        
         XLabelOffset = 0;          % actual x label offset from axis
         XLimOffset = 0;            % actual offset of label to x axis scale
-        XOffsetFromAxis = false;   % if true adjust x label offset on resize      
+        XOffsetFromAxis = false;    % if true adjust x label offset on resize      
         XString = '';              % actual x-axis label
         XStringBase = '';          % x label without clicked point info
         YLabelOffset = 0;          % actual y label offset from axis

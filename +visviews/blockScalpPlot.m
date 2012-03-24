@@ -340,12 +340,22 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 set(obj.HeadAxes, 'Units', 'Pixels');
                 set(obj.MainAxes, 'Units', 'Pixels');
                 mainPos = get(obj.MainAxes, 'Position')
+                overallWidth = mainPos(3) + obj.MarginLeft + obj.MarginRight
                 headPos = mainPos;
-                headPos(3) = min(mainPos(3), mainPos(4));
-                headPos(1) = mainPos(1) + mainPos(3)/2 - headPos(3)/2;
+                headPos(3) = min(mainPos(3) + obj.MarginLeft + obj.MarginRight ...
+                      - 2*max(obj.MarginLeft, obj.MarginRight), mainPos(4));
+                headPos(1) = (overallWidth - headPos(3))/2;
+                                
                 headPos
                 % Set position and restore original units
                 set(obj.HeadAxes, 'Position', headPos)
+                xLab = get(obj.MainAxes, 'XLabel');
+                set(xLab, 'Units', 'Pixels')
+                xExtent = get(xLab, 'Extent')
+                xPos = get(xLab, 'Position')
+                p = [headPos(3)/2, xExtent(4) - mainPos(2)]
+                set(xLab, 'Position', ...
+                     [headPos(3)/2, xExtent(4) - mainPos(2)]);
                 set(obj.HeadAxes, 'Units', oldUnitsHead);
                 set(obj.MainAxes, 'Units', oldUnitsMain);
             end
