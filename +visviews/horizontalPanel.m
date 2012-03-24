@@ -115,12 +115,13 @@ classdef horizontalPanel < uiextras.Panel & visprops.configurable & ...
             % Plot the individual items in the panel
             
             % Make sure the units are set for resizing
-            set(obj, 'Units', 'normalized', 'Position', [0, 0, 1, 1]);
+            set(obj, 'Units', 'normalized');
             % Plot each panel 
             for k = 1:length(obj.PlotList);
                    plotObj = obj.PlotList{k};
                    plotObj.plot(visData, bFunction, dslice);
             end
+           
         end % plot
         
         function registerCallbacks(obj, master)

@@ -136,6 +136,7 @@ classdef verticalPanel < uiextras.Panel & visprops.configurable ...
                 plotObj = obj.PlotList{k};
                 plotObj.plot(visData, bFunction, slice);
             end
+            obj.redraw();
         end % plotSlice
         
         function registerCallbacks(obj, master)

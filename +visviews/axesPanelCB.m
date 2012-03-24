@@ -1,12 +1,12 @@
-% visviews.axesPanel base class for an axes with fixed margins
+% visviews.axesPanelCB base class for an axes and color bar with fixed margins
 %             
 % Usage:
-%   >>   visviews.axesPanel(parent)
-%   >>   obj = visviews.axesPanel(parent)
+%   >>   visviews.axesPanelCB(parent)
+%   >>   obj = visviews.axesPanelCB(parent)
 %
 % Description:
-% visviews.axesPanel(parent) create an axes panel whose graphical parent
-%     has graphics handle parent. 
+% visviews.axesPanelCB(parent) create an axes panel and a color bar 
+%     with a graphics handle parent. 
 %
 %     The purpose of the axesPanel base class is to provide a resizable
 %     panel containing a single axes (other axes may be overlaid). The 
@@ -69,85 +69,18 @@
 % Initial version $
 %
 
-classdef axesPanel < uiextras.Panel & visviews.resizable ...
-        & visviews.clickable & visviews.cursorExplorable
+classdef axesPanelCB < visviews.axesPanel
  
-    properties(Constant = true)
-        MaximumGaps = [50, 50, 30, 30];  % largest standard borders 
-        MinimumGaps = [15, 10, 10, 15];  % smallest standard borders       
-    end % constant properties 
-    
     properties
-        MainAxes;                  % handle for the main panel axes
-        MinXLabelOffset = 5;       % minimum pixels from x label to axis
-        MinYLabelOffset = 5;       % minimum pixels from y label to axis        
-        XLabelOffset = 0;          % actual x label offset from axis
-        XLimOffset = 0;            % actual offset of label to x axis scale
-        XOffsetFromAxis = false;   % if true adjust x label offset on resize      
-        XString = '';              % actual x-axis label
-        XStringBase = '';          % x label without clicked point info
-        YLabelOffset = 0;          % actual y label offset from axis
-        YLimOffset = 0;            % actual offset of label to y axis scale
-        YOffsetFromAxis = true;    % if true adjust y label offset on resize      
-        YString = '';              % actual y-axis label
-        YStringBase = '';          % y label without clicked point info
+        ColorbarAxes = [];         % axis for the color bar
     end % public properties
  
-    properties(Access = protected)
-        InnerPanel = [];           % handle to inner panel for resizing
-        MarginBottom = 10;         % pixels on bottom panel border
-        MarginLeft = 10;           % pixels on left panel border
-        MarginRight = 10;          % pixels on right panel border 
-        MarginTop = 10;            % pixels on top panel border 
-    end % protected properties
-    
     methods
         
-        function obj = axesPanel(parent)
+        function obj = axesPanelCB(parent)
             % Create the axes panel base class
-            obj = obj@uiextras.Panel( 'Parent', parent);
-            obj.InnerPanel = uipanel('Parent', obj, 'BorderType', 'none');
-            set(obj, 'Units', 'normalized', 'Padding', 2, ...
-                 'BorderType', 'none');
-            obj.MainAxes = axes('Parent', obj.InnerPanel, ...
-                'Box', 'on',  'ActivePositionProperty', 'Position', ...
-                'Units', 'normalized', 'Tag', 'MainAxes');
+            obj = obj@visviews.axesPanel(parent);
         end % axesPanel constructor
-        
-        function c = getBackgroundColor(obj)
-            % Return the background color of the inner panel
-            c = get(obj.InnerPanel, 'BackgroundColor');
-        end % get BackgroundColor
-        
-        function [x, y, xInside, yInside] = getDataCoordinates(obj, point)
-            % Return (x, y) data coordinates of point and whether inside axes
-            %
-            % Inputs:
-            %    point     pixel coordinates of a point wrt parent figure
-            %
-            % Outputs:
-            %    x         x coordinate of point in data units
-            %    y         y coordinate of point in data units
-            %    xInside   true if x is inside main axis of this panel
-            %    yInside   true if y is inside main axis of this panel
-            % 
-            % Required for the visviews.cursorExplorable interface
-             p = getpixelposition(obj.MainAxes, true);
-             a = get(obj.MainAxes,  'XLim');
-             xDir = get(obj.MainAxes, 'XDir');
-             if strcmpi(xDir, 'reverse')
-                 a = [a(2), a(1)];
-             end
-             x = (a(2) - a(1))*(point(1) - p(1))/p(3) + a(1);
-             b = get(obj.MainAxes,  'YLim');
-             yDir = get(obj.MainAxes, 'YDir');
-             if strcmpi(yDir, 'reverse')
-                 b = [b(2), b(1)];
-             end
-             y = (b(2) - b(1))*(point(2) - p(2))/p(4) + b(1); 
-             xInside = (p(1) <= point(1)) && ( point(1) < p(1) + p(3));
-             yInside = (p(2) <= point(2)) && ( point(2) < p(2) + p(4));
-        end % getDataCoordinates
         
         function gap = getGaps(obj) 
         % Return the gaps around the axes box for repositioning (resizable)
@@ -192,42 +125,16 @@ classdef axesPanel < uiextras.Panel & visviews.resizable ...
             cbHandles = {obj.MainAxes};
             hitHandles = {obj.MainAxes};
         end % getHitObjects
-          
-        function hPosition = getPixelHitPosition(obj)
-            % Return the pixel position of the axes (a utility function)
-            t = get(obj.MainAxes, 'ActivePositionProperty');
-            set(obj.MainAxes, 'ActivePositionProperty', 'Position');
-            hPosition = getpixelposition(obj.MainAxes, true);
-            set(obj.MainAxes, 'ActivePositionProperty', t);
-        end % getPixelHitPosition
-
-        function reposition(obj, newMargins)
-            % Set margins and redraw object (required for visviews.resizable) 
-            obj.MarginLeft = newMargins(1);
-            obj.MarginBottom = newMargins(2);
-            obj.MarginRight = newMargins(3);
-            obj.MarginTop = newMargins(4);
-            obj.redraw();
-        end % reposition
     
         function reset(obj)
             % Delete the children of the axes and ready for replotting
-            set(get(obj, 'MainAxes'), 'NextPlot', 'replace');
-            childPlots = get(obj.MainAxes, 'Children');
-            if ~isempty(childPlots) % remove any previous plots without clearing
-                for c = 1:length(childPlots)
-                    delete(childPlots(c));
-                end
+            obj.reset@visviews.axesPanel();
+            % Delete the colorbar axes
+            if ~isempty(obj.ColorbarAxes) && ishandle(obj.ColorbarAxes)
+                delete(obj.ColorbarAxes);
             end
-           set(get(obj, 'MainAxes'), 'NextPlot', 'add'); % set for adding
+            obj.ColorbarAxes = [];
         end % reset
-        
-        function setBackgroundColor(obj, c)
-            % Set the background color to c
-            set(obj, 'BackgroundColor', c);
-            set(obj.InnerPanel, 'BackgroundColor', c);
-            set(obj.MainAxes, 'Color', c);
-        end % setBackgroundColor
         
     end % public methods
     

@@ -49,8 +49,8 @@
 %
 % InterpolationMethod specifies the method used to produce the shaded
 %     map of block values on the scalp. The default value is 'square' which
-%     specifies that the block values be interpolated on a grid that is 
-%     2 x the HeadRadius. After interpolation, the plot masks values 
+%     specifies that the block values be interpolated on a grid that is
+%     2 x the HeadRadius. After interpolation, the plot masks values
 %     the values that fall outside the inscribed circle with radius
 %     HeadRadius. This method is the default method used by EEGLAB
 %     topolot. Since some of the outer grid points on the square are
@@ -63,7 +63,7 @@
 %
 % IsClickable is a boolean specifying whether this plot should respond to
 %    user mouse clicks when incorporated into a linkable figure. The
-%    default value is true. 
+%    default value is true.
 %
 % LinkDetails is a boolean specifying whether clicking this plot in a
 %    linkable figure should cause detail views to display the clicked
@@ -132,7 +132,7 @@
 % Initial version $
 %
 
-classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
+classdef blockScalpPlot < visviews.axesPanelCB & visprops.configurable
     
     properties
         % configurable properties
@@ -166,7 +166,7 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
         
         function obj = blockScalpPlot(parent, manager, key)
             % Parent is non-empty handle to container for axes panel but manager can be empty
-            obj = obj@visviews.axesPanel(parent);
+            obj = obj@visviews.axesPanelCB(parent);
             obj = obj@visprops.configurable(key);
             % Update properties if any are available
             if isa(manager, 'viscore.dataManager')
@@ -186,6 +186,7 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
         function [dSlice, bFunction] = getClicked(obj)
             % Clicking on the electrodes always causes plot of an element
             bFunction = obj.CurrentFunction;
+            blockSlice = 'none';
             if isempty(obj.CurrentElement)
                 dSlice = [];
             else
@@ -196,6 +197,7 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
                     {num2str(obj.CurrentElement), ':', blockSlice}, ...
                     'DimNames', names);
             end
+            fprintf('To here %s\n', blockSlice);
         end % getClicked
         
         function [cbHandles, hitHandles] = getHitObjects(obj)
@@ -255,13 +257,13 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
                 num2str(obj.StartElement + obj.NumberElements - 1) ']'];
             obj.XString = obj.XStringBase;
             hold on
-            obj.setBackgroundColor([1, 1, 1]);
+            %obj.setBackgroundColor([1, 1, 1]);
             obj.plotMap(x, y, values)
             obj.plotHead();
-            obj.plotElements(x, y, labels); 
+            obj.plotElements(x, y, labels);
             obj.CursorString = {'y:'; 'x:'};
             hold off
-            obj.redraw();
+            %obj.redraw();
         end % plot
         
         function s = updateString(obj, point)
@@ -271,7 +273,7 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
             if ~xInside || ~yInside
                 return;
             end
-    
+            
             s = {[obj.CursorString{1} num2str(y/obj.SqueezeFactor)]; ...
                 [obj.CursorString{2} num2str(x/obj.SqueezeFactor)]}; ...
                 
@@ -297,7 +299,6 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
                     badElements + obj.StartElement - 1);
             end
             if isempty(obj.ValidElements)
-                
                 return;
             end
             validElements = sort(validElements);
@@ -425,9 +426,9 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
             axis square
             axis off
             axis equal;
-            set(gca, 'xlim', [-0.555 0.555]);
-            set(gca, 'ylim', [-0.555 0.555]);
-            obj.TextLabel = text(0.0, -0.555, 2.1, ...   % set the bottom label
+            set(gca, 'xlim', [-0.51 0.51]);
+            set(gca, 'ylim', [-0.51 0.51]);
+            obj.TextLabel = text(0.0, -0.51, 2.1, ...   % set the bottom label
                 obj.XStringBase, 'HorizontalAlignment','center',...
                 'VerticalAlignment','middle','Color', [0, 0, 0]);
         end % plotHead
@@ -467,9 +468,9 @@ classdef blockScalpPlot < visviews.axesPanel  & visprops.configurable
             surface(Xi - delta/2, Yi - delta/2, zeros(size(Zi)), ...
                 Zi, 'EdgeColor', 'none', 'FaceColor', 'flat');
             caxis([min(Zi(:)) max(Zi(:))]); % set coloraxis
-            colorbar
+            %obj.ColorbarAxes = colorbar;
         end % plotMap
-    
+        
     end % private methods
     
     methods (Static = true)
