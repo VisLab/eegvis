@@ -189,21 +189,21 @@ function testLinkageImagePlot %#ok<DEFNU>
 %     end
 % end
 
-% function testBlockScalpPlot %#ok<DEFNU>
-% % Unit test for blockScalpPlot
-% fprintf('\nUnit test for visviews.dualView for blockScalpPlot\n');
-% fprintf('It should produce a valid plot when a blockScalpPlot is used\n');
-% data = random('exp', 2, [32, 1000, 20]);
-% pS = viewTestClass.getDefaultPlotsScalp();
-% assertEqual(length(pS), 8);
-% load chanlocs.mat;
-% testVD1 = viscore.blockedData(data, 'Shows block scalp plot', ...
-%     'ElementLocations', chanlocs);
-% bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
-% drawnow
-% %delete(bv3)
-% %delete(bv4)
-% %delete(bv5)
+function testBlockScalpPlot %#ok<DEFNU>
+% Unit test for blockScalpPlot
+fprintf('\nUnit test for visviews.dualView for blockScalpPlot\n');
+fprintf('It should produce a valid plot when a blockScalpPlot is used\n');
+data = random('exp', 2, [32, 1000, 20]);
+pS = viewTestClass.getDefaultPlotsScalp();
+assertEqual(length(pS), 8);
+load chanlocs.mat;
+testVD1 = viscore.blockedData(data, 'Shows block scalp plot', ...
+    'ElementLocations', chanlocs);
+bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
+drawnow
+%delete(bv3)
+%delete(bv4)
+%delete(bv5)
 
 
 % function testSummaryOnly %#ok<DEFNU>
