@@ -262,18 +262,10 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 'Box', 'off', 'XColor', bColor, 'YColor', bColor, 'ZColor', bColor);
             set(get(obj.MainAxes, 'XLabel'), 'Color', [0, 0, 0]);
             
-            % Set the properties of the head axes
-%             set(obj.HeadAxes, 'PlotBoxAspectRatioMode', 'manual', ...
-%                 'PlotBoxAspectRatio', [1, 1, 1], ...
-%                 'DataAspectRatioMode', 'manual', ...
-%                 'DataAspectRatio', [1, 1, 1], 'XLimMode', 'manual', ...
-%                 'YLimMode', 'Manual');
-            
             % Set the current axes to the head axes for plotting map
             myFigure = ancestor(obj.MainAxes, 'figure');
             set(0, 'CurrentFigure', myFigure);    
-            set(gcf, 'CurrentAxes', obj.HeadAxes);
-            
+            set(gcf, 'CurrentAxes', obj.HeadAxes);   
             
             hold on
             obj.plotMap(x, y, values)
@@ -312,6 +304,16 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             end
             
         end % reset
+        
+        function setBackgroundColor(obj, c)
+            % Set the background color to c
+            obj.setBackgroundColor@visviews.axesPanel(c);
+            set(obj.MainAxes, 'Color', 'none', 'Box', 'off', ...
+                'XColor', bColor, 'YColor', bColor, 'ZColor', bColor);
+            if ~isempty(obj.HeadAxes)
+                set(obj.HeadAxes, 'Color', bColor);
+            end
+        end % setBackgroundColor
         
         function s = updateString(obj, point)
             % Return a cursor string corresponding to point
