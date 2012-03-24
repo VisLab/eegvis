@@ -156,7 +156,6 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         StartBlock = 1;          % starting block of currently plotted slice
         StartElement = 1;        % starting element of currently plotted slice
         SqueezeFactor = 1;       % radial squeeze factor for rescaling
-        TextLabel = [];          % handle to label at bottom of head
         ValidElements = [];      % list of the valid elements
     end % private properties
     
@@ -174,7 +173,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             if isa(manager, 'viscore.dataManager')
                 visprops.property.updateProperties(obj, manager);
             end
-            set(obj.MainAxes, 'Tag', 'blockScalpAxes');
+            set(obj.MainAxes, 'Tag', 'blockScalpMainAxes');
         end % blockScalpPlot constructor
         
         function buttonDownPreCallback (obj, src, eventdata)  %#ok<INUSD>
@@ -243,9 +242,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             
             x = x*obj.SqueezeFactor;
             y = y*obj.SqueezeFactor;
-            myFigure = ancestor(obj.MainAxes, 'figure');
-            set(0, 'CurrentFigure', myFigure);
-            set(gcf, 'CurrentAxes', obj.MainAxes);
+            
             
             % Create the label at the bottom
             if obj.NumberBlocks ~= size(sValues, 2)
@@ -255,17 +252,35 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             end
             obj.XStringBase = [obj.CurrentFunction.getValue(1, 'DisplayName'), ...
                 ' (' combineString names{3} ' ' num2str(obj.StartBlock) ':' ...
-                num2str(obj.StartBlock + obj.NumberBlocks - 1) ')' ...
-                ' [' names{1} ' ' num2str(obj.StartElement) ':' ...
-                num2str(obj.StartElement + obj.NumberElements - 1) ']'];
+                num2str(obj.StartBlock + obj.NumberBlocks - 1) ')'];
             obj.XString = obj.XStringBase;
+            obj.CursorString = {'y:'; 'x:'};
+            
+            % Set the properties of the main axes
+            bColor = obj.getBackgroundColor();
+            set(obj.MainAxes, 'Color', 'none', 'XTick', [], 'yTick', [], ...
+                'Box', 'off', 'XColor', bColor, 'YColor', bColor, 'ZColor', bColor);
+            set(get(obj.MainAxes, 'XLabel'), 'Color', [0, 0, 0]);
+            
+            % Set the properties of the head axes
+%             set(obj.HeadAxes, 'PlotBoxAspectRatioMode', 'manual', ...
+%                 'PlotBoxAspectRatio', [1, 1, 1], ...
+%                 'DataAspectRatioMode', 'manual', ...
+%                 'DataAspectRatio', [1, 1, 1], 'XLimMode', 'manual', ...
+%                 'YLimMode', 'Manual');
+            
+            % Set the current axes to the head axes for plotting map
+            myFigure = ancestor(obj.MainAxes, 'figure');
+            set(0, 'CurrentFigure', myFigure);    
+            set(gcf, 'CurrentAxes', obj.HeadAxes);
+            
+            
             hold on
-            %obj.setBackgroundColor([1, 1, 1]);
             obj.plotMap(x, y, values)
             obj.plotHead();
             obj.plotElements(x, y, labels);
-            obj.CursorString = {'y:'; 'x:'};
             hold off
+
             obj.redraw();
         end % plot
         
@@ -282,6 +297,20 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 delete(obj.HeadAxes);
             end
             obj.HeadAxes = [];
+     
+            myFigure = ancestor(obj.MainAxes, 'figure');
+            set(0, 'CurrentFigure', myFigure);
+%             if isempty(obj.ColorbarAxes)
+%                 obj.ColorbarAxes = axes('Parent', ...
+%                     get(obj.MainAxes, 'Parent'), 'Tag', 'blockScalpColorbarAxes');
+%             end
+            if isempty(obj.HeadAxes)
+                obj.HeadAxes = axes('Parent', ...
+                    get(obj.MainAxes, 'Parent'), 'Tag', 'blockScalpHeadAxes', ...
+                    'ActivePositionProperty', 'Position', ...
+                   'Units', 'normalized');
+            end
+            
         end % reset
         
         function s = updateString(obj, point)
@@ -303,12 +332,31 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         
         function redraw( obj )
             obj.redraw@visviews.axesPanel();
+            if ~isempty(obj.HeadAxes)
+                oldUnitsHead = get(obj.HeadAxes, 'Units');
+                oldUnitsMain = get(obj.MainAxes, 'Units');
+                % Work in pixels
+                set(obj.HeadAxes, 'Units', 'Pixels');
+                set(obj.MainAxes, 'Units', 'Pixels');
+                mainPos = get(obj.MainAxes, 'Position')
+                oldHeadPos = get(obj.HeadAxes, 'Position')
+                headPos = mainPos;
+                headPos(3) = min(mainPos(3), mainPos(4));
+                headPos(1) = mainPos(1) + mainPos(3)/2 - headPos(3)/2;
+                headPos
+%                 set(obj.HeadAxes, 'Position', headPos, ...
+%                     'DataAspectRatio', [headPos(4)/headPos(3), 1, 1]);
+                set(obj.HeadAxes, 'Position', headPos)
+                set(obj.HeadAxes, 'Units', oldUnitsHead);
+                set(obj.MainAxes, 'Units', oldUnitsMain);
+            end
+            
         end % redraw
         
     end % protected methods
     
     methods (Access = private)
-        
+           
         function [x, y, labels, values] = ...
                 findLocations(obj, elementLocs, bValues)
             % Find channels with valid locations and set locations
@@ -366,10 +414,11 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         end % labelCallback
         
         function plotElements(obj, x, y, labels)
-            % Plot elements points and positions, setting callbacks
+            % Plot elements points and positions on current axes, setting callbacks
             if isempty(x)  % don't plot anything if no elements
                 return;
             end
+          
             mSize = obj.getMarkerSize(length(x));
             elements = intersect(obj.ValidElements, ...
                 obj.StartElement:(obj.StartElement + obj.NumberElements - 1));
@@ -406,8 +455,8 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         end % plotElements
         
         function plotHead(obj)
-            % Plot head outline and label the graph
-            
+            % Plot head outline on current axes and label the graph
+         
             % Plot filled ring to mask jagged grid boundary
             hwidth = 0.007;                         % cartoon head ring width
             hin  = obj.SqueezeFactor*obj.HeadRadius*(1 - hwidth/2); % inner head ring radius
@@ -449,22 +498,21 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             plot3(-earX*obj.SqueezeFactor, earY*obj.SqueezeFactor,  ... % right ear
                 2*ones(size(earY)), 'Color', obj.HeadColor, 'LineWidth', 1.7)
             
-            axis square
-            axis off
-            axis equal;
+            %axis square
+            %axis off
+            set(gca, 'XTick', [], 'YTick', [], 'ZTick', []);
+            %axis equal;
+            box on
             set(gca, 'xlim', [-0.51 0.51]);
             set(gca, 'ylim', [-0.51 0.51]);
-            obj.TextLabel = text(0.0, -0.51, 2.1, ...   % set the bottom label
-                obj.XStringBase, 'HorizontalAlignment','center',...
-                'VerticalAlignment','middle','Color', [0, 0, 0]);
         end % plotHead
         
         function plotMap(obj, x, y, values)
-            % Plot contour map image for interpolation electrodes
+            % Plot contour map image on current axes for interpolation electrodes
             if isempty(values)  % Nothing to plot
                 return;
             end
-            
+
             % Find the elements to interpolate
             intElements = find(x <= obj.InterpolationRadius & y <= obj.InterpolationRadius); % interpolate and plot channels inside interpolation square
             intElements = intersect(obj.ValidElements, intElements);
