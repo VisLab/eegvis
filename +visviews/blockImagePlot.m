@@ -200,6 +200,10 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             
             [slices, names] = obj.CurrentSlice.getParameters(3);  %#ok<ASGLU>
             [data, s] = bFunction.getBlockSlice(obj.CurrentSlice);
+            if isempty(data)
+                warning('blockImagePlot:emptyData', 'No data for this plot');
+                return;
+            end
             obj.StartBlock = s(2);
             obj.StartElement = s(1);
             [obj.NumberElements, obj.NumberBlocks] = size(data);

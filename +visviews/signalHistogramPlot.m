@@ -142,6 +142,10 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
             
             [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
             [data, s] = visData.getDataSlice(obj.CurrentSlice);
+            if isempty(data)
+                warning('signalHistogramPlot:emptyData', 'No data for this plot');
+                return;
+            end
             obj.StartBlock = s(3);
             obj.StartElement = s(1);
             [obj.NumberElements, bSize, obj.NumberBlocks] = size(data); %#ok<ASGLU>
@@ -157,6 +161,11 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
             hHeight = hHeight/length(data(:));  % Probability
             hFact = floor(1./max(hHeight));
             hTop = ceil(max(hHeight)*hFact)/hFact;      % Top scale of histogram
+            if isnan(hTop) || hTop < 0.05 || hTop > 1
+                warning('signalHistogramPlot:NaNData', ...
+                    'Data histogram appears to be out of range');
+                hTop = 1;
+            end
             obj.BoxPlot = boxplot(obj.MainAxes, data(:), 'Notch', 'on', ...
                 'Positions', 1.5*hTop, 'Widths', 0.25*hTop, ...
                 'Color', obj.BoxColor, ...

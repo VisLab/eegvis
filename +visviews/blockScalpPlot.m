@@ -218,7 +218,6 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         function [dSlice, bFunction] = getClicked(obj)
             % Clicking on the electrodes always causes plot of an element
             bFunction = obj.CurrentFunction;
-            blockSlice = 'none';
             if isempty(obj.CurrentElement)
                 dSlice = [];
             else
@@ -230,7 +229,6 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                     'CombineMethod', obj.CombineMethod, 'CombineDim', 1, ...
                     'DimNames', names);
             end
-            fprintf('To here %s\n', blockSlice);
         end % getClicked
         
         function [cbHandles, hitHandles] = getHitObjects(obj)
@@ -245,36 +243,39 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             
             % Get needed information from the data and function objects
             bFunction.setData(visData);
-            obj.CurrentFunction = bFunction;
-            
+            obj.CurrentFunction = bFunction; 
             if isempty(dSlice)
                 obj.CurrentSlice = viscore.dataSlice();
             else
                 obj.CurrentSlice = dSlice;
-            end
-            
+            end 
             [slices, names] = obj.CurrentSlice.getParameters(3);
             
             % Get values for unsliced elements first (for interpolation)
             [bValues, sStarts, sSizes] =  viscore.dataSlice.getDataSlice(...
                 obj.CurrentFunction.getBlockValues(), {':', slices{3}}, ...
                 2, obj.CombineMethod);
+            if isempty(bValues) 
+                warning('blockScalpPlot:emptyData', 'No data for this plot');
+                return;
+            end
             obj.StartBlock = sStarts(2);
             obj.NumberBlocks = sSizes(2);
             
             % Now get values sliced for elements
             [sValues, sStarts, sSizes] =  viscore.dataSlice.getDataSlice(...
                 bValues, slices(1), [], []);
-            obj.StartElement = sStarts(1);
-            obj.NumberElements = sSizes(1);
-            
+            if isempty(sValues) 
+                warning('blockScalpPlot:emptyData', 'No slice data');
+                obj.StartElement = 1;
+                obj.NumberElements = 0;
+            else
+                obj.StartElement = sStarts(1);
+                obj.NumberElements = sSizes(1);
+            end
             [x, y, labels, values] = ...
                 obj.findLocations(visData.getElementLocations(), bValues);
-            
-            x = x*obj.SqueezeFactor;
-            y = y*obj.SqueezeFactor;
-            
-            
+
             % Create the label at the bottom
             if obj.NumberBlocks ~= size(sValues, 2)
                 combineString = [obj.CombineMethod ' '];
@@ -323,17 +324,11 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
      
             myFigure = ancestor(obj.MainAxes, 'figure');
             set(0, 'CurrentFigure', myFigure);
-%             if isempty(obj.ColorbarAxes)
-%                 obj.ColorbarAxes = axes('Parent', ...
-%                     get(obj.MainAxes, 'Parent'), 'Tag', 'blockScalpColorbarAxes');
-%             end
-            if isempty(obj.HeadAxes)
-                obj.HeadAxes = axes('Parent', ...
+   
+           obj.HeadAxes = axes('Parent', ...
                     get(obj.MainAxes, 'Parent'), 'Tag', 'blockScalpHeadAxes', ...
                     'ActivePositionProperty', 'Position', ...
-                   'Units', 'normalized');
-            end
-            
+                   'Units', 'normalized');      
         end % reset
         
         function setBackgroundColor(obj, c)
@@ -427,7 +422,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
            
         function [x, y, labels, values] = ...
                 findLocations(obj, elementLocs, bValues)
-            % Find channels with valid locations and set locations
+            % Find channels with valid locations and set scaled locations
             x = []; y = []; labels = {}; values = [];
             if isempty(elementLocs)   % element locations not defined
                 return;
@@ -458,6 +453,8 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             obj.PlotRadius = max(obj.InterpolationRadius, 0.5);   % plot to 0.5 head boundary
             obj.SqueezeFactor = obj.HeadRadius/obj.PlotRadius;
             obj.ValidElements = validElements;
+            x = x*obj.SqueezeFactor;
+            y = y*obj.SqueezeFactor;
         end % findLocations
         
         function markerSize = getMarkerSize(obj, ylen)   %#ok<MANU>
@@ -566,11 +563,8 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             plot3(-earX*obj.SqueezeFactor, earY*obj.SqueezeFactor,  ... % right ear
                 2*ones(size(earY)), 'Color', obj.HeadColor, 'LineWidth', 1.7)
             
-            %axis square
-            %axis off
             set(gca, 'XTick', [], 'YTick', [], 'ZTick', []);
-            %axis equal;
-            box on
+            %box on
             set(gca, 'xlim', [-0.51 0.51]);
             set(gca, 'ylim', [-0.51 0.51]);
         end % plotHead
@@ -582,11 +576,15 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             end
 
             % Find the elements to interpolate
-            intElements = find(x <= obj.InterpolationRadius & y <= obj.InterpolationRadius); % interpolate and plot channels inside interpolation square
+            values = reshape(values, size(x)); % Make sure same dimensions
+            intElements = find(x <= obj.InterpolationRadius & ...
+                               y <= obj.InterpolationRadius & ...
+                               ~isempty(values) & ~isnan(values)); 
             intElements = intersect(obj.ValidElements, intElements);
             intx  = x(intElements);
             inty  = y(intElements);
             intValues = values(intElements);
+            
             xmin = min(-obj.HeadRadius, min(intx));
             xmax = max(obj.HeadRadius, max(intx));
             ymin = min(-obj.HeadRadius, min(inty));
@@ -609,8 +607,8 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 'Ylim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC);
             surface(Xi - delta/2, Yi - delta/2, zeros(size(Zi)), ...
                 Zi, 'EdgeColor', 'none', 'FaceColor', 'flat');
-            caxis([min(Zi(:)) max(Zi(:))]); % set coloraxis
-            %obj.ColorbarAxes = colorbar;
+            %colorAxisRange
+            %caxis([min(Zi(:)) max(Zi(:))]); % set coloraxis
         end % plotMap
         
     end % private methods
@@ -630,7 +628,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 'Interpolation method', ...
                 'ShowColorBar'}, ...
                 'FieldName',     {'CombineMethod', 'ElementColor', 'HeadColor',         'InterpolationMethod', 'ShowColorbar'}, ...
-                'Value',         {'max',            [0, 0, 0],     [0.75, 0.75, 0.75],  'square',              'false'}, ...
+                'Value',         {'max',            [0, 0, 0],     [0.75, 0.75, 0.75],  'square',              false}, ...
                 'Type',          {...
                 'visprops.enumeratedProperty', ...
                 'visprops.colorProperty', ...

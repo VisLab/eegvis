@@ -258,3 +258,43 @@ testVD1 = viscore.blockedData(data, 'One summary two details');
 bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS', 'Functions', fns);
 drawnow
 %delete(bv1)
+
+function testConstantAndNaNValues %#ok<DEFNU>
+% Unit test visviews.dualView constant and NaN
+fprintf('\nUnit tests for visviews.dualView with constant and NaN values\n')
+
+% All zeros
+fprintf('It should produce a plot for when all of the values are 0\n');
+data = zeros([32, 1000, 20]);
+testVD1 = viscore.blockedData(data, 'All zeros');
+bv1 = visviews.dualView('VisData', testVD1);
+assertTrue(isvalid(bv1));
+drawnow
+
+% Data zeros, function NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
+data = zeros([32, 1000, 20]);
+testVD2 = viscore.blockedData(data, 'Data zeros, func NaN');
+bv2 =  visviews.dualView('VisData', testVD2);
+assertTrue(isvalid(bv2));
+drawnow
+
+% Data NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
+data = NaN([32, 1000, 20]);
+testVD3 = viscore.blockedData(data, 'Data NaN');
+bv3 =  visviews.dualView('VisData', testVD3);
+assertTrue(isvalid(bv3));
+drawnow
+
+% Data slice empty
+fprintf('It should produce empty axes when data slice is empty\n');
+data = zeros(5, 1);
+testVD4 = viscore.blockedData(data, 'Data empty');
+bv4 =  visviews.dualView('VisData', testVD4);
+assertTrue(isvalid(bv4));
+drawnow
+delete(bv1);
+delete(bv2);
+delete(bv3);
+delete(bv4);

@@ -197,6 +197,11 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             combDim = 0;           % Don't combine
             [slices, names, cDims, combMethod] = obj.CurrentSlice.getParameters(3);
             bValues = bFunction.getBlockSlice(dSlice); % determines line color
+            if isempty(bValues)
+                warning('signalStackedPlot:emptyBlockValues', ...
+                    'Slice has no values');
+                return;
+            end           
             [obj.TotalElements, obj.TotalBlocks] = size(bValues); % Capture size before combining
             if isempty(cDims) || ~isempty(intersect(cDims, 3))  % Plot all elements for a window
                 if (size(bValues, 2) > 1) && obj.VisData.isEpoched()
@@ -392,6 +397,13 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             end
             plotSpacing = double(scale)*trimmean(dataStd, 10);
             numPlots = length(dataStd);
+            if numPlots == 0 || isnan(plotSpacing)
+                warning('signalStackedPlot:NaNValues', ...
+                    'No data to plot');
+                return;
+            elseif plotSpacing == 0;
+                plotSpacing = 0.1;
+            end
             %y-axis reversed, so must plot the negative of the signals            
             eps = plotSpacing*obj.ClippingTolerance;
             obj.HitList = cell(1, numPlots + 1);

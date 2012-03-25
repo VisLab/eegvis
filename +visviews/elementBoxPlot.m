@@ -204,6 +204,10 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             
             [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
             [data, s] = bFunction.getBlockSlice(obj.CurrentSlice);
+            if isempty(data)
+                warning('elementBoxPlot:emptyData', 'No data for this plot');
+                return;
+            end
             obj.StartBlock = s(2);
             obj.StartElement = s(1);
             [obj.NumberElements, obj.NumberBlocks] = size(data);
@@ -220,6 +224,14 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             
             dRange = 1:(obj.NumberElements *obj.NumberBlocks);
             limits = [max(limits(1), min(data(:))), min(limits(2), max(data(:)))];
+            if sum(isnan(limits)) > 0  
+                warning('blockBoxPlot:NaNValues', 'Values were entirely NaN\n');
+                limits = [-0.1, 0.1];
+            elseif sum(abs(limits)) <= 10e-8 % limits were both zero 
+                limits = [-0.1, 0.1];
+            elseif length(data) == 1 || limits(1) == limits(2) %constant
+                limits = [limits(1)*0.9, limits(1)*1.1];
+            end
             try % boxplot fails if it doesn't have enough room
                 obj.Boxplot = boxplot(obj.MainAxes, ...
                     data(dRange),  num2cell(groups(dRange)), ...

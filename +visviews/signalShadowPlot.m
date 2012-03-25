@@ -452,6 +452,15 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
             minData = squeeze(min(min(data, [], 3)));
             y = [min(minData), max(maxData)];
             yLims = [y(1) - obj.ScaleGap*abs(y(1)), y(2) + obj.ScaleGap*abs(y(2))];
+            if sum(isnan(yLims)) > 0  % Check the bad cases before scaling
+                warning('signalShadowPlot:NaNValues', 'Values were entirely NaN\n');
+                yLims = [-0.1, 0.1];
+            elseif sum(abs(yLims)) <= 10e-8 % limits were both zero 
+                yLims = [-0.1, 0.1];
+            elseif length(data) == 1 || yLims(1) == yLims(2) %constant
+                yLims = [yLims(1)*0.9, yLims(1)*1.1];
+            end
+            
             % Draw the shaded areas
             mlColor = [0.6, 0.6, 0.6];
             slColor = [0.8, 0.8, 0.8];

@@ -141,7 +141,12 @@ classdef blockHistogramPlot < visviews.axesPanel & visprops.configurable
             end
             
             [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
+ 
             [data, s] = bFunction.getBlockSlice(obj.CurrentSlice);
+            if isempty(data)
+                warning('blockHistogramPlot:emptyData', 'No data for this plot');
+                return;
+            end
             obj.StartBlock = s(2);
             obj.StartElement = s(1);
             [obj.NumberElements, obj.NumberBlocks] = size(data);
@@ -151,6 +156,11 @@ classdef blockHistogramPlot < visviews.axesPanel & visprops.configurable
             hHeight = hHeight/length(data(:));  % Probability
             hFact = floor(1./max(hHeight));
             hTop = ceil(max(hHeight)*hFact)/hFact;      % Top scale of histogram
+            if isnan(hTop) || hTop < 0.05 || hTop > 1
+                warning('blockHistogramPlot:NaNData', ...
+                    'Data histogram appears to be out of range');
+                hTop = 1;
+            end
             obj.BoxPlot = boxplot(obj.MainAxes, data(:), 'Notch', 'on', ...
                 'Positions', 1.5*hTop, 'Widths', 0.25*hTop, ...
                 'Color', obj.BoxColor, ...
