@@ -48,18 +48,20 @@
 %     default is [0.75, 0.75, 0.75].
 %
 % InterpolationMethod specifies the method used to produce the shaded
-%     map of block values on the scalp. The default value is 'square' which
+%     map of block values on the scalp. The default value is 'v4' which
 %     specifies that the block values be interpolated on a grid that is
-%     2 x HeadRadius. After interpolation, the plot masks values
-%     the values that fall outside the inscribed circle with radius
-%     HeadRadius. This method is the default method used by EEGLAB
-%     topolot. Since some of the outer grid points on the square are
-%     outside the convex hull of the elements, values along the edges
-%     are extrapolated rather than interpolated. This can result in
-%     contours maps that are visually pleasing but can be misleading.
+%     2 x HeadRadius with extrapolation. After interpolation, 
+%     the plot masks values the values that fall outside the 
+%     inscribed circle with radius HeadRadius. This method is the default 
+%     method used by EEGLAB topolot. Since some of the outer grid points 
+%     on the square are outside the convex hull of the elements, values 
+%     along the edges are extrapolated rather than interpolated. 
+%     This can result in contours maps that are visually pleasing 
+%     but can be misleading.
 %
-%     An alternative interpolation method 'convex', only creates the
-%     map within the convex hull. All map values are then interpolated.
+%     Alternative interpolation methods include 'linear', 'cubic' and
+%     'nearest'. These three methods only create the map within the 
+%     convex hull. All map values are then interpolated.
 %
 % IsClickable is a logical value specifying whether this plot should respond to
 %    user mouse clicks when incorporated into a linkable figure. The
@@ -127,6 +129,9 @@
 %     completely, blockScalpMap does not display it, regardless of the
 %     setting of ShowColorbar.
 %  
+% Acknowledgment: This function contains code from topoplot.m of the EEGLAB  
+% software, Andy Spydell, Colin Humphries, Arnaud Delorme & Scott Makeig, 
+% CNL / Salk Institute, 8/1996-/10/2001; SCCN/INC/UCSD, Nov. 2001.
 %
 % Class documentation:
 % Execute the following in the MATLAB command window to view the class
@@ -142,6 +147,7 @@
 
 % Copyright (C) 2011  Kay Robbins, UTSA, krobbins@cs.utsa.edu
 %
+% 
 % This program is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation; either version 2 of the License, or
@@ -168,7 +174,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         CombineMethod = 'max';           % method of combining blocks
         ElementColor = [0, 0, 0];        % electrode color
         HeadColor = [0.75, 0.75, 0.75];  % color for plotting the head
-        InterpolationMethod = 'square';    % method of interpolation
+        InterpolationMethod = 'v4';      % method of interpolation
         ShowColorbar = true;             % indicates whether to show colorbar
     end % public properties
     
@@ -590,12 +596,19 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             ymin = min(-obj.HeadRadius, min(inty));
             ymax = max(obj.HeadRadius, max(inty));
             
-            xi = linspace(xmin, xmax, 67);   % x-axis description (row vector)
-            yi = linspace(ymin, ymax, 67);   % y-axis description (row vector)
-            [Xi, Yi ,Zi] = griddata(inty, intx, intValues, yi', xi, 'invdist'); % interpolate
+            xLin = linspace(xmin, xmax, 67);
+            yLin = linspace(ymin, ymax, 67);
+            
+            % TriScatterInterp version is not implemented at this time
+%           [Xi, Yi] = meshgrid(xLin, yLin);
+%           F = TriScatteredInterp(intx', inty', intValues');
+%           Zi = F(Xi, Yi);            
+
+            [Xi, Yi, Zi] = griddata(inty, intx, intValues, yLin', xLin, ...
+                obj.InterpolationMethod); %#ok<GRIDD> % interpolate
             mask = (sqrt(Xi.^2 + Yi.^2) > obj.HeadRadius); % mask outside the plotting circle
             Zi(mask)  = NaN;                 % mask non-plotting areas
-            delta = xi(2) - xi(1); % length of grid entry
+            delta = xLin(2) - xLin(1); % length of grid entry
             
             % instead of default larger AXHEADFAC
             AXHEADFAC = 1.3;        % head to axes scaling factor
@@ -605,10 +618,8 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             set(gca, ...
                 'Xlim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC, ...
                 'Ylim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC);
-            surface(Xi - delta/2, Yi - delta/2, zeros(size(Zi)), ...
-                Zi, 'EdgeColor', 'none', 'FaceColor', 'flat');
-            %colorAxisRange
-            %caxis([min(Zi(:)) max(Zi(:))]); % set coloraxis
+            surface(Xi' - delta/2, Yi' - delta/2, zeros(size(Zi)), ...
+                Zi', 'EdgeColor', 'none', 'FaceColor', 'flat');
         end % plotMap
         
     end % private methods
@@ -628,7 +639,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 'Interpolation method', ...
                 'ShowColorBar'}, ...
                 'FieldName',     {'CombineMethod', 'ElementColor', 'HeadColor',         'InterpolationMethod', 'ShowColorbar'}, ...
-                'Value',         {'max',            [0, 0, 0],     [0.75, 0.75, 0.75],  'square',              false}, ...
+                'Value',         {'max',            [0, 0, 0],     [0.75, 0.75, 0.75],  'v4',              false}, ...
                 'Type',          {...
                 'visprops.enumeratedProperty', ...
                 'visprops.colorProperty', ...
@@ -636,7 +647,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 'visprops.enumeratedProperty', ...
                 'visprops.logicalProperty'}, ...
                 'Editable',      {true, true, true, true, true}, ...
-                'Options',       {{'max', 'min', 'mean', 'median'}, '', '', {'square', 'convex'}, ''}, ...
+                'Options',       {{'max', 'min', 'mean', 'median'}, '', '', {'v4', 'linear', 'cubic', 'nearest'}, ''}, ...
                 'Description',   {...
                 'Method for combining windows to produce single value for each element', ...
                 'Color for plotting elements in current slice', ...

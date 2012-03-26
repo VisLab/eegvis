@@ -49,18 +49,20 @@
 % default is |[0.75, 0.75, 0.75]|.
 %
 % |InterpolationMethod| specifies the method used to produce the shaded
-% map of block values on the scalp. The default value is |'square'| which
+% map of block values on the scalp. The default value is |'v4'| which
 % specifies that the block values be interpolated on a grid that is
-% 2 x |HeadRadius|. After interpolation, the plot masks values
-% the values that fall outside the inscribed circle with radius
-% |HeadRadius|. This method is the default method used by EEGLAB
-% topoplot. Since some of the outer grid points on the square are
-% outside the convex hull of the elements, values along the edges
-% are extrapolated rather than interpolated. This can result in
-% contours maps that are visually pleasing but can be misleading.
+% 2 x HeadRadius with extrapolation. After interpolation, 
+% the plot masks values the values that fall outside the 
+% inscribed circle with radius HeadRadius. This method is the default 
+% method used by EEGLAB topolot. Since some of the outer grid points 
+% on the square are outside the convex hull of the elements, values 
+% along the edges are extrapolated rather than interpolated. 
+% This can result in contours maps that are visually pleasing 
+% but can be misleading.
 %
-% An alternative interpolation method 'convex', only creates the
-% map within the convex hull. All map values are then interpolated.
+% Alternative interpolation methods include |'linear'|, |'cubic'| and
+% |'nearest'|. These three methods only create the map within the 
+% convex hull. All map values are then interpolated.
 %
 % |IsClickable| is a boolean specifying whether this plot should respond to
 % user mouse clicks when incorporated into a linkable figure. The
@@ -92,8 +94,7 @@
 % clicks on the electrode point, blockScalpMap toggles a label
 % associated with the point among name, number and no display.
 %     
-%% Example:
-% Create a scalp map of kurtosis of 32 exponentially distributed channels
+%% Example 1: Create a kurtosis scalp map for 32 exponentially distributed channels
 
    % Create a block box plot
    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
@@ -118,6 +119,51 @@
    gaps = bp.getGaps();
    bp.reposition(gaps);
 
+%% Example 2: Compare scalp map interpolation methods
+
+   % Create a block box plot
+   
+   
+   % Generate some data to plot
+   data = random('exp', 1, [32, 1000, 20]);
+   load chanlocs.mat;
+   testVD = viscore.blockedData(data, 'Exponenitally distributed', ...
+            'ElementLocations', chanlocs);
+
+   % Create a kurtosis block function object
+   defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+              visfuncs.functionObj.getDefaultFunctions());
+   thisFunc = defaults{1};
+   thisFunc.setData(testVD);
+   
+   sfig1 = figure('Name', 'Default interpolation (v4)');
+   bp1 = visviews.blockScalpPlot(sfig1, [], []);
+   bp1.InterpolationMethod = 'v4';
+   bp1.plot(testVD, thisFunc, []);
+   gaps = bp1.getGaps();
+   bp1.reposition(gaps);
+
+   sfig2 = figure('Name', 'Linear interpolation');
+   bp2 = visviews.blockScalpPlot(sfig2, [], []);
+   bp2.InterpolationMethod = 'linear';
+   bp2.plot(testVD, thisFunc, []);
+   gaps = bp2.getGaps();
+   bp2.reposition(gaps);
+   
+   sfig3 = figure('Name', 'Cubic interpolation');
+   bp3 = visviews.blockScalpPlot(sfig3, [], []);
+   bp3.InterpolationMethod = 'cubic';
+   bp3.plot(testVD, thisFunc, []);
+   gaps = bp3.getGaps();
+   bp3.reposition(gaps);
+   
+   sfig4 = figure('Name', 'Nearest interpolation');
+   bp4 = visviews.blockScalpPlot(sfig4, [], []);
+   bp4.InterpolationMethod = 'nearest';
+   bp4.plot(testVD, thisFunc, []);
+   gaps = bp4.getGaps();
+   bp4.reposition(gaps);
+
 %% Notes:
 %
 % * If manager is empty, the class defaults are used to initialize.
@@ -128,6 +174,11 @@
 % make the electrodes available for clicking. If the color doesn't fit
 % completely, blockScalpMap does not display it, regardless of the
 % setting of ShowColorbar.
+%
+%% Acknowledgment: 
+% This function contains code from topoplot.m of the EEGLAB  
+% software, Andy Spydell, Colin Humphries, Arnaud Delorme & Scott Makeig, 
+% CNL / Salk Institute, 8/1996-/10/2001; SCCN/INC/UCSD, Nov. 2001.
 %  
 %% Class documentation
 % Execute the following in the MATLAB command window to view the class 

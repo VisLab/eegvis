@@ -269,3 +269,64 @@ drawnow
 % delete(sfig2);
 % delete(sfig3);
 % delete(sfig4);
+
+function testPlotInterpolationMethod %#ok<DEFNU>
+% Unit test evisviews.blockScalpPlot plot
+fprintf('\nUnit tests for visviews.blockScalpPlot plot interpolation method\n');
+
+fprintf('It should produce a plot different interpolation methods\n');
+% Generate some data to plot
+data = random('exp', 1, [32, 1000, 20]);
+load chanlocs.mat;
+testVD = viscore.blockedData(data, 'Rand1', 'ElementLocations', chanlocs);
+defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    viewTestClass.getDefaultFunctionsNoSqueeze());
+fMan = viscore.dataManager();
+fMan.putObjects(defaults);
+func = fMan.getEnabledObjects('block');
+thisFunc = func{1};
+thisFunc.setData(testVD);
+slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+
+sfig = figure('Name', 'Interpolation v4 (default)');
+bp = visviews.blockScalpPlot(sfig, [], []);
+assertTrue(isvalid(bp));
+assertTrue(strcmp(bp.InterpolationMethod, 'v4'));
+bp.plot(testVD, thisFunc, slice1);
+drawnow
+gaps = bp.getGaps();
+bp.reposition(gaps);
+
+sfig1 = figure('Name', 'Interpolation linear');
+bp1 = visviews.blockScalpPlot(sfig1, [], []);
+assertTrue(isvalid(bp1));
+bp1.InterpolationMethod = 'linear';
+bp1.plot(testVD, thisFunc, slice1);
+drawnow
+gaps = bp1.getGaps();
+bp1.reposition(gaps);
+
+
+sfig2 = figure('Name', 'Interpolation cubic');
+bp2 = visviews.blockScalpPlot(sfig2, [], []);
+assertTrue(isvalid(bp2));
+bp2.InterpolationMethod = 'cubic';
+bp2.plot(testVD, thisFunc, slice1);
+drawnow
+gaps = bp2.getGaps();
+bp2.reposition(gaps);
+
+sfig3 = figure('Name', 'Interpolation nearest');
+bp3 = visviews.blockScalpPlot(sfig3, [], []);
+assertTrue(isvalid(bp3));
+bp3.InterpolationMethod = 'nearest';
+bp3.plot(testVD, thisFunc, slice1);
+drawnow
+gaps = bp3.getGaps();
+bp3.reposition(gaps);
+
+%delete(sfig)
+%delete(sfig1)
+%delete(sfig2)
+%delete(sfig3)
