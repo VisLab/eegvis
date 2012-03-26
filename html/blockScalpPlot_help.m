@@ -6,14 +6,13 @@
 %     obj = visviews.blockScalpPlot(parent, manager, key)
 %
 %% Description
-% |obj = visviews.blockScalpPlot(parent, manager, key)| a scalp map
+% |obj = visviews.blockScalpPlot(parent, manager, key)| displays a scalp map
 % of combined block function values for a specified slice of time.
 % The display includes a contour map of the combined values over the
 % time and either points, labels, or numbers identifying the positions
 % of the elements. The block scalp plot assumes that the elements
 % correspond to eeg channels positioned on a scalp. If no channel
-% locations are provided, the scalp map arrays the elements in a circle
-% and does not draw a contour map.
+% locations are provided, the scalp map displays the head outline only.
 %
 % The |parent| is a graphics handle to the container for this plot. The
 % |manager| is an |viscore.dataManager| object containing managed objects
@@ -139,6 +138,7 @@
    sfig1 = figure('Name', 'Default interpolation (v4)');
    bp1 = visviews.blockScalpPlot(sfig1, [], []);
    bp1.InterpolationMethod = 'v4';
+   bp1.Title = 'v4 (default)';
    bp1.plot(testVD, thisFunc, []);
    gaps = bp1.getGaps();
    bp1.reposition(gaps);
@@ -146,6 +146,7 @@
    sfig2 = figure('Name', 'Linear interpolation');
    bp2 = visviews.blockScalpPlot(sfig2, [], []);
    bp2.InterpolationMethod = 'linear';
+   bp2.Title = 'linear';
    bp2.plot(testVD, thisFunc, []);
    gaps = bp2.getGaps();
    bp2.reposition(gaps);
@@ -153,6 +154,7 @@
    sfig3 = figure('Name', 'Cubic interpolation');
    bp3 = visviews.blockScalpPlot(sfig3, [], []);
    bp3.InterpolationMethod = 'cubic';
+   bp3.Title = 'cubic';
    bp3.plot(testVD, thisFunc, []);
    gaps = bp3.getGaps();
    bp3.reposition(gaps);
@@ -160,6 +162,7 @@
    sfig4 = figure('Name', 'Nearest interpolation');
    bp4 = visviews.blockScalpPlot(sfig4, [], []);
    bp4.InterpolationMethod = 'nearest';
+   bp4.Title = 'nearest';
    bp4.plot(testVD, thisFunc, []);
    gaps = bp4.getGaps();
    bp4.reposition(gaps);

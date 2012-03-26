@@ -95,7 +95,6 @@ for k = 1:length(propertyScripts)
    publish([propertyScripts{k} '.m'], publish_options);
 end
 
-
 %% Publish the visualization scripts
 baseDirectory = pwd;
 publish_options.outputDir = baseDirectory;
@@ -125,4 +124,3 @@ viewScripts = { ...
 for k = 1:length(viewScripts)
    publish([viewScripts{k} '.m'], publish_options);
 end
-

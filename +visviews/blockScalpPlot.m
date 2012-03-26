@@ -11,8 +11,7 @@
 %    time and either points, labels, or numbers identifying the positions
 %    of the elements. The block scalp plot assumes that the elements
 %    correspond to eeg channels positioned on a scalp. If no channel
-%    locations are provided, the scalp map arrays the elements in a circle
-%    and does not draw a contour map.
+%    locations are provided, the scalp map displays the head outline only.
 %
 %    The parent is a graphics handle to the container for this plot. The
 %    manager is an viscore.dataManager object containing managed objects
