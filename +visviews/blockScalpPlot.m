@@ -605,6 +605,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
 
             [Xi, Yi, Zi] = griddata(inty, intx, intValues, yLin', xLin, ...
                 obj.InterpolationMethod); %#ok<GRIDD> % interpolate
+ 
             mask = (sqrt(Xi.^2 + Yi.^2) > obj.HeadRadius); % mask outside the plotting circle
             Zi(mask)  = NaN;                 % mask non-plotting areas
             delta = xLin(2) - xLin(1); % length of grid entry
