@@ -104,7 +104,7 @@ assertTrue(isvalid(bp));
 fMan = viscore.dataManager();
 fMan.putObjects(defaults);
 func = fMan.getEnabledObjects('block');
-thisFunc = func{1};
+thisFunc = func{2};
 thisFunc.setData(testVD);
 
 bp.plot(testVD, thisFunc, slice2);
@@ -289,7 +289,7 @@ thisFunc.setData(testVD);
 slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 
-sfig = figure('Name', 'Interpolation v4 (default)');
+sfig = figure('Name', 'Random expoential: Interpolation v4 (default)');
 bp = visviews.blockScalpPlot(sfig, [], []);
 assertTrue(isvalid(bp));
 assertTrue(strcmp(bp.InterpolationMethod, 'v4'));

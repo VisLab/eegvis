@@ -138,7 +138,7 @@ classdef blockedData < hgsetget
         end % getBlockSize
         
         function data = getData(obj)
-            % Return the data
+            % Return the blocked data (may have padding at the end)
             data = obj.Data;
         end % getData
         

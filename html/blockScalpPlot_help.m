@@ -71,7 +71,7 @@
 % linkable figure should cause detail views to display the clicked
 % slice. The default value is |true|.
 %
-% ShowColorbar is a logical value specifying whether to display a colorbar
+% |ShowColorbar| is a logical value specifying whether to display a colorbar
 %    in addition to the scalp map (if the bar fits).
 %
 %% Interaction of labels with slices:
