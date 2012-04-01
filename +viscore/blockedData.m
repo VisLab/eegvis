@@ -16,6 +16,9 @@
 %    deviation or kurtosis is applied along this dimension to provide a
 %    summary of the function.
 %
+%    The data of blockData objects is always converted to double, even if it
+%    comes in as single or some other type.
+%
 %
 % viscore.blockedData(data, dataID, 'key1', 'value1', ...| specifies
 %     optional name/value parameter pairs:
@@ -308,7 +311,7 @@ classdef blockedData < hgsetget
             end
             
             % Now handle the data
-            obj.Data = pdata.Data;
+            obj.Data = double(pdata.Data);
             obj.OriginalMean = mean(obj.Data(:));
             obj.OriginalStd = std(obj.Data(:));
             obj.TotalValues = length(obj.Data(:));

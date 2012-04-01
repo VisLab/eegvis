@@ -219,7 +219,8 @@ classdef axesPanel < uiextras.Panel & visviews.resizable ...
                     delete(childPlots(c));
                 end
             end
-           set(get(obj, 'MainAxes'), 'NextPlot', 'add'); % set for adding
+            hold(obj.MainAxes, 'off');  % Make sure that hold is off to start
+            set(get(obj, 'MainAxes'), 'NextPlot', 'add'); % Set for adding
         end % reset
         
         function setBackgroundColor(obj, c)

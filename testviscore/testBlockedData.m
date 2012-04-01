@@ -249,3 +249,13 @@ assertEqual(size(values, 1), 1);
 assertEqual(size(values, 2), 1000);
 assertVectorsAlmostEqual(values, data(2, :));
 assertVectorsAlmostEqual(sValues, [2, 1, 1]);
+
+function testSinglePrecision %#ok<DEFNU>
+% Unit test for viscore.blockedData for single precession
+fprintf('\nUnit tests for viscore.blockedData when data is single precision:\n');
+
+data = single(random('exp', 1, [1, 1000, 20]));
+testVD = viscore.blockedData(data, 'Random single precision data');
+storedData = testVD.getData();
+assertTrue(isa(storedData, 'double'));
+
