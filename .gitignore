@@ -10,7 +10,6 @@
 !help_gs.png
 !help_ug.png
 !icons/*.png
-EEGVISTestScript/*
 
 EegVis_getting_started*.png
 !doc.css
