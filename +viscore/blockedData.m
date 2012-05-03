@@ -31,7 +31,7 @@
 %   'EpochTimes'        if data is epoched, times corresponding to epoch samples
 %   'PadValue'          numeric value to pad uneven blocks (defaults to 0)
 %
-% obj = viscore.blockedData(...)| returns a handle to the newly created
+% obj = viscore.blockedData(...) returns a handle to the newly created
 % object.
 %
 % Example 1:

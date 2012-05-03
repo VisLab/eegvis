@@ -1,4 +1,4 @@
-function test_suite = testDataSource %#ok<FNDEF,STOUT>
+function test_suite = testBlockedData %#ok<STOUT>
 % Unit tests for blockedData
 initTestSuite;
 
