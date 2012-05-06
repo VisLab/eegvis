@@ -94,8 +94,7 @@
 classdef eventData < hgsetget
     
     properties (Access = private)
- 
-        BlockEvents;         % cell array indexing events in block
+        BlockList;           % cell array indexing events in block
         BlockRange;          % array indicating block range each event
         BlockSize;           % size of the
         EndTimes;            % double array of event end times
@@ -117,14 +116,20 @@ classdef eventData < hgsetget
             obj.parseParameters(types, startTimes, varargin{:});
         end % eventData constructor
         
-        function blocks = getBlocks(obj)
-            % Return the cell array of block event lists
-            blocks = obj.Blocks;
-        end % getBlocks
         
         function block = getBlock(obj, k)
             % Return the row vector of doubles containing
         end
+        
+        function blocklist = getBlockList(obj)
+            % Return the cell array of block event lists
+            blocklist = obj.BlockList;
+        end % getBlockList
+        
+        function ranges = getBlockRange(obj)
+            % Return an array of ranges for the different events
+            ranges = obj.BlockRange;
+        end % getBlockRange
         
         function blockSize = getBlockSize(obj)
             % Return the current block size for this event set
@@ -155,6 +160,12 @@ classdef eventData < hgsetget
             events = events(eventIndices);
         end % getEvents
         
+        function [values, sValues] = getEventSlice(obj, dSlice)
+            % Returns the counts of each type of event in the slice
+            values = [];
+            sValues = [];
+        end % getEventSlice
+        
         function maxTime = getMaxTime(obj)
             % Return the maximum time blocked for this event set
             maxTime = obj.MaxTime;
@@ -166,10 +177,15 @@ classdef eventData < hgsetget
         end   % getSamplingRate
         
         function startTimes = getStartTimes(obj)
-            % Return event start times
+            % Return a double array of event start times
             startTimes = obj.StartTimes;
         end % getStartTimes
-         
+        
+        function uniqueTypes = getUniqueTypes(obj)
+            % Return a cell array of unique event types in event order
+            uniqueTypes = obj.UniqueTypes;
+        end % getUniqueTypes
+        
         function version = getVersionID(obj)
             % Return version ID of this event set
             version = obj.VersionID;
@@ -191,9 +207,10 @@ classdef eventData < hgsetget
             if isempty(maxTime)
                 maxTime = max(obj.EndTimes);
             end
-            numBlocks = ceil(maxTime/blockSize);
-            if ~isempty(obj.BlockSize) && ~isempty(obj.Blocks) && ...
-                    numBlocks == size(obj.Blocks, 1) && ...
+            blockTime = obj.BlockSize./obj.SamplingRate;
+            numBlocks = ceil(obj.MaxTime/blockTime);
+            if ~isempty(obj.BlockSize) && ~isempty(obj.BlockList) && ...
+                    numBlocks == size(obj.BlockList, 1) && ...
                     blockSize == obj.BlockSize
                 return;    % no change so don't reblock
             end
@@ -204,41 +221,41 @@ classdef eventData < hgsetget
             obj.BlockSize = round(blockSize);
             obj.MaxTime = maxTime;
             
-            obj.InitializeBlocks();
+            obj.BlockList = cell(numBlocks, 1);
+            for k = 1:length(obj.BlockList)
+                obj.BlockList{k} = {};
+            end;
+            %             obj.BlockEvents = cell(length(obj.Types), 1);
+            %             for k = 1:length(obj.BlockEvents)
+            %                 obj.BlockEvents{k} = {};
+            %             end;
+            
+            obj.BlockRange = zeros(length(obj.Types), 2);
+            for k = 1:length(obj.Types)
+                startBlock = floor(obj.StartTimes(k)/blockTime) + 1;
+                if startBlock > numBlocks
+                    continue;
+                end
+                endBlock = min(floor(obj.EndTimes(k)/blockTime) + 1, ...
+                    numBlocks);
+                
+                obj.BlockRange(k, :) = [startBlock, endBlock];
+                for j = startBlock:endBlock
+                    obj.BlockList{j}{length(obj.BlockList{j}) + 1} = k;
+                end
+            end
+            
+            % Now fix BlockList  elements to be arrays
+            for k = 1:length(obj.BlockList)
+                obj.BlockList{k} = cell2mat(obj.BlockList{k});
+            end
+            
         end % reblock
         
     end % public methods
     
     
     methods(Access = private)
-        
-        function initializeBlocks(obj)
-            % Initialize the Blocks cell array to hold the block numbers
-            numBlocks = ceil(maxEnd/obj.BlockSize);
-            obj.BlockList = cell(numBlocks, 1);
-            for k = 1:length(BlockList)
-                obj.BlockList{k} = {};
-            end;
-            obj.BlockEvents = cell(length(obj.Types), 1);
-            for k = 1:length(obj.BlockEvents)
-                obj.BlockEvents{k} = {};
-            end;
-            
-            obj.BlockRange = zeros(length(obj.Types), 2);
-            for k = 1:length(obj.Types)
-                startBlock = floor(obj.StartTime/obj.BlockSize) + 1;
-                if startBlock < numBlocks
-                    continue;
-                end
-                endBlock = min(floor(obj.EndTime/obj.BlockSize) + 1, ...
-                               numBlocks);
-   
-                obj.BlockRange(k, :) = [startBlock, endBlock];
-                for j = startBlock:endBlock
-                    obj.Blocks{j}{length(obj.Blocks{j}) + 1} = k;
-                end
-            end
-        end % initializeBlocks
         
         function parseParameters(obj, types, startTimes, varargin)
             % Parse parameters provided by user in constructor
@@ -276,6 +293,7 @@ classdef eventData < hgsetget
                 obj.UniqueTypes = [iEvents(:); t(:)];
             end
             
+            obj.reblock(obj.BlockSize, obj.MaxTime);
         end % parseParameters
         
     end % private methods
@@ -310,4 +328,4 @@ classdef eventData < hgsetget
     end % static methods
     
 end % eventData
-    
+

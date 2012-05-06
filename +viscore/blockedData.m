@@ -276,6 +276,10 @@ classdef blockedData < hgsetget
                 obj.Data = eval(eString);
             end
             obj.Data = reshape(obj.Data, [dStart, obj.BlockSize, blocks, dEnd]);
+            
+            if ~isempty(obj.Events)
+                obj.Events.reblock(obj.BlockSize);  % fix this later
+            end
         end % reblock
         
     end % public methods

@@ -222,7 +222,10 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
 %                 data = data';
 %             end
             
-            
+            events = visData.getEvents();
+            if isempty(events);
+                return;
+            end
             colors = permute(bFunction.getBlockColors(...
                 reshape(data, obj.NumberClumps, obj.NumberElements)), [2, 1, 3]);
             iMap = image(colors, 'Parent', obj.MainAxes, 'Tag', 'ImageMap');
