@@ -134,7 +134,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
         CurrentSlice = [];       % current slice
         NumberBlocks = 0;        % number of blocks
         NumberClumps = 0;        % current number of clumps (boxplots)
-        NumberElements = 0;      % number of elements being plotted
+        NumberElements = 0;      % number of elements in slice (for downstream)
+        NumberEvents = 0;        % number of events being plotted
         StartBlock = 1;          % starting block of currently plotted slice
         StartElement = 1;        % starting element of currently plotted slice  
     end % private properties
@@ -210,16 +211,17 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             
             % Calculate the number of clumps and adjust for uneven clumps
             obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
-            if obj.ClumpFactor > 1
-                leftOvers = obj.NumberClumps*obj.ClumpFactor - obj.NumberBlocks;
-                if leftOvers > 0
-                    data = [data, nan(obj.NumberElements, leftOvers)];
-                end
-                data = reshape(data', obj.ClumpFactor, obj.NumberClumps*obj.NumberElements);
-                data = viscore.dataSlice.combineDims(data, 1, obj.CombineMethod);
-            else
-                data = data';
-            end
+%             if obj.ClumpFactor > 1
+%                 leftOvers = obj.NumberClumps*obj.ClumpFactor - obj.NumberBlocks;
+%                 if leftOvers > 0
+%                     data = [data, nan(obj.NumberElements, leftOvers)];
+%                 end
+%                 data = reshape(data', obj.ClumpFactor, obj.NumberClumps*obj.NumberElements);
+%                 data = viscore.dataSlice.combineDims(data, 1, obj.CombineMethod);
+%             else
+%                 data = data';
+%             end
+            
             
             colors = permute(bFunction.getBlockColors(...
                 reshape(data, obj.NumberClumps, obj.NumberElements)), [2, 1, 3]);

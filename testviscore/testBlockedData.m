@@ -259,3 +259,27 @@ testVD = viscore.blockedData(data, 'Random single precision data');
 storedData = testVD.getData();
 assertTrue(isa(storedData, 'double'));
 
+function testConstructorWithEvents %#ok<DEFNU>
+% Unit test for viscore.blockedData with eventData
+fprintf('\nUnit tests for viscore.blockedData with events\n');
+data = random('normal', 0, 1, [32, 1000, 20]);
+
+
+fprintf('It should have an empty events, if none are passed in\n');
+vd1 = viscore.blockedData(data, 'ID1');
+assertTrue(isvalid(vd1));
+assertTrue(isempty(vd1.getEvents()));
+
+fprintf('It should return the eventData, if it is passed in\n');
+load('EEGData.mat');   
+tEvents = EEG.event;
+types = {tEvents.type}';
+startTimes = cell2mat({tEvents.latency})';
+ed = viscore.eventData(types, startTimes);
+vd2 = viscore.blockedData(data, 'ID2', 'Events', ed);
+assertTrue(isvalid(vd2));
+ed1 = vd2.getEvents();
+assertTrue(isvalid(ed1));
+assertTrue(isa(ed1, 'viscore.eventData'));
+
+

@@ -39,6 +39,8 @@
 %      <td>if data is epoched, times in seconds of epoch beginnings</td></tr>
 % <tr><td><tt>'EpochTimes'</tt></td>
 %      <td>if data is epoched, times corresponding to epoch samples</td></tr>
+% <tr><td><tt>'Events'</tt></td>
+%      <td>eventData object if this data has events</td></tr> 
 % <tr><td><tt>'PadValue'</tt></td>
 %      <td>numeric value to pad uneven blocks (defaults to 0)</td></tr>
 % </table>

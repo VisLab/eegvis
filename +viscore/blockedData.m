@@ -22,14 +22,15 @@
 %
 % viscore.blockedData(data, dataID, 'key1', 'value1', ...| specifies
 %     optional name/value parameter pairs:
-%   'SampleRate'        sampling rate in Hz for data (defaults to 1)
-%   'BlockSize'         window size for reblocking the data
-%   'BlockDim'          array dimension for reblocking (defaults to 2)
-%   'ElementLocations'  structure of element (channel) locations
-%   'Epoched'           if true, data is epoched and can't be reblocked
+%   'SampleRate'       sampling rate in Hz for data (defaults to 1)
+%   'BlockSize'        window size for reblocking the data
+%   'BlockDim'         array dimension for reblocking (defaults to 2)
+%   'ElementLocations' structure of element (channel) locations
+%   'Epoched'          if true, data is epoched and can't be reblocked
 %   'EpochStartTimes'  if data is epoched, times in seconds of epoch beginnings
-%   'EpochTimes'        if data is epoched, times corresponding to epoch samples
-%   'PadValue'          numeric value to pad uneven blocks (defaults to 0)
+%   'EpochTimes'       if data is epoched, times corresponding to epoch samples
+%   'Events'           eventData object if this data has events 
+%   'PadValue'         numeric value to pad uneven blocks (defaults to 0)
 %
 % obj = viscore.blockedData(...) returns a handle to the newly created
 % object.
@@ -113,9 +114,10 @@ classdef blockedData < hgsetget
     properties (Access = private)
         ActualBlockDim        % block dimension currently being used
         BlockSize = [];       % window size to use when data is reshaped
-        Data                  % 2D or 3D array of data, first dim for elements
+        Data;                 % 2D or 3D array of data, first dim for elements
         ElementLocations = [];  % element locations structure with ElementFields
-        Epoched               % true if the data is epoched
+        Epoched;              % true if the data is epoched
+        Events;               % blockedEvent object if this object has events
         OriginalMean          % overall mean of data set (before padding)
         OriginalStd           % overall std of data set (before padding)
         TotalValues           % total number of values in original data
@@ -162,8 +164,14 @@ classdef blockedData < hgsetget
         end % getDataSlice
         
         function elocs = getElementLocations(obj)
+            % Return the structure containing element locations
             elocs = obj.ElementLocations;
         end % getElementLocations
+        
+        function events = getEvents(obj)
+            % Return the eventData object containing events for this data
+            events = obj.Events;
+        end % getEvents
         
         function oMean = getOriginalMean(obj)
             % Return the overall mean of original data
@@ -292,6 +300,7 @@ classdef blockedData < hgsetget
             % Assign specified private properties
             obj.BlockSize = pdata.BlockSize;
             obj.Epoched = pdata.Epoched;
+            obj.Events = pdata.Events;
             
             % Element locations
             obj.ElementLocations = [];
@@ -387,6 +396,9 @@ classdef blockedData < hgsetget
                 {}));
             parser.addParamValue('EpochStartTimes', [], ...
                 @(x) validateattributes(x, {'numeric'}, ...
+                {}));
+            parser.addParamValue('Events', [], ...
+                @(x) validateattributes(x, {'viscore.eventData'}, ...
                 {}));
             parser.addParamValue('PadValue', 0, ...
                 @(x) validateattributes(x, {'numeric'}, {'scalar'}));
