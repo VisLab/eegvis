@@ -47,14 +47,22 @@ function testPlot %#ok<DEFNU>
 % Unit test for visviews.eventImagePlot plot
 fprintf('\nUnit tests for visviews.eventImagePlot plot method\n')
 
-fprintf('It should produce an empty plot when there are no events\n');
-sfig = figure('Name', 'Empty plot - no events');
+fprintf('It should it should produce a plot with events\n');
+sfig = figure('Name', 'Basic event plot');
 ep = visviews.eventImagePlot(sfig, [], []);
 assertTrue(isvalid(ep));
 
+load('EEGData.mat');  %
+tEvents = EEG.event;
+types = {tEvents.type}';
+startTimes = cell2mat({tEvents.latency})'./EEG.srate;
+
+ed1 = viscore.eventData(types, startTimes, 'SampleRate', 128, ...
+                        'BlockSize', 1000);
+
 % Generate some data to plot
-data = random('exp', 1, [32, 1000, 20]);
-testVD = viscore.blockedData(data, 'Rand1');
+data = EEG.data;
+testVD = viscore.blockedData(data, 'Rand1', 'Events', ed1, 'BlockSize', 1000);
 defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
     viewTestClass.getDefaultFunctionsNoSqueeze());
 fMan = viscore.dataManager();
@@ -68,10 +76,26 @@ drawnow
 gaps = ep.getGaps();
 ep.reposition(gaps);
 
-fprintf('It should produce a plot for identity slice with events\n');
-sfig = figure('Name', 'Plot with two events');
-ep = visviews.eventImagePlot(sfig, [], []);
-assertTrue(isvalid(ep));
+fprintf('It should produce a correct plot when there are endtimes\n');
+sfig2 = figure('Name', 'Plot with endtimes');
+ep2 = visviews.eventImagePlot(sfig2, [], []);
+assertTrue(isvalid(ep2));
+endTimes = startTimes + 200./128;
+ed2 = viscore.eventData(types, startTimes, ...
+        'EndTimes', endTimes, 'SampleRate', 128, 'BlockSize', 1000);
+testVD2 = viscore.blockedData(data, 'Rand1', 'Events', ed2, 'BlockSize', 1000);
+defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    viewTestClass.getDefaultFunctionsNoSqueeze());
+fMan = viscore.dataManager();
+fMan.putObjects(defaults);
+func = fMan.getEnabledObjects('block');
+thisFunc = func{1};
+slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+ep2.plot(testVD2, thisFunc, slice1);
+drawnow
+gaps = ep2.getGaps();
+ep2.reposition(gaps);
 
 
 % fprintf('It should produce a plot for identity slice\n');

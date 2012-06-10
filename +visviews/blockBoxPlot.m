@@ -5,7 +5,7 @@
 %   >>   obj = visviews.blockBoxPlot(parent, manager, key)
 %
 % Description:
-% obj = visviews.blockBoxPlot(parent, manager, key) displays a series of 
+% visviews.blockBoxPlot(parent, manager, key) displays a series of 
 %    vertical box plots using a compressed style. The block box plot 
 %    displays the distribution of values of a summarizing function for 
 %    a clump of consecutive time windows or epochs for all channels. 

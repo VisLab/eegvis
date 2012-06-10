@@ -1,4 +1,4 @@
-% visviews.eventImagePlot display element vs block values as an image
+% visviews.eventImagePlot display event type vs block or clump as an image
 %
 % Usage:
 %   >>   visviews.eventImagePlot(parent, manager, key)
@@ -6,9 +6,9 @@
 %
 % Description:
 % visviews.eventImagePlot(parent, manager, key) displays the 
-%    values of a summarizing function as an image (elements × clump), 
-%    with pixel color representing the value of the function. 
-%    The y-axis corresponds to elements (e.g., channels) and 
+%    counts of events as an image (event × clump), 
+%    with pixel color representing the number of events. 
+%    The y-axis corresponds to event types and 
 %    the x-axis corresponds to time (e.g., window or clump number).
 %
 %    The parent is a graphics handle to the container for this plot. The
@@ -125,19 +125,24 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
     
     properties
         % configurable properties
+        Background = [0.7, 0.7, 0.7];  % color of the background
         ClumpFactor = 1.0;       % number of blocks in each box plot (clump)
+        Colormap = 'jet';        % name of color map for display
         CombineMethod = 'max';   % method for combining blocks when grouped
+        Levels = [1, 2, 3, 4];   % vector of count thresholds for colors
     end % public properties
     
     properties (Access = private)
         CurrentFunction = [];    % block function that is currently displayed
         CurrentSlice = [];       % current slice
+        Events = [];             % events object with events 
         NumberBlocks = 0;        % number of blocks
         NumberClumps = 0;        % current number of clumps (boxplots)
         NumberElements = 0;      % number of elements in slice (for downstream)
         NumberEvents = 0;        % number of events being plotted
         StartBlock = 1;          % starting block of currently plotted slice
-        StartElement = 1;        % starting element of currently plotted slice  
+        StartElement = 1;        % starting element of currently plotted slice 
+        UniqueTypes = {};        % cell array with unique event names
     end % private properties
     
     methods
@@ -208,41 +213,31 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             obj.StartBlock = s(2);
             obj.StartElement = s(1);
             [obj.NumberElements, obj.NumberBlocks] = size(data);
+           
             
             % Calculate the number of clumps and adjust for uneven clumps
             obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
-%             if obj.ClumpFactor > 1
-%                 leftOvers = obj.NumberClumps*obj.ClumpFactor - obj.NumberBlocks;
-%                 if leftOvers > 0
-%                     data = [data, nan(obj.NumberElements, leftOvers)];
-%                 end
-%                 data = reshape(data', obj.ClumpFactor, obj.NumberClumps*obj.NumberElements);
-%                 data = viscore.dataSlice.combineDims(data, 1, obj.CombineMethod);
-%             else
-%                 data = data';
-%             end
-            
-            events = visData.getEvents();
-            if isempty(events);
+            obj.Events = visData.getEvents();  
+            if isempty(obj.Events);
                 return;
             end
-            colors = permute(bFunction.getBlockColors(...
-                reshape(data, obj.NumberClumps, obj.NumberElements)), [2, 1, 3]);
+            obj.UniqueTypes = obj.Events.getUniqueTypes();
+            obj.NumberEvents = size(obj.UniqueTypes, 1);
+            colors = obj.getColors();
             iMap = image(colors, 'Parent', obj.MainAxes, 'Tag', 'ImageMap');
             set(iMap, 'HitTest', 'off') %Get position from axes not image
             
             % Fix up the labels, limits and tick marks as needed
-            yLimits = [0.5, double(obj.NumberElements) + 0.5];
-            yTickLabels = cell(1, obj.NumberElements);
-            yTickLabels{1} = num2str(obj.StartElement);
-            yTickLabels{obj.NumberElements} = ...
-                num2str(obj.StartElement + obj.NumberElements - 1);
+            yLimits = [0.5, double(obj.NumberEvents) + 0.5];
+            yTickLabels = cell(1, obj.NumberEvents);
+            yTickLabels{1} = '1';
+            yTickLabels{obj.NumberEvents} = num2str(obj.NumberEvents);
             
             xLimits = [0.5, double(obj.NumberClumps) + 0.5];
             [xTickMarks, xTickLabels, obj.XStringBase] = ...
                 obj.getClumpTicks(names{3});
             
-            obj.YStringBase = names{1};
+            obj.YStringBase = 'Event';
             obj.YString =  obj.YStringBase;
             obj.XString = obj.XStringBase;
             if ~isempty(names{3})
@@ -292,8 +287,24 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
     end % public methods
     
     methods (Access = 'private')
-
-
+        
+        function colors = getColors(obj)
+            % Returns the range of block numbers occupied by event k
+            counts = obj.Events.getEventCounts();
+            mask = zeros(1, obj.NumberEvents*obj.NumberClumps);
+            for k = 2:length(obj.Levels)
+                mask(counts >= obj.Levels(k - 1) & ...
+                     counts < obj.Levels(k)) = k - 1;
+            end;
+            mask(counts >= obj.Levels(end)) = length(obj.Levels);
+            
+            colors = eval([obj.Colormap '(' num2str(length(obj.Levels)) ')']);
+            colors = [obj.Background; colors];
+            colors = colors(mask + 1, :);   
+            colors = reshape(colors, [obj.NumberEvents, obj.NumberClumps, 3]);
+            
+        end % getColors
+        
         function [xTickMarks, xTickLabels, xStringBase] = getClumpTicks(obj, clumpName)
             % Calculate the x tick marks and labels based on clumps
             if obj.NumberClumps <= 1 && obj.ClumpFactor == 1
@@ -334,21 +345,41 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             % Structure specifying how to set configurable public properties
             cName = 'visviews.eventImagePlot';
             settings = struct( ...
-                'Enabled',       {true, true}, ...
-                'Category',      {cName, cName}, ...
+                'Enabled',       {true, true, true, true}, ...
+                'Category',      {cName, cName, cName, cName}, ...
                 'DisplayName',   { ...
                 'Blocks per clump', ...
-                'Combine method'}, ...
-                'FieldName',     {'ClumpFactor',          'CombineMethod'}, ...
-                'Value',         {1,                      'max'}, ...
+                'Colormap', ...
+                'Combine method', ...
+                'Levels'}, ...
+                'FieldName',     { ...
+                'ClumpFactor', ...
+                'Colormap', ...
+                'CombineMethod', ...
+                'Levels'}, ...
+                'Value',         {...
+                1,  ...
+                'jet', ...
+                'max', ...
+                [1, 2, 3]}, ...
                 'Type',          { ...
                 'visprops.unsignedIntegerProperty', ...
-                'visprops.enumeratedProperty'}, ...
-                'Editable',      {true,                    true}, ...
-                'Options',       {[1, inf],  {'max', 'min', 'mean', 'median'}}, ...
+                'visprops.enumeratedProperty', ...
+                'visprops.enumeratedProperty', ...
+                'visprops.vectorProperty'}, ...
+                'Editable',      {true, true, true, true}, ...
+                'Options',       { ...
+                [1, inf],  ...
+                {'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', ...
+                'autumn', 'winter', 'gray', 'bone', 'copper', ...
+                'pink', 'lines'}, ...
+                {'max', 'min', 'mean', 'median'}, ...
+                [1, inf]}, ...
                 'Description',   {...
                 'Number of blocks grouped into a clump represented by one image pixel column', ...
-                'Method for combining blocks in a clump'} ...
+                'Color map for the counts', ...
+                'Method for combining blocks in a clump', ...
+                'Vector of threshold counts for event colors'} ...
                 );
         end % getDefaultProperties
         

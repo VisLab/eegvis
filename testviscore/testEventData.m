@@ -10,20 +10,21 @@ fprintf('It should construct a valid event set from set of types and start times
 load('EEGData.mat');  %
 tEvents = EEG.event;
 types = {tEvents.type}';
-startTimes = cell2mat({tEvents.latency})'./1000; % Convert to seconds
+startTimes = cell2mat({tEvents.latency})'; % Convert to seconds
 
 ed1 = viscore.eventData(types, startTimes);
 assertTrue(isvalid(ed1));
 fprintf('The event start times should match the input start times\n');
 assertVectorsAlmostEqual(startTimes, ed1.getStartTimes());
-fprintf('The default end times should match the start times\n')
-assertVectorsAlmostEqual(startTimes, ed1.getEndTimes());
+fprintf('The default end times should be one more sample than start times\n')
+assertVectorsAlmostEqual(startTimes + 1, ed1.getEndTimes());
 fprintf('The default block size should be 1\n');
 assertElementsAlmostEqual(ed1.getBlockSize(), 1);
 fprintf('The default sampling rate should be 1Hz\n');
-assertElementsAlmostEqual(ed1.getSamplingRate(), 1);
-fprintf('The default maximum time is the longest event end time\n');
-assertElementsAlmostEqual(ed1.getMaxTime(), max(startTimes));
+assertElementsAlmostEqual(ed1.getSampleRate(), 1);
+fprintf('The number of blocks should be correct\n');
+assertEqual(ed1.getNumberBlocks(), 30307);
+
 
 endTimes = startTimes + 2;
 ed2 = viscore.eventData(types, startTimes, endTimes);
@@ -32,16 +33,18 @@ assertTrue(isvalid(ed2));
 assertVectorsAlmostEqual(startTimes, ed2.getStartTimes());
 assertVectorsAlmostEqual(endTimes, ed2.getEndTimes());
 
-fprintf('When the sampling rate is passed, the object sampling rate should agree\n');
-ed3 = viscore.eventData(types, startTimes, 'SamplingRate', EEG.srate);
-assertTrue(isvalid(ed3));
-assertElementsAlmostEqual(EEG.srate, ed3.getSamplingRate());
 
-fprintf('When the block size is passed, the object block size should agree\n');
-ed4 = viscore.eventData(types, startTimes, 'SamplingRate', EEG.srate, ...
-                        'BlockSize', 1000);
-assertTrue(isvalid(ed4));
-assertElementsAlmostEqual(1000, ed4.getBlockSize());
+fprintf('When the sampling rate is passed and block size are passed, the object sampling rate should agree\n');
+startTimes = startTimes./EEG.srate;
+ed3 = viscore.eventData(types, startTimes, 'SampleRate', EEG.srate, ...
+                         'BlockSize', 1000);
+assertTrue(isvalid(ed3));
+fprintf('The sampling rate should be correct\n');
+assertElementsAlmostEqual(EEG.srate, ed3.getSampleRate());
+fprintf('The number of blocks should be correct\n');
+assertEqual(ed3.getNumberBlocks(), 31);
+fprintf('The blocksize should be correct\n');
+assertElementsAlmostEqual(1000, ed3.getBlockSize());
 
 function testBadConstructor %#ok<DEFNU>
 % Unit test for viscore.eventData bad constructor
@@ -83,26 +86,47 @@ fprintf('\nUnit tests for viscore.eventData handling of block list\n');
 
 fprintf('It should return a blocklist of correct size:\n');
 load('EEGData.mat');  %
-tEvents = EEG.urevent;
+tEvents = EEG.event;
 types = {tEvents.type}';
-startTimes = cell2mat({tEvents.latency})'./EEG.srate;
-
-ed1 = viscore.eventData(types, startTimes, 'SamplingRate', EEG.srate, ...
-    'BlockSize', 1000);
+startTimes =cell2mat({tEvents.latency}')./EEG.srate;
+blockSize = 1000;
+ed1 = viscore.eventData(types, startTimes, 'SampleRate', EEG.srate, ...
+    'BlockSize', blockSize);
 assertTrue(isvalid(ed1));
-originalUnique = unique(types);
 sTimes = ed1.getStartTimes();
-blockTime = 1000/EEG.srate;
-numberBlocks = ceil(ed1.getMaxTime()/blockTime);
-assertEqual(numberBlocks, 31);
+fprintf('It should have the right number of blocks\n');
+assertEqual(ed1.getNumberBlocks(), 31);
 bList = ed1.getBlockList();
-assertEqual(length(bList), numberBlocks);
-bTimes = (0:(numberBlocks - 1)) * blockTime;
+assertEqual(length(bList), ed1.getNumberBlocks());
+blockTime = blockSize./EEG.srate;
+bTimes = (0:(ed1.getNumberBlocks() - 1)) * blockTime;
 for k = 1:length(bList)
-    indices = find(bTimes(k) <= sTimes & sTimes < bTimes(k) + blockTime);
+    indices = find(bTimes(k) <= sTimes & sTimes < bTimes(k) + blockTime)';
     fprintf('---Block %g should have %g events\n', k, length(indices)); 
     assertEqual(length(indices), length(bList{k}));
+    assertVectorsAlmostEqual(indices, bList{k});
+end
+
+fprintf('It should have the right indices associated with each block\n');
+for k = 1:length(bList)
+    indices = find(bTimes(k) <= sTimes & sTimes < bTimes(k) + blockTime)';
+    fprintf('---Block %g should have %g events\n', k, length(indices)); 
+    assertVectorsAlmostEqual(indices, ed1.getBlock(k, k));
 end
 
 
+function testGetEventSlice %#ok<DEFNU>
+% Unit test for viscore.eventData slice
+fprintf('\nUnit tests for viscore.eventData handling of block list\n');
 
+% load('EEGData.mat');  %
+% tEvents = EEG.event;
+% types = {tEvents.type}';
+% startTimes = (1:10:length(types))';
+% endTimes = startTimes + 5;
+% blockSize = 1000;
+% ed1 = viscore.eventData(types, startTimes, 'EndTimes', endTimes, ...
+%         'SampleRate', EEG.srate, 'BlockSize', blockSize);
+% assertTrue(isvalid(ed1));
+% ds = viscore.dataSlice('Slices', {':', ':', '3'});
+% [selected, limits] = ed1.getEventSlice(ds);
