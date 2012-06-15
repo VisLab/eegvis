@@ -216,7 +216,7 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
             end  
             
             % Title figure window appropriately, taking into account source
-            name = obj.VisData.DataID;
+            name = obj.VisData.getDataID();
             namePrefix = obj.VisName;
             if ~isempty(obj.VisSource)
                 namePrefix = [namePrefix ' (' obj.VisSource ')'];

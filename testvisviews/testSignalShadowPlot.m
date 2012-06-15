@@ -296,7 +296,7 @@ bp2.reposition(gaps);
 drawnow
 
 % Data NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
 data = NaN([32, 1000, 20]);
 testVD = viscore.blockedData(data, 'Data NaN');
 slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
@@ -310,7 +310,7 @@ bp3.reposition(gaps);
 drawnow
 
 % Data slice empty
-fprintf('It should produce empty axes when data slice is empty\n');
+fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
 data = zeros(5, 1);
 testVD = viscore.blockedData(data, 'Data empty');
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
@@ -328,6 +328,28 @@ delete(sfig3);
 delete(sfig4);
 
 
+function testPlotEpoched %#ok<DEFNU>
+%test signalShadowPlot plot
+fprintf('\nUnit tests for visviews.signalShadowPlot plot method on epoched data\n')
+load('EEGEpoch.mat')
 
+fprintf('It should produce a plot for a slice along dimension 3\n');
+sfig = figure('Name', 'Epoched non-clumped slice along dimension 3');
+sp = visviews.signalShadowPlot(sfig, [], []);
+assertTrue(isvalid(sp));
+% Generate some data to plot
+keyfun = @(x) x.('ShortName');
+defFuns= visfuncs.functionObj.createObjects( ...
+    'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
+fun = defFuns{1};
+
+testVD = viscore.blockedData(EEGEpoch.data, 'Epoched');
+slice1 = viscore.dataSlice('Slices', {':', ':', '1'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sp.plot(testVD, fun, slice1);
+gaps = sp.getGaps();
+sp.reposition(gaps);
+sp.registerCallbacks([]);
+drawnow
 
 

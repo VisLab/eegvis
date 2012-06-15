@@ -68,14 +68,14 @@ assertTrue(isvalid(ep));
 
 % Generate some data to plot
 load('EEGData.mat');  %
-ed1 = viscore.eventData(event, 'BlockTime', 1000/128);
+ev = viscore.eventData(event, 'BlockTime', 1000/128);
 data = EEG.data;
-testVD = viscore.blockedData(data, 'Rand1', 'Events', ed1, ...
+testVD = viscore.blockedData(data, 'Rand1', 'Events', ev, ...
     'SampleRate', 128, 'BlockSize', 1000);
 numBlocks = ceil(size(data, 2)/1000);
-counts = ed1.getEventCounts(1, numBlocks);
+counts = ev.getEventCounts(1, numBlocks);
 assertVectorsAlmostEqual(size(counts), ...
-    [length(ed1.getUniqueTypes()), numBlocks]);
+    [length(ev.getUniqueTypes()), numBlocks]);
 defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
     viewTestClass.getDefaultFunctionsNoSqueeze());
 fMan = viscore.dataManager();
@@ -95,14 +95,14 @@ ep1 = visviews.eventImagePlot(sfig1, [], []);
 assertTrue(isvalid(ep1));
 load('EEGArtifact.mat');  
 load('ArtifactEvents.mat');
-ev = viscore.eventData(event, 'BlockTime', 1000/256);
+ev1 = viscore.eventData(event, 'BlockTime', 1000/EEGArtifact.srate);
 testVD1 = viscore.blockedData(EEGArtifact.data, 'Artifact', ...
-    'Events', ev, ...
-    'SampleRate', 256, 'BlockSize', 1000);
+    'Events', ev1, ...
+    'SampleRate', EEGArtifact.srate, 'BlockSize', 1000);
 numBlocks = ceil(size(EEGArtifact.data, 2)/1000);
-counts = ev.getEventCounts(1, numBlocks);
+counts = ev1.getEventCounts(1, numBlocks);
 assertVectorsAlmostEqual(size(counts), ...
-    [length(ev.getUniqueTypes()), numBlocks]);
+    [length(ev1.getUniqueTypes()), numBlocks]);
 defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
     viewTestClass.getDefaultFunctionsNoSqueeze());
 fMan = viscore.dataManager();
@@ -115,52 +115,33 @@ ep1.plot(testVD1, thisFunc, slice1);
 drawnow
 gaps = ep1.getGaps();
 ep1.reposition(gaps);
+fprintf('It should allow callbacks to be registered\n')
+ep1.registerCallbacks(ep1);
 
-fprintf('It should work with the artifact data\n');
-% fprintf('It should produce a plot for identity slice\n');
+fprintf('It should produce a plot for empty slice\n');
+sfig2 = figure('Name', 'Empty slice');
+ep2 = visviews.eventImagePlot(sfig2, [], []);
+assertTrue(isvalid(ep2));
+% Generate some data to plot
+ev2 = viscore.eventData(event, 'BlockTime', 1000/EEGArtifact.srate);
+testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', ...
+    'Events', ev2, ...
+    'SampleRate', EEGArtifact.srate, 'BlockSize', 1000);
 
-% sfig = figure('Name', 'Clumps of one window');
-% ip = visviews.eventImagePlot(sfig, [], []);
-% assertTrue(isvalid(ip));
-% % Generate some data to plot
-% data = random('exp', 1, [32, 1000, 20]);
-% testVD = viscore.blockedData(data, 'Rand1');
-% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-%     viewTestClass.getDefaultFunctionsNoSqueeze());
-% fMan = viscore.dataManager();
-% fMan.putObjects(defaults);
-% func = fMan.getEnabledObjects('block');
-% thisFunc = func{1};
-% slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% ip.plot(testVD, thisFunc, slice1);
-% drawnow
-% gaps = ip.getGaps();
-% ip.reposition(gaps);
-% fprintf('It should allow callbacks to be registered\n')
-% ip.registerCallbacks(ip);
-% 
-% fprintf('It should produce a plot for empty slice\n');
-% sfig1 = figure('Name', 'Empty slice');
-% bp = visviews.eventImagePlot(sfig1, [], []);
-% assertTrue(isvalid(bp));
-% % Generate some data to plot
-% data = random('exp', 1, [32, 1000, 20]);
-% testVD = viscore.blockedData(data, 'Rand1');
-% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-%     viewTestClass.getDefaultFunctionsNoSqueeze());
-% fMan = viscore.dataManager();
-% fMan.putObjects(defaults);
-% func = fMan.getEnabledObjects('block');
-% thisFunc = func{1};
-% thisFunc.setData(testVD);
-% bp.plot(testVD, thisFunc, []);
-% drawnow
-% gaps = bp.getGaps();
-% bp.reposition(gaps);
+defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    viewTestClass.getDefaultFunctionsNoSqueeze());
+fMan = viscore.dataManager();
+fMan.putObjects(defaults);
+func = fMan.getEnabledObjects('block');
+thisFunc = func{1};
+thisFunc.setData(testVD2);
+ep2.plot(testVD, thisFunc, []);
+drawnow
+gaps = ep2.getGaps();
+ep2.reposition(gaps);
 % delete(sfig);
 % delete(sfig1);
-% 
+% delete(sfig2);
 
 % function testSettingStructure %#ok<DEFNU>
 % % Unit test for visviews.eventImagePlot getDefaultProperties

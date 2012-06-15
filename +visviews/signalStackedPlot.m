@@ -264,7 +264,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 elseif obj.TotalBlocks == 1
                      combineString = ''; % only one block so don't combine
                 end
-                obj.XLimOffset = (sStart(3) - 1)*nSamples/visData.SampleRate;
+                obj.XLimOffset = (sStart(3) - 1)*nSamples/visData.getSampleRate();
                 obj.XStringBase = [names{1} ' '  ...
                     viscore.dataSlice.rangeString(obj.StartElement, nElements) ...
                                   ' ('  combineString names{3} ' ' ...
@@ -283,12 +283,12 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             end
       
             if obj.VisData.isEpoched() % add time scale to x label
-                obj.XValues = visData.EpochTimes;
+                obj.XValues = visData.getEpochTimes();
                 obj.XStringBase = ['Time(ms) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'ms';
             else
                 obj.XValues = obj.XLimOffset + ...
-                    (0:(size(obj.Signals, 2) - 1))/visData.SampleRate;
+                    (0:(size(obj.Signals, 2) - 1))/visData.getSampleRate();
                 obj.XStringBase = ['Time(s) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'sec';
             end

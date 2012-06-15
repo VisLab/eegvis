@@ -100,7 +100,7 @@ gaps = sp1.getGaps();
 sp1.reposition(gaps);
 sp1.registerCallbacks([]);
 drawnow
-assertAlmostEqual(testVD1.EpochTimes, (0:999)*4);
+assertAlmostEqual(testVD1.getEpochTimes(), (0:999)*4);
 
 fprintf('It should produce a plot for a slice along dimension 1\n');
 sfig2 = figure('Name', 'visviews.signalStackedPlot test plot slice element');
@@ -395,7 +395,7 @@ bp2.reposition(gaps);
 drawnow
 
 % Data NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
 data = NaN([32, 1000, 20]);
 testVD = viscore.blockedData(data, 'Data NaN');
 slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
@@ -409,7 +409,7 @@ bp3.reposition(gaps);
 drawnow
 
 % Data slice empty
-fprintf('It should produce empty axes when data slice is empty\n');
+fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
 data = zeros(5, 1);
 testVD = viscore.blockedData(data, 'Data empty');
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...

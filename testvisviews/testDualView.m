@@ -344,5 +344,18 @@ testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', 'Events', ed2, ...
 bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
 assertTrue(isvalid(bv2));
 drawnow
+
+fprintf('It should produce a valid figure for epoched data\n');
+pS = viewTestClass.getDefaultPlotsWithEvents();
+assertEqual(length(pS), 10);
+load('EEGEpoch.mat');
+load('ArtifactEvents.mat');
+ed2 = viscore.eventData(event, 'BlockTime', 1000/EEGArtifact.srate);
+assertTrue(isvalid(ed2));
+testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', 'Events', ed2, ...
+    'BlockSize', 1000, 'SampleRate', EEGArtifact.srate);
+bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
+assertTrue(isvalid(bv2));
+drawnow
 %delete(bv1)
 %delete(bv2)

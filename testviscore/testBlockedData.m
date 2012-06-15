@@ -10,7 +10,7 @@ fprintf('It should construct a valid generic slice when constructor has no param
 data = random('normal', 0, 1, [32, 1000, 20]);
 vd = viscore.blockedData(data, 'ID1');
 assertTrue(isvalid(vd));
-assertTrue(strcmp(vd.DataID, 'ID1'));
+assertTrue(strcmp(vd.getDataID(), 'ID1'));
 
 function testBadConstructor %#ok<DEFNU>
 % Unit test for viscore.blockedData bad constructor
@@ -102,31 +102,31 @@ data = random('exp', 1, [1, 1000, 20]);
 
 fprintf('Non-epoched data should have empty epoch start times\n');
 testVD1 = viscore.blockedData(data, 'Rand exp');
-assertTrue(isempty(testVD1.EpochStartTimes));
+assertTrue(isempty(testVD1.getEpochStartTimes()));
 
 fprintf('Epoched data with no start times should have defaults\n');
 testVD2 = viscore.blockedData(data, 'Rand exp', 'Epoched', true);
-assertElementsAlmostEqual(testVD2.EpochStartTimes, (0:19)*1000);
+assertElementsAlmostEqual(testVD2.getEpochStartTimes(), (0:19)*1000);
 
 fprintf('Epoched data with no start times should be correct when sampling rate not 1\n');
 testVD3 = viscore.blockedData(data, 'Rand exp', 'Epoched', true, ...
     'SampleRate', 2);
-assertElementsAlmostEqual(testVD3.EpochStartTimes, (0:19)*500);
+assertElementsAlmostEqual(testVD3.getEpochStartTimes(), (0:19)*500);
 
 
 fprintf('Epoched data with explicit start times should match\n');
 testVD4 = viscore.blockedData(data, 'Rand exp', 'Epoched', true, ...
     'EpochStartTimes', (0:19)*500);
-assertElementsAlmostEqual(testVD4.EpochStartTimes, (0:19)*500);
+assertElementsAlmostEqual(testVD4.getEpochStartTimes(), (0:19)*500);
 
 fprintf('Epoched data with no sampling rate and epoch times should have correct defaults\n')
 testVD5 = viscore.blockedData(data, 'Rand exp', 'Epoched', true);
-assertElementsAlmostEqual(testVD5.EpochTimes, (0:999)*1000);
+assertElementsAlmostEqual(testVD5.getEpochTimes(), (0:999)*1000);
 
 fprintf('Epoched data with sampling rate and no epoch times should have correctdefaults\n')
 testVD5 = viscore.blockedData(data, 'Rand exp', 'Epoched', true, ...
     'SampleRate', 250);
-assertElementsAlmostEqual(testVD5.EpochTimes, (0:999)*4);
+assertElementsAlmostEqual(testVD5.getEpochTimes(), (0:999)*4);
 
 function testReblock %#ok<DEFNU>
 % Unit test for blockedData reblock

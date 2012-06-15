@@ -269,7 +269,7 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
                     obj.Signals = reshape(obj.Signals, [nSamples*nBlocks, nElements]);
                     obj.Signals = squeeze(obj.Signals');
                 end
-                obj.XLimOffset = (sStart(3) - 1)*nSamples/visData.SampleRate;
+                obj.XLimOffset = (sStart(3) - 1)*nSamples/visData.getSampleRate();
                 obj.XStringBase = [names{1} ' '  ...
                     viscore.dataSlice.rangeString(obj.StartElement, nElements) ...
                                   ' ('  names{3} ' ' ...
@@ -289,12 +289,12 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
 
             % Adjust the labels
             if visData.isEpoched() % add time scale to x label
-                obj.XValues = visData.EpochTimes;
+                obj.XValues = visData.getEpochTimes();
                 obj.XStringBase = ['Time(ms) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'ms';
             else
                 obj.XValues = obj.XLimOffset + ...
-                    (0:(size(obj.Signals, 2) - 1))./visData.SampleRate;
+                    (0:(size(obj.Signals, 2) - 1))./visData.getSampleRate();
                 obj.XStringBase = ['Time(s) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'sec';
             end

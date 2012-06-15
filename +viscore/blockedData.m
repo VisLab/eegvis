@@ -101,25 +101,22 @@
 %
 
 classdef blockedData < hgsetget
-    
-    properties
-        BlockDim              % dimension used for reblocking (default 2)
-        DataID                % ID of the data contained in this object
-        EpochStartTimes = []  % start times of epochs in seconds
-        EpochTimes = [];      % time offsets in ms for epoch samples
-        PadValue = 0;         % use to pad data if not divisible by BlockSize
-        SampleRate = 1;       % sampling rate in Hz of data
-    end % public properties
-    
+
     properties (Access = private)
         ActualBlockDim        % block dimension currently being used
+        BlockDim              % dimension used for reblocking (default 2)
         BlockSize = [];       % window size to use when data is reshaped
         Data;                 % 2D or 3D array of data, first dim for elements
+        DataID                % ID of the data contained in this object
         ElementLocations = [];  % element locations structure with ElementFields
         Epoched;              % true if the data is epoched
+        EpochStartTimes = []  % start times of epochs in seconds
+        EpochTimes = [];      % time offsets in ms for epoch samples
         Events;               % blockedEvent object if this object has events
         OriginalMean          % overall mean of data set (before padding)
         OriginalStd           % overall std of data set (before padding)
+        PadValue = 0;         % use to pad data if not divisible by BlockSize
+        SampleRate = 1;       % sampling rate in Hz of data
         TotalValues           % total number of values in original data
         VersionID             % version ID of this data
     end % private properties
@@ -147,6 +144,11 @@ classdef blockedData < hgsetget
             data = obj.Data;
         end % getData
         
+        function dataID = getDataID(obj)
+            % Return the data ID
+            dataID = obj.DataID;
+        end % getDataID
+        
         function [nElements, nSamples, nBlocks] = getDataSize(obj)
             % Return number of elements, samples and blocks in data
             [nElements, nSamples, nBlocks] = size(obj.Data);
@@ -168,6 +170,16 @@ classdef blockedData < hgsetget
             elocs = obj.ElementLocations;
         end % getElementLocations
         
+        function eStarts = getEpochStartTimes(obj)
+            % Return the epoch start times in seconds
+            eStarts = obj.EpochStartTimes;
+        end % getEpochStartTimes
+        
+        function eTimes = getEpochTimes(obj)
+            % Return the epoch frame times in ms
+            eTimes = obj.EpochTimes;
+        end % getEpochTimes
+        
         function events = getEvents(obj)
             % Return the eventData object containing events for this data
             events = obj.Events;
@@ -182,6 +194,11 @@ classdef blockedData < hgsetget
             % Return the overall standard deviation of original data
             oStd = obj.OriginalStd;
         end % getOriginalStd
+        
+        function srate = getSampleRate(obj)
+            % Return sample rate for this data
+            srate = obj.SampleRate;
+        end % getSampleRate
         
         function nValues = getTotalValues(obj)
             % Return total number of values in original data (before padding)
@@ -290,22 +307,19 @@ classdef blockedData < hgsetget
         function parseParameters(obj, data, dataID, varargin)
             % Parse parameters provided by user in constructor
             parser = viscore.blockedData.getParser();
-            obj.SampleRate = 1;
-            obj.BlockDim = 2;
             parser.parse(data, dataID, varargin{:})
-            % Get the parsed results
             pdata = parser.Results;
-            % Override public properties with explicit user settings
-            myFields = properties(obj);
-            for k = 1:length(myFields)
-                if isfield(pdata, myFields{k}) && ~isempty(pdata.(myFields{k}))
-                    obj.(myFields{k}) = pdata.(myFields{k});
-                end
-            end
+            
             % Assign specified private properties
+            obj.BlockDim = pdata.BlockDim;
             obj.BlockSize = pdata.BlockSize;
+            obj.DataID = pdata.DataID;
             obj.Epoched = pdata.Epoched;
+            obj.EpochTimes = pdata.EpochTimes;
+            obj.EpochStartTimes = pdata.EpochStartTimes;
             obj.Events = pdata.Events;
+            obj.PadValue = pdata.PadValue;
+            obj.SampleRate = pdata.SampleRate;
             
             % Element locations
             obj.ElementLocations = [];
