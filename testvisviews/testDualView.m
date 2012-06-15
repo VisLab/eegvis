@@ -2,6 +2,21 @@ function test_suite = testDualView %#ok<STOUT>
 % Unit tests for dualView
 initTestSuite;
 
+function values = setup %#ok<DEFNU>
+load('EEGData.mat'); 
+values.EEG = EEG;  
+tEvents = EEG.event;
+types = {tEvents.type}';
+                                      % Convert to seconds since beginning
+startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
+endTimes = startTimes + 1/EEG.srate;
+values.event = struct('type', types, 'startTime', num2cell(startTimes), ...
+    'endTime', num2cell(endTimes));
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+
 % function testNormalConstructor %#ok<DEFNU>
 % % Unit test for normal dualView normal constructor
 % fprintf('\nUnit test for visviews.dualView normal constructor\n');
@@ -303,22 +318,31 @@ initTestSuite;
 % delete(bv3);
 % delete(bv4);
 
-function testEventImagePlot %#ok<DEFNU>
-% Unit test for eventImagePlot
-fprintf('\nUnit test for visviews.dualView for eventImagePlot\n');
-fprintf('It should produce a valid plot when a eventImagePlot is used\n');
+function testEventPlots(values) %#ok<DEFNU>
+% Unit test for event plots
+fprintf('\nUnit test for visviews.dualView for event plots\n');
+fprintf('It should produce a valid figure when events are displayed\n');
 pS = viewTestClass.getDefaultPlotsWithEvents();
-assertEqual(length(pS), 9);
-load('EEGData.mat');  %
-tEvents = EEG.event;
-types = {tEvents.type}';
-startTimes =cell2mat({tEvents.latency}')./EEG.srate;
-blockSize = 1000;
-ed1 = viscore.eventData(types, startTimes, 'SampleRate', EEG.srate, ...
-    'BlockSize', blockSize);
+assertEqual(length(pS), 10);
+ed1 = viscore.eventData(values.event, 'BlockTime', 1000/values.EEG.srate);
 assertTrue(isvalid(ed1));
-testVD1 = viscore.blockedData(EEG.data, 'Rand1', 'Events', ed1, 'BlockSize', 1000);
+testVD1 = viscore.blockedData(values.EEG.data, 'EEGLABsample', 'Events', ed1, ...
+    'BlockSize', 1000, 'SampleRate', values.EEG.srate);
 bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
 assertTrue(isvalid(bv1));
 drawnow
+
+fprintf('It should produce a valid figure for artifacts\n');
+pS = viewTestClass.getDefaultPlotsWithEvents();
+assertEqual(length(pS), 10);
+load('EEGArtifact.mat');
+load('ArtifactEvents.mat');
+ed2 = viscore.eventData(event, 'BlockTime', 1000/EEGArtifact.srate);
+assertTrue(isvalid(ed2));
+testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', 'Events', ed2, ...
+    'BlockSize', 1000, 'SampleRate', EEGArtifact.srate);
+bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
+assertTrue(isvalid(bv2));
+drawnow
 %delete(bv1)
+%delete(bv2)

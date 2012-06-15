@@ -226,20 +226,28 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             iMap = image(colors, 'Parent', obj.MainAxes, 'Tag', 'ImageMap');
             set(iMap, 'HitTest', 'off') %Get position from axes not image
             
+ 
             % Fix up the labels, limits and tick marks as needed
+            obj.YStringBase = names{1};
+            obj.YString =  obj.YStringBase;
             yLimits = [0.5, double(obj.NumberElements) + 0.5];
             yTickLabels = cell(1, obj.NumberElements);
-            yTickLabels{1} = num2str(obj.StartElement);
-            yTickLabels{obj.NumberElements} = ...
-                num2str(obj.StartElement + obj.NumberElements - 1);
+            if obj.NumberElements > 1
+                yTickLabels{1} = num2str(obj.StartElement);
+                yTickLabels{obj.NumberElements} = ...
+                    num2str(obj.StartElement + obj.NumberElements - 1);
+            else
+                yTickLabels{1} = '';
+                obj.YString = [obj.YStringBase '[' ...
+                    num2str(obj.StartElement) ']'];
+            end
             
             xLimits = [0.5, double(obj.NumberClumps) + 0.5];
             [xTickMarks, xTickLabels, obj.XStringBase] = ...
                 obj.getClumpTicks(names{3});
-            
-            obj.YStringBase = names{1};
-            obj.YString =  obj.YStringBase;
             obj.XString = obj.XStringBase;
+            
+            % Fix the cursor string template
             if ~isempty(names{3})
                 wString = names{3}(1);
             else
@@ -260,6 +268,7 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
                 'YLimMode', 'manual', 'YLim', yLimits, ...
                 'YTickMode','manual', 'YTick', 1:obj.NumberElements, ...
                 'YTickLabelMode', 'manual', 'YTickLabel', yTickLabels);
+            obj.redraw();
         end % plot
         
         function s = updateString(obj, point)

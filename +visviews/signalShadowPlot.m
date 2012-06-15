@@ -220,6 +220,9 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
         function plot(obj, visData, bFunction, dSlice)
             % Plot the specified slice of visData
             obj.reset();
+            if isempty(visData)
+                return;
+            end
             bFunction.setData(visData);
             obj.VisData = visData; % Keep data for cursor exploration
   
@@ -287,12 +290,12 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
             % Adjust the labels
             if visData.isEpoched() % add time scale to x label
                 obj.XValues = visData.EpochTimes;
-                obj.XStringBase = ['Time (ms) [' obj.XStringBase ']'];
+                obj.XStringBase = ['Time(ms) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'ms';
             else
                 obj.XValues = obj.XLimOffset + ...
                     (0:(size(obj.Signals, 2) - 1))./visData.SampleRate;
-                obj.XStringBase = ['Time (s) [' obj.XStringBase ']'];
+                obj.XStringBase = ['Time(s) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'sec';
             end
             obj.SelectedHandle = [];

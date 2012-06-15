@@ -2,7 +2,20 @@ function test_suite = testEventImagePlot %#ok<STOUT>
 % Unit tests for eventImagePlot
 initTestSuite;
 
-function testNormalConstructor %#ok<DEFNU>
+function event = setup %#ok<DEFNU>
+load('EEGData.mat');  %
+tEvents = EEG.event;
+types = {tEvents.type}';
+                                      % Convert to seconds since beginning
+startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
+endTimes = startTimes + 1/EEG.srate;
+event = struct('type', types, 'startTime', num2cell(startTimes), ...
+    'endTime', num2cell(endTimes));
+
+function teardown(event) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testNormalConstructor(event) %#ok<INUSD,DEFNU>
 % testSignalPlot unit test for visviews.eventImagePlot constructor
 fprintf('\nUnit tests for visviews.eventImagePlot valid constructor\n');
 
@@ -13,7 +26,7 @@ assertTrue(isvalid(ip));
 drawnow
 delete(sfig);
 
-function testBadConstructor %#ok<DEFNU>
+function testBadConstructor(event) %#ok<INUSD,DEFNU>
 % Unit test for visviews.eventImagePlot bad constructor
 fprintf('\nUnit tests for visviews.eventImagePlot invalid constructor parameters\n');
 
@@ -35,7 +48,7 @@ f = @() visviews.eventImagePlot(sfig, [], [], []);
 assertExceptionThrown(f, 'MATLAB:maxrhs');
 delete(sfig);
 
-function testGetDefaultProperties %#ok<DEFNU>
+function testGetDefaultProperties(event) %#ok<INUSD,DEFNU>
 % Unit test for visviews.eventImagePlot getDefaultProperties
 fprintf('\nUnit tests for visviews.eventImagePlot getDefaultProperties\n');
 
@@ -43,7 +56,7 @@ fprintf('It should have a getDefaultProperties method that returns a structure\n
 s = visviews.eventImagePlot.getDefaultProperties();
 assertTrue(isa(s, 'struct'));
 
-function testPlot %#ok<DEFNU>
+function testPlot(event) %#ok<DEFNU>
 % Unit test for visviews.eventImagePlot plot
 fprintf('\nUnit tests for visviews.eventImagePlot plot method\n')
 
@@ -52,17 +65,17 @@ sfig = figure('Name', 'Basic event plot');
 ep = visviews.eventImagePlot(sfig, [], []);
 assertTrue(isvalid(ep));
 
-load('EEGData.mat');  %
-tEvents = EEG.event;
-types = {tEvents.type}';
-startTimes = cell2mat({tEvents.latency})'./EEG.srate;
-
-ed1 = viscore.eventData(types, startTimes, 'SampleRate', 128, ...
-                        'BlockSize', 1000);
 
 % Generate some data to plot
+load('EEGData.mat');  %
+ed1 = viscore.eventData(event, 'BlockTime', 1000/128);
 data = EEG.data;
-testVD = viscore.blockedData(data, 'Rand1', 'Events', ed1, 'BlockSize', 1000);
+testVD = viscore.blockedData(data, 'Rand1', 'Events', ed1, ...
+    'SampleRate', 128, 'BlockSize', 1000);
+numBlocks = ceil(size(data, 2)/1000);
+counts = ed1.getEventCounts(1, numBlocks);
+assertVectorsAlmostEqual(size(counts), ...
+    [length(ed1.getUniqueTypes()), numBlocks]);
 defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
     viewTestClass.getDefaultFunctionsNoSqueeze());
 fMan = viscore.dataManager();
@@ -76,14 +89,20 @@ drawnow
 gaps = ep.getGaps();
 ep.reposition(gaps);
 
-fprintf('It should produce a correct plot when there are endtimes\n');
-sfig2 = figure('Name', 'Plot with endtimes');
-ep2 = visviews.eventImagePlot(sfig2, [], []);
-assertTrue(isvalid(ep2));
-endTimes = startTimes + 200./128;
-ed2 = viscore.eventData(types, startTimes, ...
-        'EndTimes', endTimes, 'SampleRate', 128, 'BlockSize', 1000);
-testVD2 = viscore.blockedData(data, 'Rand1', 'Events', ed2, 'BlockSize', 1000);
+fprintf('It should work with the artifact data\n');
+sfig1 = figure('Name', 'Artifact plot');
+ep1 = visviews.eventImagePlot(sfig1, [], []);
+assertTrue(isvalid(ep1));
+load('EEGArtifact.mat');  
+load('ArtifactEvents.mat');
+ev = viscore.eventData(event, 'BlockTime', 1000/256);
+testVD1 = viscore.blockedData(EEGArtifact.data, 'Artifact', ...
+    'Events', ev, ...
+    'SampleRate', 256, 'BlockSize', 1000);
+numBlocks = ceil(size(EEGArtifact.data, 2)/1000);
+counts = ev.getEventCounts(1, numBlocks);
+assertVectorsAlmostEqual(size(counts), ...
+    [length(ev.getUniqueTypes()), numBlocks]);
 defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
     viewTestClass.getDefaultFunctionsNoSqueeze());
 fMan = viscore.dataManager();
@@ -92,12 +111,12 @@ func = fMan.getEnabledObjects('block');
 thisFunc = func{1};
 slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-ep2.plot(testVD2, thisFunc, slice1);
+ep1.plot(testVD1, thisFunc, slice1);
 drawnow
-gaps = ep2.getGaps();
-ep2.reposition(gaps);
+gaps = ep1.getGaps();
+ep1.reposition(gaps);
 
-
+fprintf('It should work with the artifact data\n');
 % fprintf('It should produce a plot for identity slice\n');
 
 % sfig = figure('Name', 'Clumps of one window');

@@ -262,12 +262,14 @@ classdef dataSlice < hgsetget
                 return;
             end
             
-            nd = max(ndims(data), 3); % Always return slice starts at least 3
-            sizes = ones(1, nd);
-            s = size(data);
-            sizes(1:length(s)) = size(data);
             [dSlice, sStart, sSizes] = ...
-                    viscore.dataSlice.getSliceEvaluation(sizes, slices);
+                viscore.dataSlice.getSliceEvaluation(size(data), slices);
+%             nd = max(ndims(data), 3); % Always return slice starts at least 3
+%             sizes = ones(1, nd);
+%             s = size(data);
+%             sizes(1:length(s)) = size(data);
+%             [dSlice, sStart, sSizes] = ...
+%                     viscore.dataSlice.getSliceEvaluation(sizes, slices);
             if isempty(slices)
                 return;
             elseif isempty(sStart)
@@ -281,6 +283,7 @@ classdef dataSlice < hgsetget
             end
         end % getDataSlice
         
+
         function parser = getParser()
             % Create an inputparser for FileSelector
             parser = inputParser;
@@ -295,6 +298,15 @@ classdef dataSlice < hgsetget
             parser.addParamValue('Slices', [], ...
                 @(x) validateattributes(x, {'cell'}, {}));
         end % getParser()
+        
+                function [dSlice, sStart, sSizes] = getSlices(sizes, slices)
+            nd = max(length(sizes), 3); % Always return slice starts at least 3
+            sSizes = ones(1, nd);
+            sSizes(1:length(sizes)) = sizes;
+            [dSlice, sStart, sSizes] = ...
+                    viscore.dataSlice.getSliceEvaluation(sSizes, slices);
+        end % getSlices
+        
         
        function [evalSlice, startSlice, sizeSlice] = getSliceEvaluation(aSizes, slices)
             % Returns evaluation string and vector of start values for slice 

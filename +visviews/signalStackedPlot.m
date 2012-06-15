@@ -183,6 +183,9 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
         function plot(obj, visData, bFunction, dSlice)
             % Plot specified data slice of visData using bFunction's colors
             obj.reset();
+            if isempty(visData)
+                return;
+            end
             bFunction.setData(visData);
             obj.VisData = visData; % Keep data for cursor exploration 
                            
@@ -204,14 +207,14 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             end           
             [obj.TotalElements, obj.TotalBlocks] = size(bValues); % Capture size before combining
             if isempty(cDims) || ~isempty(intersect(cDims, 3))  % Plot all elements for a window
-                if (size(bValues, 2) > 1) && obj.VisData.isEpoched()
+                if (obj.TotalBlocks > 1) && obj.VisData.isEpoched()
                     combDim = 2;
-                elseif (size(bValues, 2) > 1)
+                elseif (obj.TotalBlocks > 1)
                     combDim = -2;   % Combine for colors
                 end         
                 obj.PlotWindow = true; 
             elseif ~isempty(intersect(cDims, 1))  % Plot all windows for an element 
-                if size(bValues, 1) > 1
+                if obj.TotalElements > 1
                     combDim = 1;  
                 end         
                 obj.PlotWindow = false;
@@ -281,12 +284,12 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
       
             if obj.VisData.isEpoched() % add time scale to x label
                 obj.XValues = visData.EpochTimes;
-                obj.XStringBase = ['Time (ms) [' obj.XStringBase ']'];
+                obj.XStringBase = ['Time(ms) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'ms';
             else
                 obj.XValues = obj.XLimOffset + ...
                     (0:(size(obj.Signals, 2) - 1))/visData.SampleRate;
-                obj.XStringBase = ['Time (s) [' obj.XStringBase ']'];
+                obj.XStringBase = ['Time(s) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'sec';
             end
             obj.SelectedHandle = [];
@@ -354,7 +357,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 else
                     selected = str2double(srcTag) + obj.StartBlock - 1;
                 end
-                obj.YString = [obj.YStringBase ' ' '[' num2str(selected) ']'];
+                obj.YString = [obj.YStringBase ' [' num2str(selected) ']'];
                 obj.SelectedTagNumber = str2double(srcTag);
                 if ~obj.PlotWindow && ~obj.VisData.isEpoched()
                     obj.SelectedBlockOffset = obj.VisData.getBlockSize() * ...

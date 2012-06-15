@@ -2,59 +2,68 @@ function test_suite = testEventStackedPlot %#ok<STOUT>
 % Unit tests for visviews.stackedEventPlot
 initTestSuite;
 
-% function testNormalConstructor %#ok<DEFNU>
-% % testEventStackedPlot unit test for visviews.stackedEventPlot constructor
-% fprintf('\nUnit tests for visviews.stackedEventPlot valid constructor\n');
-% 
-% fprintf('It should construct a valid stacked event plot when only parent passed')
-% sfig = figure('Name', 'Creates a panel when only parent is passed');
-% sp = visviews.eventStackedPlot(sfig, [], []);
-% assertTrue(isvalid(sp));
-% drawnow
-% delete(sfig);
-% 
-% function testBadConstructor %#ok<DEFNU>
-% % testEventStackedPlot unit test for eventStackedPlot constructor
-% fprintf('\nUnit tests for visviews.eventStackedPlot invalid constructor parameters\n');
-% 
-% fprintf('It should throw an exception when no paramters are passed\n');
-% f = @() visviews.eventStackedPlot();
-% assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
-% 
-% fprintf('It should throw an exception when only one parameter is passed\n');
-% sfig = figure('Name', 'Invalid constructor');
-% f = @() visviews.eventStackedPlot(sfig);
-% assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
-% 
-% fprintf('It should throw an exception when only two parameters are passed\n');
-% f = @() visviews.eventStackedPlot(sfig, []);
-% assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
-% 
-% 
-% fprintf('It should throw an exception when more than three parameters are passed\n');
-% f = @() visviews.eventStackedPlot(sfig, [], [], []);
-% assertExceptionThrown(f, 'MATLAB:maxrhs');
-% delete(sfig);
-% 
-% function testGetDefaultProperties %#ok<DEFNU>
-% % Unit test for visviews.eventStackedPlot getDefaultProperties
-% fprintf('\nUnit tests for visviews.eventStackedPlot getDefaultProperties\n');
-% fprintf('It should have a getDefaultProperties method that returns a structure\n');
-% s = visviews.eventStackedPlot.getDefaultProperties();
-% assertTrue(isa(s, 'struct'));
+function event = setup %#ok<DEFNU>
+load('EEGData.mat');  %
+tEvents = EEG.event;
+types = {tEvents.type}';
+                                      % Convert to seconds since beginning
+startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
+endTimes = startTimes + 1/EEG.srate;
+event = struct('type', types, 'startTime', num2cell(startTimes), ...
+    'endTime', num2cell(endTimes));
 
-function testPlot %#ok<DEFNU>
+function teardown(event) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testNormalConstructor(event) %#ok<INUSD,DEFNU>
+% testEventStackedPlot unit test for visviews.stackedEventPlot constructor
+fprintf('\nUnit tests for visviews.stackedEventPlot valid constructor\n');
+
+fprintf('It should construct a valid stacked event plot when only parent passed')
+sfig = figure('Name', 'Creates a panel when only parent is passed');
+sp = visviews.eventStackedPlot(sfig, [], []);
+assertTrue(isvalid(sp));
+drawnow
+delete(sfig);
+
+function testBadConstructor(event) %#ok<INUSD,DEFNU>
+% testEventStackedPlot unit test for eventStackedPlot constructor
+fprintf('\nUnit tests for visviews.eventStackedPlot invalid constructor parameters\n');
+
+fprintf('It should throw an exception when no paramters are passed\n');
+f = @() visviews.eventStackedPlot();
+assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
+
+fprintf('It should throw an exception when only one parameter is passed\n');
+sfig = figure('Name', 'Invalid constructor');
+f = @() visviews.eventStackedPlot(sfig);
+assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
+
+fprintf('It should throw an exception when only two parameters are passed\n');
+f = @() visviews.eventStackedPlot(sfig, []);
+assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
+
+
+fprintf('It should throw an exception when more than three parameters are passed\n');
+f = @() visviews.eventStackedPlot(sfig, [], [], []);
+assertExceptionThrown(f, 'MATLAB:maxrhs');
+delete(sfig);
+
+function testGetDefaultProperties(event) %#ok<INUSD,DEFNU>
+% Unit test for visviews.eventStackedPlot getDefaultProperties
+fprintf('\nUnit tests for visviews.eventStackedPlot getDefaultProperties\n');
+fprintf('It should have a getDefaultProperties method that returns a structure\n');
+s = visviews.eventStackedPlot.getDefaultProperties();
+assertTrue(isa(s, 'struct'));
+
+function testPlot(event) %#ok<DEFNU>
 % Unit test visviews.eventStackedPlot plot
 fprintf('\nUnit tests for visviews.eventStackedPlot plot method\n')
 % Read the sample data for testing
 load('EEGData.mat');  %
-tEvents = EEG.event;
-types = {tEvents.type}';
-startTimes = cell2mat({tEvents.latency})'; % Convert to seconds
 
-ed1 = viscore.eventData(types, startTimes, 'BlockSize', 1000, ...
-    'SampleRate', 128);
-testVD = viscore.blockedData(EEG.data, 'EEG', 'Events', ed1);
+ed1 = viscore.eventData(event, 'BlockTime', 1000/128);
+testVD = viscore.blockedData(EEG.data, 'EEG', 'SampleRate', 128, 'Events', ed1);
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
@@ -64,7 +73,6 @@ fun = defFuns{1};
 fprintf('It should produce a plot for a slice along dimension 3\n');
 sfig = figure('Name', 'visviews.eventStackedPlot test plot slice window');
 sp = visviews.eventStackedPlot(sfig, [], []);
-sp.EventScale = 8.0;
 assertTrue(isvalid(sp));
 
 sp.plot(testVD, fun, slice1);
@@ -72,9 +80,37 @@ gaps = sp.getGaps();
 sp.reposition(gaps);
 drawnow
 
-
 fprintf('It should allow callbacks to be registered\n')
 sp.registerCallbacks([]);
+
+fprintf('It should work with the artifact data\n');
+load('EEGArtifact.mat');  
+load('ArtifactEvents.mat');
+ev1 = viscore.eventData(event, 'BlockTime', 1000/256);
+testVD1 = viscore.blockedData(EEGArtifact.data, 'Artifact', ...
+    'Events', ev1, ...
+    'SampleRate', 256, 'BlockSize', 1000);
+numBlocks = ceil(size(EEGArtifact.data, 2)/1000);
+counts = ev1.getEventCounts(1, numBlocks);
+assertVectorsAlmostEqual(size(counts), ...
+    [length(ev1.getUniqueTypes()), numBlocks]);
+defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    viewTestClass.getDefaultFunctionsNoSqueeze());
+fMan = viscore.dataManager();
+fMan.putObjects(defaults);
+func = fMan.getEnabledObjects('block');
+thisFunc = func{1};
+slice1 = viscore.dataSlice('Slices', {':', ':', '8'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sfig1 = figure('Name', 'visviews.eventStackedPlot with artifact data');
+sp1 = visviews.eventStackedPlot(sfig1, [], []);
+assertTrue(isvalid(sp1));
+sp1.plot(testVD1, thisFunc, slice1);
+drawnow
+gaps = sp1.getGaps();
+sp1.reposition(gaps);
+fprintf('It should allow callbacks to be registered\n')
+sp1.registerCallbacks([]);
 
 % 
 % fprintf('It should produce a plot when the data is epoched\n');

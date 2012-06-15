@@ -128,12 +128,13 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
     %    settings  structure or ModelSettings object containing this
     
     properties
-        CombineMethod = 'mean';      % method for combining dimensions for display
-        EventScale = 3;              % event scale
+        ColorSelected = [1, 0, 0];   % face color of selected event
+        ColorUnselected = [0, 1, 0]; % face color of unselected events
     end % public properties 
     
     properties (Access = private)   
-        Colors = [];                 % needed for clickable
+        ColorLines = [0.8, 0.8, 0.8]; % color of grid lines
+
         CurrentSlice = [];           % current data slice
         CurrentEvents = [];          % array with current event numbers
         Events = [];                 % events currently plotted in this panel
@@ -144,7 +145,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
         PlotWindow = true;           % if true, a window is being plotted
         SelectedBlockOffset = 0;     % start of selected block in seconds
         SelectedHandle = [];         % handle of selected event or empty
-        SelectedSignal = [];         % data in selected event or empty
+        SelectedEvent = [];          % data in selected event or empty
         SelectedTagNumber = [];      % number of selected event within events
         
         StartBlock = 1;              % starting block of currently plotted slice
@@ -180,11 +181,12 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
         function plot(obj, visData, bFunction, dSlice)
             % Plot specified data slice of visData using bFunction's colors
             obj.reset();
-            bFunction.setData(visData);
-            obj.VisData = visData; % Keep data for cursor exploration
             if isempty(visData)
                 return;
             end
+            bFunction.setData(visData);
+            obj.VisData = visData; % Keep data for cursor exploration
+
             obj.Events = visData.getEvents();    
             if isempty(obj.Events)
                 return;
@@ -197,26 +199,43 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
                 obj.CurrentSlice = dSlice;
             end
             
+            % Calculate sizes and number of clumps, adjust for uneven clumps
+            [e, s, b] = visData.getDataSize();
             [slices, names, cDims] = obj.CurrentSlice.getParameters(3);
-            if ~isempty(cDims)  && isempty(intersect(cDims, 3))  % Plot all events for a window
+            [dSlice, starts, sizes] = viscore.dataSlice.getSliceEvaluation(...
+                                       [e, s, b], slices); %#ok<ASGLU>
+            obj.StartBlock = starts(3);
+            obj.TotalBlocks = sizes(3);
+          
+            combDim = 0;   % Don't combine
+            if isempty(cDims) || ~isempty(intersect(cDims, 3))  % Plot all elements for a window
+                if (obj.TotalBlocks > 1) && obj.VisData.isEpoched()
+                    combDim = 2;
+                elseif (obj.TotalBlocks > 1)
+                    combDim = -2;   % Combine for colors
+                end         
+                obj.PlotWindow = true; 
+                obj.XStringBase = ['[' names{3} ' ' ...
+                    viscore.dataSlice.rangeString(obj.StartBlock, obj.TotalBlocks) ']'];
+            elseif ~isempty(intersect(cDims, 1))  % Plot all events  
+                obj.PlotWindow = false;
+                obj.XStringBase = '';
+            else
+                warning('eventStackedPlot:plotSlice', ...
+                        'array slice is empty and cannot be plotted');
                 return;
             end
-            sStart = [1, 1, 1];
-            obj.StartBlock = sStart(3);
-            obj.CurrentEvents = obj.Events.getBlock(1, 1);
+
+           
+            obj.CurrentEvents = obj.Events.getBlocks(obj.StartBlock, ...
+                obj.StartBlock + obj.TotalBlocks - 1);
             obj.UniqueEvents = obj.Events.getUniqueTypes();
-            obj.XLimOffset = (sStart(3) - 1)* ...
-                obj.Events.getBlockSize()/obj.Events.getSampleRate();
-            obj.XStringBase = [names{1} ' '  ...
-                viscore.dataSlice.rangeString(obj.StartBlock, obj.StartBlock) ')'];
+            obj.XLimOffset = (obj.StartBlock - 1)* obj.Events.getBlockTime();
+            obj.XStringBase = ['Time(s) ' obj.XStringBase];
             obj.YStringBase = 'Events';
-            
-            obj.XValues = obj.XLimOffset + ...
-                (0:(obj.Events.getBlockSize() - 1))/obj.Events.getSampleRate();
-            obj.XStringBase = 'Time (s)';
             obj.TimeUnits = 'sec';
             obj.SelectedHandle = [];
-            obj.SelectedSignal = [];
+            obj.SelectedEvent = [];
             obj.YString = obj.YStringBase;
             obj.XString = obj.XStringBase;
             obj.displayPlot();
@@ -264,29 +283,27 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
         function buttonDownPreCallback(obj, src, eventdata, master)  %#ok<INUSD>
             % Callback when user clicks on the plot to select a event
             if ~isempty(obj.SelectedHandle) && ishandle(obj.SelectedHandle)
-                set(obj.SelectedHandle, 'LineWidth', obj.LineWidthUnselected);
+                set(obj.SelectedHandle, ...
+                    'MarkerFaceColor', obj.ColorUnselected, ...
+                    'Color', obj.ColorUnselected);
             end
-            obj.SelectedHandle = [];
-            obj.SelectedSignal = [];
-            obj.SelectedBlockOffset = 0;
-            obj.YString = obj.YStringBase;
-            srcTag = get(src, 'Tag');
-            if ~isempty(srcTag) && strcmpi(get(src, 'Type'), 'line')
-                set(src, 'LineWidth', obj.LineWidthSelected);
-                obj.SelectedHandle = src;
-                obj.SelectedSignal = obj.Signals(str2double(srcTag), :);
-                if obj.PlotWindow
-                    selected = str2double(srcTag) + obj.StartElement - 1;
-                else
-                    selected = str2double(srcTag) + obj.StartBlock - 1;
-                end
-                obj.YString = [obj.YStringBase ' ' '[' num2str(selected) ']'];
-                obj.SelectedTagNumber = str2double(srcTag);
-                if ~obj.PlotWindow && ~obj.VisData.isEpoched()
-                    obj.SelectedBlockOffset = obj.VisData.getBlockSize() * ...
-                        (selected - 1) /obj.VisData.SampleRate;
-                 end
-            end
+
+            if ~strcmpi(get(src, 'Type'), 'line')
+                obj.SelectedHandle = [];
+                obj.SelectedEvent = []; 
+                obj.XString = obj.XStringBase;
+                return;
+            end 
+            set(src, 'MarkerFaceColor', obj.ColorSelected, ...
+                     'Color', obj.ColorSelected);
+            obj.SelectedHandle = src;
+            event = get(src, 'Tag');
+            obj.SelectedEvent = str2double(event); 
+            type = obj.Events.getTypes(obj.SelectedEvent); 
+            obj.XString = [obj.XStringBase ' {Event('  event '): ' ...
+                  type{1} ' [' ...
+                  num2str(obj.Events.getStartTimes(obj.SelectedEvent)) ...
+                  ', '  num2str(obj.Events.getEndTimes(obj.SelectedEvent)) ']}' ];
             obj.redraw();
         end % buttonDownPreCallback
         
@@ -301,43 +318,42 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             if isempty(obj.Events)
                 return;
             end        
-            
-            scale = obj.EventScale;
-            if isempty(scale)
-                scale = 1;
-            end
-            plotSpacing = double(scale);
+              
             numPlots = length(obj.UniqueEvents);
-            if numPlots == 0 || isnan(plotSpacing)
-                warning('eventStackedPlot:NaNValues', 'No data to plot');
+            if numPlots == 0 
+                warning('eventStackedPlot:NaNValues', 'No events');
                 return;
-            elseif plotSpacing == 0;
-                plotSpacing = 0.1;
             end
             %y-axis reversed, so must plot the negative of the events            
-            obj.HitList = cell(1, numPlots + 1);
+            sTimes = obj.Events.getStartTimes(obj.CurrentEvents);
+            eTimes = obj.Events.getEndTimes(obj.CurrentEvents);
+            tNums = obj.Events.getTypeNumbers(obj.CurrentEvents);
+            obj.HitList = cell(1, length(obj.CurrentEvents) + 1);
             obj.HitList{1} = obj.MainAxes;
-            for k = 1:numPlots
-                
-                hp = plot(obj.MainAxes, obj.XValues, events, ...
-                    'Color', obj.Colors(k, :), ...
-                    'Clipping','on', 'LineWidth', obj.LineWidthUnselected);
-                set(hp, 'Tag', num2str(k));
-                obj.HitList{k + 1} = hp;
+            for k = 1:length(obj.CurrentEvents);
+                h =  plot(obj.MainAxes, [sTimes(k); eTimes(k)], ...
+                          [tNums(k); tNums(k)], '-s', ...
+                         'Tag', num2str(obj.CurrentEvents(k)), ...
+                          'LineWidth', 4,...
+                          'Color', obj.ColorUnselected, ...
+                          'MarkerEdgeColor', 'k',...
+                          'MarkerFaceColor', obj.ColorUnselected,...
+                          'MarkerSize', 10);
+                obj.HitList{k + 1} = h;
             end
+           
             yTickLabels = cell(1, numPlots);
             yTickLabels{1} = '1';
             yTickLabels{numPlots} = num2str(numPlots);
-%             obj.XString = sprintf('%s (Scale: %g %s)', ...
-%                 obj.XString, plotSpacing, obj.SignalLabel);
             set(obj.MainAxes,  'YLimMode', 'manual', ...
-                'YLim', [0, plotSpacing*(numPlots + 1)], ...
+                'YLim', [0, numPlots + 1], ...
                 'YTickMode', 'manual', 'YTickLabelMode', 'manual', ...
-                'YTick', plotSpacing:plotSpacing:numPlots*plotSpacing, ...
+                'YTick', 1:numPlots, ...
                 'YTickLabel', yTickLabels, ...
                 'XTickMode', 'auto', ...
-                'XLim', [obj.XValues(1), obj.XValues(end)], 'XLimMode', 'manual', ...
-                'XTickMode', 'auto');
+                'XLim', [obj.XLimOffset, ...
+                         obj.XLimOffset + obj.Events.getBlockTime()], ...
+                'XLimMode', 'manual', 'XTickMode', 'auto');
              obj.redraw();
         end % plot
         
@@ -349,31 +365,19 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             % Structure specifying how to set configurable public properties
             cName = 'visviews.eventStackedPlot';
             settings = struct( ...
-                'Enabled',       {true,           true,               true,            true,            true,        true}, ...
-                'Category',      {cName,          cName,              cName,           cName,           cName,       cName}, ...
-                'DisplayName',   {'Clipping on',  'Combine method',   'Remove mean',  'Signal label',  'Signal scale', 'Trim percent'}, ...
-                'FieldName',     {'ClippingOn',   'CombineMethod',    'RemoveMean',   'SignalLabel',    'SignalScale',  'TrimPercent'}, ...
-                'Value',         {true,           'mean',             true,          '{\mu}V',        3.0,           0 }, ...
+                'Enabled',       {true,           true}, ...
+                'Category',      {cName,          cName}, ...
+                'DisplayName',   {'Color selected',  'Color unselected'}, ...
+                'FieldName',     {'ColorSelected',   'ColorUnselected'}, ...
+                'Value',         {[1, 0, 0],         [0, 1, 0]}, ...
                 'Type',          { ...
-                'visprops.logicalProperty', ...
-                'visprops.enumeratedProperty', ...
-                'visprops.logicalProperty', ...
-                'visprops.stringProperty', ...
-                'visprops.doubleProperty', ...
-                'visprops.doubleProperty'}, ...
-                'Editable',      {true,              true,            true,           true,            true,         true}, ...
-                'Options',       {'',         {'mean', 'median', 'max', 'min'},'',              '',              [0, inf],     [0, inf]}, ...
+                'visprops.colorProperty', ...
+                'visprops.colorProperty'}, ...
+                'Editable',      {true,              true}, ...
+                'Options',       {'',         ''}, ...
                 'Description',   { ...
-                ['If true, individual events are clipped ' ...
-                'to fall within the plot window'], ...
-                ['Specifies how to combine multiple windows ' ...
-                 'into a single window for plotting'], ...
-                'If true, remove mean before plotting', ...
-                'Label indicating event units', ...
-                ['Scale factor for plotting individual event plots ' ...
-                '(must be positive)'], ...
-                 ['Percentage of extreme points (half on each end ' ...
-                'before calculating limits']} ...
+                'Color of selected event', ...
+                'Color of unselected event'} ...
                 );
         end % getDefaultProperties
         

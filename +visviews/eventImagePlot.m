@@ -204,18 +204,16 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 obj.CurrentSlice = dSlice;
             end
             
-            [slices, names] = obj.CurrentSlice.getParameters(3);  %#ok<ASGLU>
-            [data, s] = bFunction.getBlockSlice(obj.CurrentSlice);
-            if isempty(data)
-                warning('eventImagePlot:emptyData', 'No data for this plot');
-                return;
-            end
-            obj.StartBlock = s(2);
-            obj.StartElement = s(1);
-            [obj.NumberElements, obj.NumberBlocks] = size(data);
+             % Calculate sizes and number of clumps, adjust for uneven clumps
+            [e, s, b] = visData.getDataSize();
+            [slices, names] = obj.CurrentSlice.getParameters(3);  
+            [dSlice, starts, sizes] = viscore.dataSlice.getSliceEvaluation(...
+                [e, s, b], slices); %#ok<ASGLU>
+            obj.StartBlock = starts(3);
+            obj.StartElement = starts(1);
+            obj.NumberBlocks = sizes(3);
+            obj.NumberElements = sizes(1);
            
-            
-            % Calculate the number of clumps and adjust for uneven clumps
             obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
             obj.Events = visData.getEvents();  
             if isempty(obj.Events);
@@ -228,6 +226,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             set(iMap, 'HitTest', 'off') %Get position from axes not image
             
             % Fix up the labels, limits and tick marks as needed
+            obj.YStringBase = 'Event';
+            obj.YString =  obj.YStringBase;
             yLimits = [0.5, double(obj.NumberEvents) + 0.5];
             yTickLabels = cell(1, obj.NumberEvents);
             yTickLabels{1} = '1';
@@ -236,30 +236,26 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             xLimits = [0.5, double(obj.NumberClumps) + 0.5];
             [xTickMarks, xTickLabels, obj.XStringBase] = ...
                 obj.getClumpTicks(names{3});
-            
-            obj.YStringBase = 'Event';
-            obj.YString =  obj.YStringBase;
             obj.XString = obj.XStringBase;
+            
+            % Fix the cursor string template
             if ~isempty(names{3})
                 wString = names{3}(1);
             else
                 wString = 'w';
             end
-            if ~isempty(names{1})
-                eString = names{1}(1);
-            else
-                eString = 'e';
-            end
+     
             obj.CursorString = {[wString ': ']; ...
-                [eString ': ']; ...
+                ['ev: ']; ...
                 [bFunction.getValue(1, 'ShortName') ': ']; };
             set(obj.MainAxes, ...
                 'XLimMode', 'manual', 'XLim', xLimits, ...
                 'XTickMode','manual', 'XTick', xTickMarks, ...
                 'XTickLabelMode', 'manual', 'XTickLabel', xTickLabels, ...
                 'YLimMode', 'manual', 'YLim', yLimits, ...
-                'YTickMode','manual', 'YTick', 1:obj.NumberElements, ...
+                'YTickMode','manual', 'YTick', 1:obj.NumberEvents, ...
                 'YTickLabelMode', 'manual', 'YTickLabel', yTickLabels);
+            obj.redraw();
         end % plot
         
         function s = updateString(obj, point)
@@ -279,9 +275,7 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             y = ceil(y - 0.5);
             
             s = {[obj.CursorString{1} num2str(w)]; ...
-                [obj.CursorString{2} num2str(y)]; ...
-                [obj.CursorString{3} ...
-                num2str(obj.CurrentFunction.getBlockValue(y, w))]};
+                [obj.CursorString{2} num2str(y)]};
         end % updateString
         
     end % public methods
@@ -290,7 +284,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
         
         function colors = getColors(obj)
             % Returns the range of block numbers occupied by event k
-            counts = obj.Events.getEventCounts();
+            counts = obj.Events.getEventCounts(obj.StartBlock, ...
+                obj.StartBlock + obj.NumberBlocks - 1);
             mask = zeros(1, obj.NumberEvents*obj.NumberClumps);
             for k = 2:length(obj.Levels)
                 mask(counts >= obj.Levels(k - 1) & ...

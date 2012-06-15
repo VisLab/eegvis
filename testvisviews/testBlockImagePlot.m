@@ -589,7 +589,7 @@ bp3.reposition(gaps);
 drawnow
 
 % Data slice empty
-fprintf('It should produce empty axes when data slice is empty\n');
+fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
 data = zeros(5, 1);
 testVD = viscore.blockedData(data, 'Data empty');
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...

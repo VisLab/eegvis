@@ -274,12 +274,24 @@ fprintf('It should return the eventData, if it is passed in\n');
 load('EEGData.mat');   
 tEvents = EEG.event;
 types = {tEvents.type}';
-startTimes = cell2mat({tEvents.latency})';
-ed = viscore.eventData(types, startTimes);
-vd2 = viscore.blockedData(data, 'ID2', 'Events', ed);
+                                      % Convert to seconds since beginning
+startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
+endTimes = startTimes + 1/EEG.srate;
+event = struct('type', types, 'startTime', num2cell(startTimes), ...
+    'endTime', num2cell(endTimes));
+
+ed = viscore.eventData(event, 'BlockTime', 1000/128);
+vd2 = viscore.blockedData(data, 'ID2', 'Events', ed, ...
+           'SampleRate', 128, 'BlockSize', 1000);
 assertTrue(isvalid(vd2));
 ed1 = vd2.getEvents();
 assertTrue(isvalid(ed1));
 assertTrue(isa(ed1, 'viscore.eventData'));
-
+fprintf('It should have the right event counts\n');
+endTimes = ed1.getEndTimes();
+numBlocks = ceil(max(endTimes)/ed1.getBlockTime());
+counts = ed1.getEventCounts(1, numBlocks);
+assertEqual(size(counts, 1), length(ed1.getUniqueTypes()));
+assertEqual(size(counts, 2), numBlocks);
+assertEqual(sum(counts(:)), length(event));
 
