@@ -324,9 +324,8 @@ fprintf('\nUnit test for visviews.dualView for event plots\n');
 fprintf('It should produce a valid figure when events are displayed\n');
 pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
-ed1 = viscore.eventData(values.event, 'BlockTime', 1000/values.EEG.srate);
-assertTrue(isvalid(ed1));
-testVD1 = viscore.blockedData(values.EEG.data, 'EEGLABsample', 'Events', ed1, ...
+testVD1 = viscore.blockedData(values.EEG.data, 'EEGLABsample', ...
+    'Events', values.event, ...
     'BlockSize', 1000, 'SampleRate', values.EEG.srate);
 bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
 assertTrue(isvalid(bv1));
@@ -337,9 +336,7 @@ pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
 load('EEGArtifact.mat');
 load('ArtifactEvents.mat');
-ed2 = viscore.eventData(event, 'BlockTime', 1000/EEGArtifact.srate);
-assertTrue(isvalid(ed2));
-testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', 'Events', ed2, ...
+testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', 'Events', event, ...
     'BlockSize', 1000, 'SampleRate', EEGArtifact.srate);
 bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
 assertTrue(isvalid(bv2));
@@ -350,9 +347,7 @@ pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
 load('EEGEpoch.mat');
 load('ArtifactEvents.mat');
-ed2 = viscore.eventData(event, 'BlockTime', 1000/EEGArtifact.srate);
-assertTrue(isvalid(ed2));
-testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', 'Events', ed2, ...
+testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', 'Events', event, ...
     'BlockSize', 1000, 'SampleRate', EEGArtifact.srate);
 bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
 assertTrue(isvalid(bv2));

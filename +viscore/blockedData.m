@@ -103,7 +103,6 @@
 classdef blockedData < hgsetget
 
     properties (Access = private)
-        ActualBlockDim        % block dimension currently being used
         BlockDim              % dimension used for reblocking (default 2)
         BlockSize = [];       % window size to use when data is reshaped
         Data;                 % 2D or 3D array of data, first dim for elements
@@ -111,7 +110,7 @@ classdef blockedData < hgsetget
         ElementLocations = [];  % element locations structure with ElementFields
         Epoched;              % true if the data is epoched
         EpochStartTimes = []  % start times of epochs in seconds
-        EpochTimes = [];      % time offsets in ms for epoch samples
+        EpochTimeScale = [];  % time offsets in ms for epoch samples
         Events;               % blockedEvent object if this object has events
         OriginalMean          % overall mean of data set (before padding)
         OriginalStd           % overall std of data set (before padding)
@@ -175,9 +174,9 @@ classdef blockedData < hgsetget
             eStarts = obj.EpochStartTimes;
         end % getEpochStartTimes
         
-        function eTimes = getEpochTimes(obj)
+        function eTimes = getEpochTimeScale(obj)
             % Return the epoch frame times in ms
-            eTimes = obj.EpochTimes;
+            eTimes = obj.EpochTimeScale;
         end % getEpochTimes
         
         function events = getEvents(obj)
@@ -236,7 +235,7 @@ classdef blockedData < hgsetget
             end
             
             % Compute the sizes of different dimensions
-            p = obj.ActualBlockDim;
+            p = obj.BlockDim;
             nds = max(ndims(obj.Data), p + 1);
             dDims = ones(1, nds);
             for k = 1:nds
@@ -314,14 +313,24 @@ classdef blockedData < hgsetget
             obj.BlockDim = pdata.BlockDim;
             obj.BlockSize = pdata.BlockSize;
             obj.DataID = pdata.DataID;
-            obj.Epoched = pdata.Epoched;
-            obj.EpochTimes = pdata.EpochTimes;
-            obj.EpochStartTimes = pdata.EpochStartTimes;
-            obj.Events = pdata.Events;
+
             obj.PadValue = pdata.PadValue;
             obj.SampleRate = pdata.SampleRate;
             
-            % Element locations
+            % Now handle the data
+            obj.Data = double(pdata.Data);
+            obj.OriginalMean = mean(obj.Data(:));
+            obj.OriginalStd = std(obj.Data(:));
+            obj.TotalValues = length(obj.Data(:));
+            setElementLocations(obj, pdata); % Handle element locations
+            setEpochs(obj, pdata);           % Handle epoching         
+            obj.Events = [];
+            obj.reblock(obj.BlockSize);     
+            obj.setEvents(pdata);
+        end % parseParameters
+        
+        function  [] = setElementLocations(obj, pdata)
+            % Helper to set element locations from a pdata structure
             obj.ElementLocations = [];
             if isfield(pdata, 'ElementLocations') && ~isempty(pdata.ElementLocations)
                 eFields = fieldnames(pdata.ElementLocations);
@@ -337,56 +346,71 @@ classdef blockedData < hgsetget
                 end
                 obj.ElementLocations = pdata.ElementLocations;       
             end
-            
-            % Now handle the data
-            obj.Data = double(pdata.Data);
-            obj.OriginalMean = mean(obj.Data(:));
-            obj.OriginalStd = std(obj.Data(:));
-            obj.TotalValues = length(obj.Data(:));
-            
-            if isempty(obj.BlockSize) || obj.Epoched
-                obj.BlockSize = size(pdata.Data, obj.BlockDim);
-            else
-                obj.BlockSize = pdata.BlockSize;
-            end
-            obj.ActualBlockDim = obj.BlockDim; % Set the one used
-            
-            % Handle blocking and epoching
+        end % setElementLocations
+        
+        function [] = setEpochs(obj, pdata)
+            % Helper function to set epochs
+            obj.Epoched = pdata.Epoched;      
             if ~obj.Epoched
-                obj.reblock(obj.BlockSize);
-                if ~isempty(pdata.EpochTimes) && ~obj.Epoched
-                    warning('blockedData:EpochIssue', ...
-                        'Data is not epoched so EpochTimes are ignored');
-                end
-                return
+                obj.BlockSize = pdata.BlockSize;
+                obj.EpochTimeScale = [];
+                obj.EpochStartTimes = [];
+                return;
             end
-            
-            % Epoched data
-            if isempty(obj.EpochTimes)
-                obj.EpochTimes = 1000.*(0:(obj.BlockSize - 1))./obj.SampleRate;
-            elseif ~isempty(pdata.EpochTimes) && ...
-                    length(pdata.EpochTimes) ~= obj.BlockSize
-                error('blockedData:EpochIssue', ...
-                    ['Argument ''EpochTimes'' has length %d' ...
-                    ' but match size(signalData, %d): %d'], ...
-                    length(pdata.EpochTimes), obj.BlockDim, obj.BlockSize);
+            obj.BlockSize = size(pdata.Data, obj.BlockDim);
+            obj.EpochTimeScale = pdata.EpochTimeScale;
+            obj.EpochStartTimes = pdata.EpochStartTimes;                                 
+            if isempty(obj.EpochTimeScale) 
+                obj.EpochTimeScale = 1000.*(0:(obj.BlockSize - 1))./obj.SampleRate;
             end
             if isempty(obj.EpochStartTimes)
                   obj.EpochStartTimes = obj.BlockSize*...
                        (0:(size(obj.Data, 3) - 1))./obj.SampleRate;
-            elseif ~isempty(pdata.EpochStartTimes) && ...
-                    length(pdata.EpochStartTimes) ~= size(obj.Data, 3)
-                error('blockedData:EpochIssue', ...
-                    ['Argument ''EpochStartTimes'' has length %d' ...
-                    ' but match size(signalData, %d): %d'], ...
-                    length(pdata.EpochStartTimes), obj.BlockDim, obj.BlockSize);
             end
-        end % parseParameters
+        end % setEpochs
         
-        
+        function setEvents(obj, pdata)
+            % Helper function to set events
+            if isempty(pdata.Events)
+                obj.Events = [];
+                return;
+            elseif obj.Epoched
+                bStarts = obj.EpochStartTimes;
+                maxTime = [];
+            else
+                bStarts = [];
+                maxTime = obj.BlockSize*size(obj.Data, obj.BlockDim);
+            end
+            
+            obj.Events = viscore.eventData(pdata.Events, ...
+                'BlockStartTimes', bStarts, 'MaxTime', maxTime, ...
+                'BlockTime', obj.BlockSize./obj.SampleRate);
+        end % setEvents     
+           
     end % private methods
     
     methods(Static = true)
+                function [startTimes, timeScale] = getEpochTimes(EEG)
+            % Return epoch start times in seconds and time scale in ms
+            if ~isstruct(EEG) ||~isfield(EEG, 'times')
+                timeScale = [];
+            else
+                timeScale = EEG.times;
+            end
+            if ~isstruct(EEG) ||~isfield(EEG, 'event') || ...
+                    isempty(EEG.event) || ~isfield(EEG,'epoch') || ...
+                    isempty(EEG.epoch)
+                startTimes = [];
+                return;
+            end
+            eventTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
+            startTimes = zeros(length(EEG.epoch), 1);
+            for k = 1:length(EEG.epoch)
+                e = EEG.epoch(k).event(1);
+                latency = EEG.epoch(k).eventlatency{1}/1000;
+                startTimes(k) = eventTimes(e) - latency;
+            end
+        end  % getEpochTimes
         
         function parser = getParser()
             % Create a parser for blockedData
@@ -399,26 +423,21 @@ classdef blockedData < hgsetget
                 @(x) validateattributes(x, {'numeric'}, ...
                 {'scalar', 'nonempty', 'positive'}));
             parser.addParamValue('ElementLocations', [], ...
-                @(x) validateattributes(x, {'struct'}, ...
-                {}));
+                @(x) validateattributes(x, {'struct'}, {}));
             parser.addParamValue('BlockDim', 2, ...
                 @(x) validateattributes(x, {'numeric'}, ...
                 {'scalar', 'nonnegative'}));
-            parser.addParamValue('BlockSize', [], ...
+            parser.addParamValue('BlockSize', 1000, ...
                 @(x) validateattributes(x, {'numeric'}, ...
                 {'scalar', 'nonnegative'}));
             parser.addParamValue('Epoched', false, ...
-                @(x) validateattributes(x, {'logical'}, ...
-                {}));
-            parser.addParamValue('EpochTimes', [], ...
-                @(x) validateattributes(x, {'numeric'}, ...
-                {}));
+                @(x) validateattributes(x, {'logical'}, {}));
             parser.addParamValue('EpochStartTimes', [], ...
-                @(x) validateattributes(x, {'numeric'}, ...
-                {}));
+                @(x) validateattributes(x, {'numeric'}, {}));
+            parser.addParamValue('EpochTimeScale', [], ...
+                @(x) validateattributes(x, {'numeric'}, {}));
             parser.addParamValue('Events', [], ...
-                @(x) validateattributes(x, {'viscore.eventData'}, ...
-                {}));
+                @(x) validateattributes(x, {'struct'}, {}));
             parser.addParamValue('PadValue', 0, ...
                 @(x) validateattributes(x, {'numeric'}, {'scalar'}));
         end % getParser

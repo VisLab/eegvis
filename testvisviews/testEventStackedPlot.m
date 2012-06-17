@@ -62,8 +62,7 @@ fprintf('\nUnit tests for visviews.eventStackedPlot plot method\n')
 % Read the sample data for testing
 load('EEGData.mat');  %
 
-ed1 = viscore.eventData(event, 'BlockTime', 1000/128);
-testVD = viscore.blockedData(EEG.data, 'EEG', 'SampleRate', 128, 'Events', ed1);
+testVD = viscore.blockedData(EEG.data, 'EEG', 'SampleRate', 128, 'Events', event);
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
@@ -86,10 +85,10 @@ sp.registerCallbacks([]);
 fprintf('It should work with the artifact data\n');
 load('EEGArtifact.mat');  
 load('ArtifactEvents.mat');
-ev1 = viscore.eventData(event, 'BlockTime', 1000/256);
 testVD1 = viscore.blockedData(EEGArtifact.data, 'Artifact', ...
-    'Events', ev1, ...
+    'Events', event, ...
     'SampleRate', 256, 'BlockSize', 1000);
+ev1 = testVD1.getEvents();
 numBlocks = ceil(size(EEGArtifact.data, 2)/1000);
 counts = ev1.getEventCounts(1, numBlocks);
 assertVectorsAlmostEqual(size(counts), ...

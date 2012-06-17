@@ -289,7 +289,7 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
 
             % Adjust the labels
             if visData.isEpoched() % add time scale to x label
-                obj.XValues = visData.getEpochTimes();
+                obj.XValues = visData.getEpochTimeScale();
                 obj.XStringBase = ['Time(ms) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'ms';
             else

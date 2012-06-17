@@ -302,7 +302,8 @@ classdef eegbrowse < hgsetget & visprops.configurable
                     end
                     dataID = [obj.FileName ' [' obj.FilePath ']'];
                     obj.VisualFig.setDataSource(...
-                        eegbrowse.getBlockDataFromEEG(eData, dataID));
+                        eegbrowse.getBlockDataFromEEG(eData, dataID, ...
+                        obj.VisualFig.BlockSize));
                 end
                 
                 % Now actually draw visualization
@@ -737,17 +738,20 @@ classdef eegbrowse < hgsetget & visprops.configurable
     
     methods(Static = true)
         
-        function visData = getBlockDataFromEEG(EEG, dataID)
+        function visData = getBlockDataFromEEG(EEG, dataID, blocksize)
             % Create a BlockData object for an EEG structure
-            if isempty(EEG.chanlocs)
-                visData = viscore.blockedData(EEG.data, dataID, ...
-                    'EpochTimes', EEG.times, 'SampleRate', EEG.srate, ...
-                    'Epoched', ~isempty(EEG.times));
+            if isempty(EEG.chanlocs)   
+                chanlocs = [];
             else
-                visData = viscore.blockedData(EEG.data, dataID, ...
-                    'EpochTimes', EEG.times, 'SampleRate', EEG.srate, ...
-                    'Epoched', ~isempty(EEG.times), 'ElementLocations', EEG.chanlocs);
+                chanlocs = EEG.chanlocs;
             end
+            event = viscore.eventData.getEventStructure(EEG);
+            [startTimes, timeScale] = viscore.blockedData.getEpochTimes(EEG);
+            visData = viscore.blockedData(EEG.data, dataID, ...
+                    'SampleRate', EEG.srate, 'Events', event, ...
+                    'ElementLocations', chanlocs, 'BlockSize', blocksize, ...
+                    'Epoched', ndims(EEG.data) == 3, ...
+                    'EpochTimes', timeScale, 'EpochStartTimes', startTimes);
         end % getBlockDataFromEEG
         
         function settings = getConfigurableDefaults()

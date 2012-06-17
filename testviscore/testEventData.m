@@ -15,7 +15,6 @@ event = struct('type', types, 'startTime', num2cell(startTimes), ...
 function teardown(event) %#ok<INUSD,DEFNU>
 % Function executed after each test
 
-
 function testNormalConstructor(event) %#ok<DEFNU>
 % Unit test for eventData normal constructor
 fprintf('\nUnit tests for viscore.eventData valid constructor\n');
@@ -28,36 +27,7 @@ assertTrue(sum(ed1.getStartTimes() < 0) == 0);
 fprintf('The end times be greater than 0\n');
 assertTrue(sum(ed1.getEndTimes() <= 0) == 0);
 fprintf('The block time should be correct\n');
-assertElementsAlmostEqual(ed1.getBlockTime(), 1);
-% fprintf('The end times should be greater than the start times\n')
-% assertVectorsAlmostEqual(startTimes + 1, ed1.getEndTimes());
-% fprintf('The default block size should be 1\n');
-% assertElementsAlmostEqual(ed1.getBlockSize(), 1);
-% fprintf('The default sampling rate should be 1Hz\n');
-% assertElementsAlmostEqual(ed1.getSampleRate(), 1);
-% fprintf('The number of blocks should be correct\n');
-% assertEqual(ed1.getNumberBlocks(), 30307);
 
-% 
-% endTimes = startTimes + 2;
-% ed2 = viscore.eventData(types, startTimes, endTimes);
-% fprintf('When event end times are passed, the object end times should agree\n');
-% assertTrue(isvalid(ed2));
-% assertVectorsAlmostEqual(startTimes, ed2.getStartTimes());
-% assertVectorsAlmostEqual(endTimes, ed2.getEndTimes());
-
-
-% fprintf('When the sampling rate is passed and block size are passed, the object sampling rate should agree\n');
-% startTimes = startTimes./EEG.srate;
-% ed3 = viscore.eventData(types, startTimes, 'SampleRate', EEG.srate, ...
-%                          'BlockSize', 1000);
-% assertTrue(isvalid(ed3));
-% fprintf('The sampling rate should be correct\n');
-% assertElementsAlmostEqual(EEG.srate, ed3.getSampleRate());
-% fprintf('The number of blocks should be correct\n');
-% assertEqual(ed3.getNumberBlocks(), 31);
-% fprintf('The blocksize should be correct\n');
-% assertElementsAlmostEqual(1000, ed3.getBlockSize());
 
 function testBadConstructor(event) %#ok<INUSD,DEFNU>
 % Unit test for viscore.eventData bad constructor
@@ -110,7 +80,7 @@ end
 
 fprintf('It should have the right indices associated with each block\n');
 for k = 1:length(bList)
-    indices = find(bTimes(k) <= sTimes & sTimes < bTimes(k) + blockTime)';
+    indices = find(bTimes(k) <= sTimes & sTimes < bTimes(k) + blockTime);
     fprintf('---Block %g should have %g events\n', k, length(indices)); 
     assertVectorsAlmostEqual(indices, ed1.getBlocks(k, k));
 end
@@ -175,23 +145,30 @@ function testGetTypes(event) %#ok<DEFNU>
   assertEqual(size(counts, 1), length(ed1.getUniqueTypes()));
   assertEqual(size(counts, 2), numBlocks);
 
+  function testGetEventStructure(event) %#ok<DEFNU>
+  % Unit test for viscore.eventData getEventStructure
+  load('EEGData.mat');  %
+  eventNew = viscore.eventData.getEventStructure(EEG);
+  assertTrue(isequal(eventNew, event));
+  
+  function testEpochTimes(event) %#ok<INUSD,DEFNU>
+  % Unit test for viscore.eventData getEventStructure
+  load('EEGEpoch.mat');  %
+  [startTimes, timeScale] = viscore.blockedData.getEpochTimes(EEGEpoch);
+  assertEqual(length(startTimes), size(EEGEpoch.data, 3));
+  assertEqual(length(timeScale), size(EEGEpoch.data, 2));
+          
   function testArtifactData(event) %#ok<DEFNU>
 % Unit test for viscore.eventData getEventCounts 
   load('ArtifactEvents.mat');
   ev = viscore.eventData(event, 'BlockTime', 1000/256);
+  assertEqual(length(event), length(ev.getEndTimes()));
   
-% function testGetEventSlice %#ok<DEFNU>
-% % Unit test for viscore.eventData slice
-% fprintf('\nUnit tests for viscore.eventData handling of block list\n');
-% 
-% % load('EEGData.mat');  %
-% % tEvents = EEG.event;
-% % types = {tEvents.type}';
-% % startTimes = (1:10:length(types))';
-% % endTimes = startTimes + 5;
-% % blockSize = 1000;
-% % ed1 = viscore.eventData(types, startTimes, 'EndTimes', endTimes, ...
-% %         'SampleRate', EEG.srate, 'BlockSize', blockSize);
-% % assertTrue(isvalid(ed1));
-% % ds = viscore.dataSlice('Slices', {':', ':', '3'});
-% % [selected, limits] = ed1.getEventSlice(ds);
+  function testEpochData(event) %#ok<DEFNU>
+  % Unit test for viscore.eventData getEventCounts 
+  load('EEGEpoch.mat');
+  bTime  = size(EEGEpoch.data, 2)./EEGEpoch.srate;
+  startTimes = viscore.blockedData.getEpochTimes(EEGEpoch);
+  ev = viscore.eventData(event, 'BlockTime', bTime, ...
+      'BlockStartTimes', startTimes);
+  

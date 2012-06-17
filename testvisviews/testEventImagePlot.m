@@ -68,11 +68,11 @@ assertTrue(isvalid(ep));
 
 % Generate some data to plot
 load('EEGData.mat');  %
-ev = viscore.eventData(event, 'BlockTime', 1000/128);
 data = EEG.data;
-testVD = viscore.blockedData(data, 'Rand1', 'Events', ev, ...
+testVD = viscore.blockedData(data, 'Rand1', 'Events', event, ...
     'SampleRate', 128, 'BlockSize', 1000);
 numBlocks = ceil(size(data, 2)/1000);
+ev = testVD.getEvents();
 counts = ev.getEventCounts(1, numBlocks);
 assertVectorsAlmostEqual(size(counts), ...
     [length(ev.getUniqueTypes()), numBlocks]);
@@ -97,9 +97,10 @@ load('EEGArtifact.mat');
 load('ArtifactEvents.mat');
 ev1 = viscore.eventData(event, 'BlockTime', 1000/EEGArtifact.srate);
 testVD1 = viscore.blockedData(EEGArtifact.data, 'Artifact', ...
-    'Events', ev1, ...
+    'Events', event, ...
     'SampleRate', EEGArtifact.srate, 'BlockSize', 1000);
 numBlocks = ceil(size(EEGArtifact.data, 2)/1000);
+ev1 = testVD1.getEvents();
 counts = ev1.getEventCounts(1, numBlocks);
 assertVectorsAlmostEqual(size(counts), ...
     [length(ev1.getUniqueTypes()), numBlocks]);
@@ -123,11 +124,9 @@ sfig2 = figure('Name', 'Empty slice');
 ep2 = visviews.eventImagePlot(sfig2, [], []);
 assertTrue(isvalid(ep2));
 % Generate some data to plot
-ev2 = viscore.eventData(event, 'BlockTime', 1000/EEGArtifact.srate);
 testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', ...
-    'Events', ev2, ...
+    'Events', event, ...
     'SampleRate', EEGArtifact.srate, 'BlockSize', 1000);
-
 defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
     viewTestClass.getDefaultFunctionsNoSqueeze());
 fMan = viscore.dataManager();

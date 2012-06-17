@@ -100,7 +100,7 @@ gaps = sp1.getGaps();
 sp1.reposition(gaps);
 sp1.registerCallbacks([]);
 drawnow
-assertAlmostEqual(testVD1.getEpochTimes(), (0:999)*4);
+assertAlmostEqual(testVD1.getEpochTimeScale(), (0:999)*4);
 
 fprintf('It should produce a plot for a slice along dimension 1\n');
 sfig2 = figure('Name', 'visviews.signalStackedPlot test plot slice element');
@@ -425,4 +425,30 @@ delete(sfig1);
 delete(sfig2);
 delete(sfig3);
 delete(sfig4);
+
+function testPlotRealData %#ok<DEFNU>
+% Unit test visviews.signalStackedPlot plot real data
+fprintf('\nUnit tests for visviews.signalStackedPlot plot method real data\n')
+% Generate some data for testing
+load('EEGEpoch.mat');
+
+fprintf('It should produce a plot when the data is epoched\n');
+testVD1 = viscore.blockedData(EEGEpoch.data, 'EEGEpoched', 'Epoched', true, ...
+            'SampleRate', EEGEpoch.srate);
+assertTrue(testVD1.isEpoched())
+keyfun = @(x) x.('ShortName');
+defFuns= visfuncs.functionObj.createObjects( ...
+    'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
+fun = defFuns{1};
+sfig1 = figure('Name', 'Plot when data is epoched\n');
+sp1 = visviews.signalStackedPlot(sfig1, [], []);
+assertTrue(testVD1.isEpoched())
+slice1 = viscore.dataSlice('Slices', {':', ':', '5'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sp1.plot(testVD1, fun, slice1);
+gaps = sp1.getGaps();
+sp1.reposition(gaps);
+sp1.registerCallbacks([]);
+drawnow
+
 

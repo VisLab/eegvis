@@ -1,26 +1,31 @@
-% viscore.eventData   manages an array of events for visualization
+% viscore.eventData   manages an array of events for block visualizations
 %
 % Usage:
 %   >>  viscore.eventData(event)
 %   >>  obj = viscore.eventData(event)
-%   >>  obj = viscore.eventData(..., 'Name', 'Value')
+%   >>  obj = viscore.eventData(..., 'Name1', 'Value1', ...)
 %
 % Description:
 % viscore.eventData(event) creates an object to hold events for
 %    visualization. The event parameter is an array of structures.
+%    The visualization is assumed to be divided into (potentially
+%    overlapping) fixed length blocks that are used for summaries.
 %
 %
-% viscore.eventData(events, eventsID, 'key1', 'value1', ...| specifies
+% viscore.eventData(events, 'Name1', 'Value1', ...) specifies
 %     optional name/value parameter pairs:
-%   'EventOrder'        cell array specifying display order of event types
-%   'Probabilities'     cell array specifying display order of event types
+%
+%   'BlockStartTimes'   optional vector of start times (in seconds) of blocks
+%   'BlockTime'         length of block in seconds
+%   'EventOrder'        cell array specifying display order of unique event types
+%   'MaxTime'           maximum time in seconds to use
+%
 %
 % The event order is alphabetical by default. The order is relevant for
 % the order in which events occur in the visualization. The EventOrder
 % parameter allows users to over-ride this behavior by specifying the
 % types of events that should appear first (and hence are displayed more
-% prominently). Any event types not mentioned follow the specified ones
-% in alphabetical order.
+% prominently). Any event types not mentioned are not displayed.
 %
 % obj = viscore.eventData(...) returns a handle to the newly created
 % object.
@@ -28,7 +33,7 @@
 % Example 1:
 % Create a blocked data object for a random array
 %   data = random('normal', 0, 1, [32, 1000, 20]);
-%   bd = viscore.eventData(data, 'Normal(0, 1)');
+%   bd = viscore.eventData(data);
 %
 % Example 2:
 % Reblock a data object in blocks of 500 frames
@@ -92,14 +97,14 @@ classdef eventData < hgsetget
     
     properties (Access = private)
         BlockList;           % cell array indexing events in block
+        BlockStartTimes;     % start time of each block in seconds
         BlockTime;           % time in seconds for one block
-        EndTimes;            % double array of event end times
-        Epoched;             % true if the data is epoched
+        EventEndTimes;       % double array of event end times
         EventCounts;         % type x blocks array with event counts
-        OriginalPositions;   % original positions of events in stream
-        StartTimes;          % double array of event start times
-        TypeNumbers;         % cell array of event type numbers
-        UniqueTypes;         % cell array of unique in desired order
+        EventStartTimes;     % double array of event start times
+        EventTypeNumbers;    % cell array of event type numbers
+        EventUniqueTypes;    % cell array of unique in desired order
+        MaxTime;             % maximum time in seconds for events
         VersionID            % version ID of this event set
     end % private properties
     
@@ -113,7 +118,7 @@ classdef eventData < hgsetget
         end % eventData constructor
         
         
-        function events = getBlocks(obj, startBlock, endBlock) 
+        function events = getBlocks(obj, startBlock, endBlock)
             % Return the row vector of doubles containing event numbers
             bStart = max(startBlock, 1);
             bEnd = min(endBlock, length(obj.BlockList));
@@ -122,10 +127,13 @@ classdef eventData < hgsetget
                 numEvents = numEvents + length(obj.BlockList{k});
             end
             events = zeros(numEvents, 1);
-            
-            if 1 <= k && k <= length(obj.BlockList) 
-                events = obj.BlockList{k};
+            s = 1;
+            for k = bStart:bEnd
+                e = s + length(obj.BlockList{k}) - 1;
+                events(s:e) = obj.BlockList{k};
+                s = e + 1;
             end
+            events = unique(events);
         end % getBlocks
         
         function blocklist = getBlockList(obj)
@@ -133,12 +141,12 @@ classdef eventData < hgsetget
             blocklist = obj.BlockList;
         end % getBlockList
         
-  
+        
         function range = getBlockRange(obj, k)
             % Returns the range of block numbers occupied by event k
             range = floor(obj.SampleRate.* ...
-                         [obj.StartTimes(k), obj.EndTimes(k)]./ ...
-                         obj.BlockSize) + 1;
+                [obj.EventStartTimes(k), obj.EventEndTimes(k)]./ ...
+                obj.BlockSize) + 1;
             if range(1) > length(obj.BlockList)
                 range = [];
             end
@@ -153,101 +161,100 @@ classdef eventData < hgsetget
         function endTimes = getEndTimes(obj, varargin)
             % Return event end times - all or those specified by varargin
             if nargin == 1
-                endTimes = obj.EndTimes;
+                endTimes = obj.EventEndTimes;
             else
-                endTimes = obj.EndTimes(varargin{1});
+                endTimes = obj.EventEndTimes(varargin{1});
             end
         end % getEndTimes
         
         function event = getEvent(obj, k)
             % Return event k as a structure or empty
             event = [];
-            try
-                event.type = obj.Types{k};
-                event.startTime = obj.StartTimes(k);
-                event.endTime = obj.EndTimes(k);
-                event.blocks = obj.Blocks{k};
-            catch ME %#ok<NASGU>
+            if k < 1 || k > length(obj.EventTypes)
+                return;
             end
+            event.type = obj.EventTypes{k};
+            event.startTime = obj.EventStartTimes(k);
+            event.endTime = obj.EventEndTimes(k);
         end % getEvent
         
         function counts = getEventCounts(obj, startBlock, endBlock) %#ok<MANU>
             % Return types x blocks array of counts
-           counts = eval(['obj.EventCounts(:, ' ...
-               num2str(startBlock) ':' num2str(endBlock) ')']);
+            counts = eval(['obj.EventCounts(:, ' ...
+                num2str(startBlock) ':' num2str(endBlock) ')']);
         end % getEventCounts
         
         
-        function events = getEvents(obj, type)
-            % Return the events of a particular type
-            events = {obj.Events.type};
-            eventIndices = strcmpi({obj.Events.type}, type);
-            events = events(eventIndices);
-        end % getEvents
-        
-        function [selected, limits] = getEventSlice(obj, dSlice) 
-            % Return the event positions of the events in the slice
-            slices = dSlice.getParameters(3);
-            
-            slicePoints = eval(slices{2});
-            if isempty(slicePoints)
-                selected = [];
-                limits = [];
-                return;
-            end    
-            
-            firstTime = (min(slicePoints(:)) - 1)/obj.SampleRate;
-            lastTime = (max(slicePoints(:)) - 1)/obj.SampleRate;
-            selected = (firstTime <= obj.StartTimes &&  ...
-                        obj.StartTimes <= lastTime) || ...
-                       (firstTime <= obj.EndTimes &&  ...
-                        obj.EndTimes <= lastTime);
-            limits = [firstTime, lastTime];
-        end % getEventSlice
-        
+%         function events = getEvents(obj, type)
+%             % Return the events of a particular type
+%             events = {obj.Events.type};
+%             eventIndices = strcmpi({obj.Events.type}, type);
+%             events = events(eventIndices);
+%         end % getEvents
+%         
+%         function [selected, limits] = getEventSlice(obj, dSlice)
+%             % Return the event positions of the events in the slice
+%             slices = dSlice.getParameters(3);
+%             
+%             slicePoints = eval(slices{2});
+%             if isempty(slicePoints)
+%                 selected = [];
+%                 limits = [];
+%                 return;
+%             end
+%             
+%             firstTime = (min(slicePoints(:)) - 1)/obj.SampleRate;
+%             lastTime = (max(slicePoints(:)) - 1)/obj.SampleRate;
+%             selected = (firstTime <= obj.StartTimes &&  ...
+%                 obj.StartTimes <= lastTime) || ...
+%                 (firstTime <= obj.EndTimes &&  ...
+%                 obj.EndTimes <= lastTime);
+%             limits = [firstTime, lastTime];
+%         end % getEventSlice
+%         
         
         function numBlocks = getNumberBlocks(obj)
             % Returns the current number of blocks
             numBlocks = length(obj.BlockList);
         end % getNumberBlocks
         
-        function sampleRate = getSampleRate(obj)
-            % Return the current sample rate for this event set
-            sampleRate = obj.SampleRate;
-        end   % getSampleRate
-        
+%         function sampleRate = getSampleRate(obj)
+%             % Return the current sample rate for this event set
+%             sampleRate = obj.SampleRate;
+%         end   % getSampleRate
+%         
         function startTimes = getStartTimes(obj, varargin)
             % Return event start times - all or those specified by varargin
             if nargin == 1
-                startTimes = obj.StartTimes;
+                startTimes = obj.EventStartTimes;
             else
-                startTimes = obj.StartTimes(varargin{1});
+                startTimes = obj.EventStartTimes(varargin{1});
             end
         end % getStartTimes
         
-       function types = getTypes(obj, varargin)
+        function types = getTypes(obj, varargin)
             % Return a cell array of event types in event order
             if nargin == 1
-                types = obj.TypeNumbers;
+                types = obj.EventTypeNumbers;
             else
-                types = obj.TypeNumbers(varargin{1});
+                types = obj.EventTypeNumbers(varargin{1});
             end
-            types = obj.UniqueTypes(types);
+            types = obj.EventUniqueTypes(types);  % not correct
         end % getUniqueTypes
         
         
         function typeNumbers = getTypeNumbers(obj, varargin)
             % Return event type numbers - all or those specified by varargin
             if nargin == 1
-                typeNumbers = obj.TypeNumbers;
+                typeNumbers = obj.EventTypeNumbers;
             else
-                typeNumbers = obj.TypeNumbers(varargin{1});
+                typeNumbers = obj.EventTypeNumbers(varargin{1});
             end
         end % getTypeNumbers
         
         function uniqueTypes = getUniqueTypes(obj)
             % Return the unique event types
-            uniqueTypes = obj.UniqueTypes;
+            uniqueTypes = obj.EventUniqueTypes;
         end % getUniqueTypes
         
         function version = getVersionID(obj)
@@ -265,37 +272,41 @@ classdef eventData < hgsetget
             % Notes:
             %  - no action is taken if data is epoched or blockSize <= 0
             %
-            if isempty(blockTime) || blockTime <= 0 
+            if isempty(blockTime) || blockTime <= 0
                 return;
             end
-            if nargin == 2
-                 maxTime = max(obj.EndTimes);
+            if nargin == 2 || isempty(maxTime)
+                maxTime = max(obj.EventEndTimes);
             end
-            numBlocks = ceil(maxTime/blockTime);
-
+            if isempty(obj.BlockStartTimes)
+               numBlocks = ceil(maxTime/blockTime);
+            else
+               numBlocks = length(obj.BlockStartTimes);
+            end
+            
             % Reblocking so the version changes
             c = viscore.counter.getInstance();
             obj.VersionID = num2str(c.getNext());  %
             obj.BlockTime = blockTime;
             
-            obj.EventCounts = zeros(length(obj.UniqueTypes), numBlocks);
+            obj.EventCounts = zeros(length(obj.EventUniqueTypes), numBlocks);
             obj.BlockList = cell(numBlocks, 1);
             for k = 1:length(obj.BlockList)
                 obj.BlockList{k} = {};
             end;
-           
-            for k = 1:length(obj.StartTimes)
-                startBlock = floor(obj.StartTimes(k)/blockTime) + 1;
+            
+            for k = 1:length(obj.EventStartTimes)
+                startBlock = floor(obj.EventStartTimes(k)/blockTime) + 1;
                 if startBlock > numBlocks
                     continue;
                 end
-                endBlock = min(floor(obj.EndTimes(k)/blockTime) + 1, ...
+                endBlock = min(floor(obj.EventEndTimes(k)/blockTime) + 1, ...
                     numBlocks);
                 
                 for j = startBlock:endBlock
                     obj.BlockList{j}{length(obj.BlockList{j}) + 1} = k;
-                    obj.EventCounts(obj.TypeNumbers(k), j) = ...
-                        obj.EventCounts(obj.TypeNumbers(k), j) + 1;
+                    obj.EventCounts(obj.EventTypeNumbers(k), j) = ...
+                        obj.EventCounts(obj.EventTypeNumbers(k), j) + 1;
                 end
             end
             
@@ -306,7 +317,7 @@ classdef eventData < hgsetget
             
         end % reblock
         
- 
+        
     end % public methods
     
     
@@ -320,44 +331,40 @@ classdef eventData < hgsetget
             p = parser.Results;
             
             % Handle the events
-            obj.Epoched = false;
             obj.BlockTime = p.BlockTime;
-            event = event(:); 
-            
+            obj.BlockStartTimes = p.BlockStartTimes;
+            obj.MaxTime = p.MaxTime;
+            event = event(:);
             types = {p.event.type}';
-            obj.StartTimes = cell2mat({p.event.startTime})';
-            obj.EndTimes = cell2mat({p.event.endTime})';
-            if length(types) ~= length(event) || ...
-                    length(obj.StartTimes) ~= length(event) || ...
-                    length(obj.EndTimes) ~= length(event)
-                error('eventData:EmptyValues',  ...
-                    'Event types, start times, and end times must not be empty');
-            elseif sum(isnan(obj.StartTimes)) > 0 || sum(obj.StartTimes) < 0 > 0
+            obj.EventStartTimes = cell2mat({p.event.startTime})';
+            obj.EventEndTimes = cell2mat({p.event.endTime})';
+            if sum(isnan(obj.EventStartTimes)) > 0 || sum(obj.EventStartTimes) < 0 > 0
                 error('eventData:NonNegativeStart', ...
                     'Event start times must be non negative\n')
-            elseif sum(isnan(obj.EndTimes)) > 0 || ...
-                    sum(obj.StartTimes > obj.EndTimes) > 0
+            elseif sum(isnan(obj.EventEndTimes)) > 0 || ...
+                    sum(obj.EventStartTimes > obj.EventEndTimes) > 0
                 error('eventData:StartEndMatch', ...
                     'Event end times must be greater than or equal to the endTimes\n');
             end
-            % Process the event order parameter
-            obj.UniqueTypes = unique(types);
-            if isempty(obj.UniqueTypes{1})
+            
+            % Process the event order parameter         
+            obj.EventUniqueTypes = unique(types);       
+            if isempty(obj.EventUniqueTypes{1})
                 error('eventData:NonemptyType', ...
                     'Event types must be non empty\n');
             end
             if ~isempty(p.EventOrder)
                 t = p.EventOrder;
-                [iEvents, ia, ib] = intersect(obj.UniqueEvents, t); %#ok<ASGLU>
+                [iEvents, ia, ib] = intersect(obj.EventUniqueEvents, t); %#ok<ASGLU>
                 t(ib) = [];
-                obj.UniqueTypes = [iEvents(:); t(:)];
+                obj.EventUniqueTypes = [iEvents(:); t(:)];
             end
-            obj.TypeNumbers = zeros(length(types), 1);
-            for k = 1:length(obj.UniqueTypes)
-                obj.TypeNumbers(strcmpi(obj.UniqueTypes{k}, types)) = k;
+            obj.EventTypeNumbers = zeros(length(types), 1);
+            for k = 1:length(obj.EventUniqueTypes)
+                obj.EventTypeNumbers(strcmpi(obj.EventUniqueTypes{k}, types)) = k;
             end
             
-            obj.reblock(obj.BlockTime);
+            obj.reblock(obj.BlockTime, obj.MaxTime);
         end % parseParameters
         
     end % private methods
@@ -371,21 +378,29 @@ classdef eventData < hgsetget
             parser.addRequired('event', ...
                 @(x) (~isempty(x) && isstruct(x)) && ...
                 sum(isfield(x, {'type', 'startTime', 'endTime'})) == 3);
-%             parser.addParamValue('type', [], ...
-%                 @(x) (~isempty(x) && ischar(x)));
-%             parser.addParamValue('startTime', [], ...
-%                 @(x) validateattributes(x, {'numeric'}, ...
-%                 {'scalar', 'nonnegative'}));
-%             parser.addParamValue('endTime', [], ...
-%                 @(x) validateattributes(x, {'numeric'}, ...
-%                 {'scalar', 'positive'}));
+            parser.addParamValue('BlockStartTimes', [], ...
+                @(x)(isempty(x) || (iscolumn(x) && isnumeric(x))));
             parser.addParamValue('BlockTime', 1, ...
-                @(x) validateattributes(x, {'numeric'}, ...
-                {'scalar', 'positive'}));
+                @(x) validateattributes(x, {'numeric'}, {'scalar', 'positive'}));
             parser.addParamValue('EventOrder', {}, ...
                 @(x) (isempty(x) || (iscolumn(x) && sum(~iscellstr(x)) == 0)));
+            parser.addParamValue('MaxTime', [], ...
+                @(x) validateattributes(x, {'numeric'}, {'scalar', 'positive'}));
         end % getParser
         
+        function event = getEventStructure(EEG)
+            % Returns a structure for an EEG type structure
+            if ~isstruct(EEG) ||~isfield(EEG, 'event') || isempty(EEG.event)
+                event = [];
+                return;
+            end
+            types = {EEG.event.type}';
+            startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
+            endTimes = startTimes + 1/EEG.srate;
+            event = struct('type', types, 'startTime', num2cell(startTimes), ...
+                'endTime', num2cell(endTimes));
+        end % getEventStructure
+   
     end % static methods
     
 end % eventData

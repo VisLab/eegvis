@@ -283,7 +283,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             end
       
             if obj.VisData.isEpoched() % add time scale to x label
-                obj.XValues = visData.getEpochTimes();
+                obj.XValues = visData.getEpochTimeScale();
                 obj.XStringBase = ['Time(ms) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'ms';
             else
