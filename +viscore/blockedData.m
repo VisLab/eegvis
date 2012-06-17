@@ -332,20 +332,11 @@ classdef blockedData < hgsetget
         function  [] = setElementLocations(obj, pdata)
             % Helper to set element locations from a pdata structure
             obj.ElementLocations = [];
-            if isfield(pdata, 'ElementLocations') && ~isempty(pdata.ElementLocations)
-                eFields = fieldnames(pdata.ElementLocations);
-                intFields = intersect(eFields, obj.ElementFields);
-                diffFields = setdiff(obj.ElementFields, intFields);
-                if ~isempty(diffFields)
-                   sString = diffFields{1};
-                   for k = 2:length(diffFields)
-                       sString = [sString ' ' diffFields{k}]; %#ok<AGROW>
-                   end
-                   error('blockedData:ElementLocationIssue', ...
-                    ['The following required fields are missing:' sString '\n']);
-                end
-                obj.ElementLocations = pdata.ElementLocations;       
+            if isempty(pdata.ElementLocations) || ...
+                    isequal(pdata.ElementLocations, struct())
+                return;
             end
+            obj.ElementLocations = pdata.ElementLocations;       
         end % setElementLocations
         
         function [] = setEpochs(obj, pdata)
@@ -423,7 +414,9 @@ classdef blockedData < hgsetget
                 @(x) validateattributes(x, {'numeric'}, ...
                 {'scalar', 'nonempty', 'positive'}));
             parser.addParamValue('ElementLocations', [], ...
-                @(x) validateattributes(x, {'struct'}, {}));
+                @(x) (isempty(x) || isequal(x, struct()) || (isstruct(x)) ...
+                && sum(isfield(x, viscore.blockedData.ElementFields)) ...
+                == length(viscore.blockedData.ElementFields)));
             parser.addParamValue('BlockDim', 2, ...
                 @(x) validateattributes(x, {'numeric'}, ...
                 {'scalar', 'nonnegative'}));
@@ -437,7 +430,8 @@ classdef blockedData < hgsetget
             parser.addParamValue('EpochTimeScale', [], ...
                 @(x) validateattributes(x, {'numeric'}, {}));
             parser.addParamValue('Events', [], ...
-                @(x) validateattributes(x, {'struct'}, {}));
+                 @(x) (isempty(x) || (isstruct(x)) && ...
+                sum(isfield(x, {'type', 'startTime', 'endTime'})) == 3));
             parser.addParamValue('PadValue', 0, ...
                 @(x) validateattributes(x, {'numeric'}, {'scalar'}));
         end % getParser

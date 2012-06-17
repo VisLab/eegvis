@@ -56,19 +56,25 @@ function testConstructorWithElementLocations %#ok<DEFNU>
 % Unit test for viscore.blockedData with element locations
 fprintf('\nUnit tests for viscore.blockedData with element locations\n');
 data = random('normal', 0, 1, [32, 1000, 20]);
-
 fprintf('It should allow element locations specified by structure array\n')
 elocs(32) = struct('X', 2, 'Y', 3, 'Z', 1, 'labels', {'FPOZ'}, 'theta', 3, 'radius', 4);
 vd1 = viscore.blockedData(data, 'ID1', 'ElementLocations', elocs);
 assertTrue(isvalid(vd1));
-fprintf('It should not allow an empty element location structure if ElementLocations parameter is given\n')
-f = @() viscore.blockedData(data, 'ID1', 'ElementLocations', struct());
-assertExceptionThrown(f, 'blockedData:ElementLocationIssue');
-fprintf('It should allow not allow empty element locations if ElementLocations parameter is given\n')
-f = @() viscore.blockedData(data, 'ID1', 'ElementLocations', []);
-assertExceptionThrown(f, 'MATLAB:invalidType');
-f = @() viscore.blockedData(data, 'ID1', 'ElementLocations', '');
-assertExceptionThrown(f, 'MATLAB:invalidType');
+fprintf('It should ignore the element locations if parameter is empty\n');
+vd2 = viscore.blockedData(data, 'ID2', 'ElementLocations', []);
+assertTrue(isvalid(vd2));
+assertTrue(isempty(vd2.getElementLocations));
+fprintf('It should ignore the element locations if parameter is empty structure\n');
+vd3 = viscore.blockedData(data, 'ID2', 'ElementLocations', []);
+assertTrue(isvalid(vd3));
+assertTrue(isempty(vd3.getElementLocations));
+vd4 = viscore.blockedData(data, 'ID2', 'ElementLocations', '');
+assertTrue(isvalid(vd4));
+assertTrue(isempty(vd4.getElementLocations));
+fprintf('It should throw an exception of required location fields not present\n');
+elocs1(32) = struct('X', 2, 'Y', 3, 'Z', 1, 'labels', {'FPOZ'});
+f = @() viscore.blockedData(data, 'ID1', 'ElementLocations', elocs1);
+assertExceptionThrown(f, 'MATLAB:InputParser:ArgumentFailedValidation');
 
 function testConstructorFewerThanThreeDimensions %#ok<DEFNU>
 % Unit test for viscore.blockedData with fewer than 3 dimensions

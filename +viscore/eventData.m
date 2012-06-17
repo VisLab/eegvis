@@ -315,11 +315,9 @@ classdef eventData < hgsetget
                 obj.BlockList{k} = cell2mat(obj.BlockList{k});
             end
             
-        end % reblock
-        
+        end % reblock  
         
     end % public methods
-    
     
     methods(Access = private)
         
@@ -334,7 +332,6 @@ classdef eventData < hgsetget
             obj.BlockTime = p.BlockTime;
             obj.BlockStartTimes = p.BlockStartTimes;
             obj.MaxTime = p.MaxTime;
-            event = event(:);
             types = {p.event.type}';
             obj.EventStartTimes = cell2mat({p.event.startTime})';
             obj.EventEndTimes = cell2mat({p.event.endTime})';
@@ -385,7 +382,7 @@ classdef eventData < hgsetget
             parser.addParamValue('EventOrder', {}, ...
                 @(x) (isempty(x) || (iscolumn(x) && sum(~iscellstr(x)) == 0)));
             parser.addParamValue('MaxTime', [], ...
-                @(x) validateattributes(x, {'numeric'}, {'scalar', 'positive'}));
+               @(x) (isempty(x) || (isnumeric(x) && isscalar(x) && x > 0)));
         end % getParser
         
         function event = getEventStructure(EEG)
