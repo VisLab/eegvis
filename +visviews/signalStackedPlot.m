@@ -361,7 +361,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 obj.SelectedTagNumber = str2double(srcTag);
                 if ~obj.PlotWindow && ~obj.VisData.isEpoched()
                     obj.SelectedBlockOffset = obj.VisData.getBlockSize() * ...
-                        (selected - 1) /obj.VisData.SampleRate;
+                        (selected - 1) /obj.VisData.getSampleRate();
                  end
             end
             obj.redraw();

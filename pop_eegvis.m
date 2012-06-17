@@ -73,7 +73,7 @@ if isempty(EEG.setname)
 else
     dname = EEG.setname;
 end
-dv.setDataSource(eegbrowse.getBlockDataFromEEG(EEG, dname));
+dv.setDataSource(eegbrowse.getBlockDataFromEEG(EEG, dname, 1000));
 dv.reset(true, true, true);
 
 % Return the string command

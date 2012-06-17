@@ -259,8 +259,7 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
             obj.Signals = squeeze(obj.Signals);
             obj.StartElement = sStart(1);
             obj.StartBlock = sStart(3);
-
-           
+   
             % Adjust signals to account for blocking
             if obj.PlotWindow  % Plot all elements for a window           
                 % If continguous windows are plotted reshape to align
@@ -405,7 +404,7 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
                 end
                 if ~obj.PlotWindow && ~obj.VisData.isEpoched()
                     obj.SelectedBlockOffset = obj.VisData.getBlockSize() * ...
-                        (obj.SelectedBlock - 1) /obj.VisData.SampleRate;
+                        (obj.SelectedBlock - 1) /obj.VisData.getSampleRate();
                 end
             end
             obj.redraw();

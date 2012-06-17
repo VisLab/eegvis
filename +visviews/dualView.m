@@ -505,8 +505,80 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
                 'Visualization figure title bar identification' ...
                 });
         end % getDefaultProperties
-        
+       
         function pStruct = getDefaultPlots()
+            % Structure specifying the individual visualizations used
+            pStruct = struct( ...
+                'Enabled',        { ... % enabled (true) or disabled
+                 true, ...  % 1 
+                 true, ...  % 2 
+                 true, ...  % 3 
+                 false, ... % 4 
+                 false, ... % 5 
+                 false, ... % 6    
+                 true, ...  % 7 
+                 true, ...  % 8      
+                 false, ... % 9          
+                 true}, ... % 10
+                'Category',       { ...  % category: summary or detail
+                'summary',  ...  % 1      
+                'summary',  ...  % 2     
+                'summary',  ...  % 3    
+                'summary',  ...  % 4      
+                'summary',  ...  % 5      
+                'summary',  ...  % 6  
+                'summary',  ...  % 7      
+                'detail',   ...  % 8      
+                'detail',   ...  % 9      
+                'detail'}, ...   % 10
+                'DisplayName',    { ...  % unique name for source linking
+                'Block image',      ...  % 1
+                'Element box',      ...  % 2
+                'Block box',        ...  % 3
+                'Block histogram',  ...  % 4
+                'Block Scalp',      ...  % 5
+                'Signal histogram', ...  % 6
+                'Event image',      ...  % 7
+                'Event stacked',    ...  % 8
+                'Shadow signal',    ...  % 9
+                'Stacked signal'},  ...  % 10
+                'Definition', { ...      % string giving class name
+                'visviews.blockImagePlot',      ... % 1
+                'visviews.elementBoxPlot',      ... % 2
+                'visviews.blockBoxPlot',        ... % 3
+                'visviews.blockHistogramPlot',  ... % 4
+                'visviews.blockScalpPlot',      ... % 5
+                'visviews.signalHistogramPlot', ... % 6
+                'visviews.eventImagePlot',      ... % 7
+                'visviews.eventStackedPlot',    ... % 8
+                'visviews.signalShadowPlot',    ... % 9
+                'visviews.signalStackedPlot'},  ... % 10
+                'Sources', { ...         % upstream plots for this plot
+                'None',    ... % 1
+                'None',    ... % 2
+                'None',    ... % 3
+                'None',    ... % 4
+                'None',    ... % 5
+                'None',    ... % 6
+                'None',    ... % 7   
+                'Master',  ... % 8
+                'Master',  ... % 9
+                'Master'}, ... % 10
+                'Description', { ...    % description for user
+                'Image of blocked value array',                          ... % 1
+                'Box plot of block summary values for each element',     ... % 2 
+                'Box plot of block summary values for groups of blocks', ... % 3
+                'Histogram of the block summary values',                 ... % 4
+                'Scalp map of the block summary values',                 ... % 5
+                'Histogram of the signal values',                        ... % 6
+                'Image of event counts for each block or clump',         ... % 7
+                'Stacked plot of events in a time window',               ... % 8
+                'Stacked plot of raw signals in a time window',          ... % 9
+                'Shadow plot of raw signals in a time window'            ... % 10
+                });
+        end % getDefaultPlots 
+        
+        function pStruct = getDefaultPlotsOld()
             % Structure specifying the individual visualizations used
             pStruct = struct( ...
                 'Enabled',        { ... % enabled (true) or disabled

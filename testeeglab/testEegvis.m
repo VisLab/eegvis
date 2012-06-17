@@ -13,7 +13,7 @@ drawnow
 assertTrue(ishandle(bv));
 
 fprintf('It should create a valid figure when a functions structure is passed for ''Functions'' in the constructor\n');
-f = eegbrowse.getDefaultFunctions();
+f = visviews.dualView.getDefaultFunctions();
 bv1 = eegvis(data, 'Functions', f); 
 drawnow
 assertTrue(ishandle(bv1));
@@ -32,7 +32,7 @@ drawnow
 assertTrue(ishandle(bv3));
 
 fprintf('It should create a valid figure when a plot structure is passed for ''Plots'' in the constructor\n');
-p = eegbrowse.getDefaultPlots();
+p = visviews.dualView.getDefaultPlots();
 bv4 = eegvis(data, 'Plots', p); 
 assertTrue(ishandle(bv4));
 drawnow
@@ -62,7 +62,7 @@ bv7 = eegvis(data, 'Properties', testSettings);
 assertTrue(ishandle(bv7));
 drawnow
 
-fprintf('It should ignore non configurable objects when a cell array of configurable objects is passed for ''Properties'' in the constructor\n'); 
+fprintf('It should ignore non configurable objects when a cell array of configurable objects is passed for ''Properties'' in the constructor (---see warning)\n'); 
 sNext = visviews.blockBoxPlot.getDefaultProperties();
 confObj2 = visprops.configurableObj('Block box', sNext, 'visviews.blockBoxPlot');
 propList = {confObj, 'Test it', confObj2};

@@ -59,7 +59,7 @@ x = get(bv7.ConFig, 'Name');
 assertTrue(strcmpi(x, testTitle))
 
 fprintf('It should create a valid browser when a functions structure is passed for ''Functions'' in the constructor\n');
-f = eegbrowse.getDefaultFunctions();
+f = visviews.dualView.getDefaultFunctions();
 bv8 = eegbrowse('Functions', f, 'Title', 'Function structure and title passed'); 
 drawnow
 assertTrue(isvalid(bv8));
@@ -78,7 +78,7 @@ drawnow
 assertTrue(isvalid(bv10));
 
 fprintf('It should create a valid browser when a plot structure is passed for ''Plots'' in the constructor\n');
-p = eegbrowse.getDefaultPlots();
+p = visviews.dualView.getDefaultPlots();
 bv11 = eegbrowse('Plots', p, 'Title', 'Plot structure and title passed'); 
 assertTrue(isvalid(bv11));
 drawnow
@@ -122,10 +122,13 @@ assertTrue(strcmp(sNew(1).Value, 'ABC'));
 fprintf('It should ignore non configurable objects when a cell array of configurable objects is passed for ''Properties'' in the constructor\n'); 
 sNext = visviews.blockBoxPlot.getDefaultProperties();
 confObj2 = visprops.configurableObj('Block box', sNext, 'visviews.blockBoxPlot');
-propList = {confObj, 'Test it', confObj2};
-bv15 = eegbrowse('Properties', propList, 'Title', 'Ignores non configurable objects on property parameter ');
-objs = bv15.PropSelect.getObjects();
-assertEqual(length(objs), 10);
+propList1 = {confObj, 'Test it', confObj2};
+bv15 = eegbrowse('Properties', propList1, 'Title', 'Ignores non configurable objects on property parameter ');
+objs1 = bv15.PropSelect.getObjects();
+propList2 = {confObj, confObj2};
+bv16 = eegbrowse('Properties', propList2, 'Title', 'Ignores non configurable objects on property parameter ');
+objs2 = bv16.PropSelect.getObjects();
+assertEqual(length(objs1), length(objs2));
 
 fprintf('It should create a valid browser when the ''UseEEGLab'' parameter to the constructor is true\n');
 %eeglab()  % See if EEGLAB was already running
