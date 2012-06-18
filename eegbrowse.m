@@ -745,8 +745,7 @@ classdef eegbrowse < hgsetget & visprops.configurable
             else
                 chanlocs = EEG.chanlocs;
             end
-            event = viscore.eventData.getEventStructure(EEG);
-            [startTimes, timeScale] = viscore.blockedData.getEpochTimes(EEG);
+            [event, startTimes, timeScale] = viscore.eventData.getEEGTimes(EEG);
             visData = viscore.blockedData(EEG.data, dataID, ...
                     'SampleRate', EEG.srate, 'Events', event, ...
                     'ElementLocations', chanlocs, 'BlockSize', blocksize, ...

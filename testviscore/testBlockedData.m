@@ -104,7 +104,7 @@ assertVectorsAlmostEqual([x, y, z], [1000, 20, 1]);
 function testConstructorWithEpochs %#ok<DEFNU>
 % Unit test for viscore.blockedData epoch parameters
 fprintf('\nUnit tests for viscore.blockedData epoch start times\n');
-data = random('exp', 1, [30, 1000, 20]);
+data = random('exp', 1, [30, 500, 20]);
 
 fprintf('Non-epoched data should have empty epoch start times\n');
 testVD1 = viscore.blockedData(data, 'Rand exp');
@@ -112,27 +112,28 @@ assertTrue(isempty(testVD1.getEpochStartTimes()));
 
 fprintf('Epoched data with no start times should have defaults\n');
 testVD2 = viscore.blockedData(data, 'Rand exp', 'Epoched', true);
-assertElementsAlmostEqual(testVD2.getEpochStartTimes(), (0:19)*1000);
+assertElementsAlmostEqual(testVD2.getEpochStartTimes(), (0:19)*500);
 
 fprintf('Epoched data with no start times should be correct when sampling rate not 1\n');
 testVD3 = viscore.blockedData(data, 'Rand exp', 'Epoched', true, ...
     'SampleRate', 2);
-assertElementsAlmostEqual(testVD3.getEpochStartTimes(), (0:19)*500);
-
+assertElementsAlmostEqual(testVD3.getEpochStartTimes(), (0:19)*250);
+fprintf('Epoched data should have blocksize that agrees with epoch size\n');
+assertEqual(testVD3.getBlockSize(), 500);
 
 fprintf('Epoched data with explicit start times should match\n');
 testVD4 = viscore.blockedData(data, 'Rand exp', 'Epoched', true, ...
-    'EpochStartTimes', (0:19)*500);
-assertElementsAlmostEqual(testVD4.getEpochStartTimes(), (0:19)*500);
+    'EpochStartTimes', (0:19)*2000);
+assertElementsAlmostEqual(testVD4.getEpochStartTimes(), (0:19)*2000);
 
 fprintf('Epoched data with no sampling rate and epoch times should have correct defaults\n')
 testVD5 = viscore.blockedData(data, 'Rand exp', 'Epoched', true);
-assertElementsAlmostEqual(testVD5.getEpochTimeScale(), (0:999)*1000);
+assertElementsAlmostEqual(testVD5.getEpochTimeScale(), 0:499);
 
 fprintf('Epoched data with sampling rate and no epoch times should have correctdefaults\n')
 testVD5 = viscore.blockedData(data, 'Rand exp', 'Epoched', true, ...
     'SampleRate', 250);
-assertElementsAlmostEqual(testVD5.getEpochTimeScale(), (0:999)*4);
+assertElementsAlmostEqual(testVD5.getEpochTimeScale(), (0:499)*4/1000);
 
 function testReblock %#ok<DEFNU>
 % Unit test for blockedData reblock
@@ -268,9 +269,9 @@ assertTrue(isa(storedData, 'double'));
 function testConstructorWithEvents %#ok<DEFNU>
 % Unit test for viscore.blockedData with eventData
 fprintf('\nUnit tests for viscore.blockedData with events\n');
-data = random('normal', 0, 1, [32, 1000, 20]);
 
 fprintf('It should have an empty events, if none are passed in\n');
+data = random('normal', 0, 1, [32, 1000, 20]);
 vd1 = viscore.blockedData(data, 'ID1');
 assertTrue(isvalid(vd1));
 assertTrue(isempty(vd1.getEvents()));
@@ -299,3 +300,16 @@ assertEqual(size(counts, 1), length(ed1.getUniqueTypes()));
 assertEqual(size(counts, 2), numBlocks);
 assertEqual(sum(counts(:)), length(event));
 
+function testGetEpochTimes(event) %#ok<INUSD,DEFNU>
+% Unit test for viscore.blockedData with getEpochTimes
+fprintf('\nUnit tests for viscore.blockedData with getEpochTimes\n');
+load('EEGEpoch.mat');
+fprintf('It should have the correct number of start times\n');
+[event, startTimes, timeScale] = viscore.eventData.getEEGTimes(EEGEpoch);
+assertEqual(length(startTimes), length(EEGEpoch.epoch));
+fprintf('It should have the correct number of time scale values\n');
+assertEqual(length(timeScale), length(EEGEpoch.times));
+fprintf('It should have the correct epoch start times (to within a sample)\n');
+assertElementsAlmostEqual(startTimes(1), 0.0);
+assertTrue( abs(startTimes(2)- 0.6953) < 10-05);
+assertTrue( abs(startTimes(3)- 3.7081) < 10-05);

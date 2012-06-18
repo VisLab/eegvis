@@ -148,13 +148,13 @@ function testGetTypes(event) %#ok<DEFNU>
   function testGetEventStructure(event) %#ok<DEFNU>
   % Unit test for viscore.eventData getEventStructure
   load('EEGData.mat');  %
-  eventNew = viscore.eventData.getEventStructure(EEG);
+  eventNew = viscore.eventData.getEEGTimes(EEG);
   assertTrue(isequal(eventNew, event));
   
   function testEpochTimes(event) %#ok<INUSD,DEFNU>
   % Unit test for viscore.eventData getEventStructure
   load('EEGEpoch.mat');  %
-  [startTimes, timeScale] = viscore.blockedData.getEpochTimes(EEGEpoch);
+  [events, startTimes, timeScale] = viscore.eventData.getEEGTimes(EEGEpoch);
   assertEqual(length(startTimes), size(EEGEpoch.data, 3));
   assertEqual(length(timeScale), size(EEGEpoch.data, 2));
           
@@ -164,11 +164,20 @@ function testGetTypes(event) %#ok<DEFNU>
   ev = viscore.eventData(event, 'BlockTime', 1000/256);
   assertEqual(length(event), length(ev.getEndTimes()));
   
-  function testEpochData(event) %#ok<DEFNU>
-  % Unit test for viscore.eventData getEventCounts 
+  function testGetBlockListEpochData(event) %#ok<DEFNU>
+  % Unit test for viscore.eventData
+  fprintf('\nUnit tests for viscore.eventData getBlockList with epoched data\n');
   load('EEGEpoch.mat');
   bTime  = size(EEGEpoch.data, 2)./EEGEpoch.srate;
-  startTimes = viscore.blockedData.getEpochTimes(EEGEpoch);
-  ev = viscore.eventData(event, 'BlockTime', bTime, ...
+  [events, startTimes, timeScales] = viscore.eventData.getEEGTimes(EEGEpoch);
+  ev = viscore.eventData(events, 'BlockTime', bTime, ...
       'BlockStartTimes', startTimes);
+  blockList = ev.getBlockList();
+  fprintf('It should have the correct block list for point events\n');
+  assertEqual(length(startTimes), length(blockList));
+  epochs = EEGEpoch.epoch;
+  for k = 1:length(startTimes)
+      fprintf('---Epoch %g should have %g events\n', k, length(epochs(k).event)); 
+      assertTrue(isequal(blockList{k}, epochs(k).event));
+  end
   

@@ -107,10 +107,10 @@ classdef blockedData < hgsetget
         BlockSize = [];       % window size to use when data is reshaped
         Data;                 % 2D or 3D array of data, first dim for elements
         DataID                % ID of the data contained in this object
-        ElementLocations = [];  % element locations structure with ElementFields
+        ElementLocations = [];% element locations structure with ElementFields
         Epoched;              % true if the data is epoched
         EpochStartTimes = []  % start times of epochs in seconds
-        EpochTimeScale = [];  % time offsets in ms for epoch samples
+        EpochTimeScale = [];  % time offsets in seconds for epoch samples
         Events;               % blockedEvent object if this object has events
         OriginalMean          % overall mean of data set (before padding)
         OriginalStd           % overall std of data set (before padding)
@@ -352,7 +352,7 @@ classdef blockedData < hgsetget
             obj.EpochTimeScale = pdata.EpochTimeScale;
             obj.EpochStartTimes = pdata.EpochStartTimes;                                 
             if isempty(obj.EpochTimeScale) 
-                obj.EpochTimeScale = 1000.*(0:(obj.BlockSize - 1))./obj.SampleRate;
+                obj.EpochTimeScale = (0:(obj.BlockSize - 1))./obj.SampleRate;
             end
             if isempty(obj.EpochStartTimes)
                   obj.EpochStartTimes = obj.BlockSize*...
@@ -381,27 +381,7 @@ classdef blockedData < hgsetget
     end % private methods
     
     methods(Static = true)
-                function [startTimes, timeScale] = getEpochTimes(EEG)
-            % Return epoch start times in seconds and time scale in ms
-            if ~isstruct(EEG) ||~isfield(EEG, 'times')
-                timeScale = [];
-            else
-                timeScale = EEG.times;
-            end
-            if ~isstruct(EEG) ||~isfield(EEG, 'event') || ...
-                    isempty(EEG.event) || ~isfield(EEG,'epoch') || ...
-                    isempty(EEG.epoch)
-                startTimes = [];
-                return;
-            end
-            eventTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
-            startTimes = zeros(length(EEG.epoch), 1);
-            for k = 1:length(EEG.epoch)
-                e = EEG.epoch(k).event(1);
-                latency = EEG.epoch(k).eventlatency{1}/1000;
-                startTimes(k) = eventTimes(e) - latency;
-            end
-        end  % getEpochTimes
+
         
         function parser = getParser()
             % Create a parser for blockedData

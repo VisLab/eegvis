@@ -464,14 +464,14 @@ classdef viewTestClass < hgsetget
             pStruct = struct( ...
                 'Enabled',        { ... % enabled (true) or disabled
                  true, ...  % 1 
-                 false, ... % 2 
-                 true, ...  % 3 
+                 true, ... % 2 
+                 false, ...  % 3 
                  false, ... % 4 
                  false, ... % 5 
                  false, ... % 6    
                  true, ...  % 7 
                  true, ...  % 8      
-                 false, ... % 9          
+                 true, ... % 9          
                  true}, ... % 10
                 'Category',       { ...  % category: summary or detail
                 'summary',  ...  % 1      

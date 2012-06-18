@@ -111,6 +111,35 @@ sp1.reposition(gaps);
 fprintf('It should allow callbacks to be registered\n')
 sp1.registerCallbacks([]);
 
+fprintf('It should work with the epoched data\n');
+load('EEGEpoch.mat');  
+[eventEpoched, startTimes, timeScale] = viscore.eventData.getEEGTimes(EEGEpoch);
+testVD1 = viscore.blockedData(EEGEpoch.data, 'Epoched', ...
+    'Events', eventEpoched, 'Epoched', true, ...
+    'SampleRate', EEGEpoch.srate, 'BlockSize', 1000, ...
+    'EpochTimeScale', timeScale, 'EpochStartTimes', startTimes);
+ev1 = testVD1.getEvents();
+numBlocks = ceil(size(EEGEpoch.data, 3));
+counts = ev1.getEventCounts(1, numBlocks);
+assertVectorsAlmostEqual(size(counts), ...
+    [length(ev1.getUniqueTypes()), numBlocks]);
+defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    viewTestClass.getDefaultFunctionsNoSqueeze());
+fMan = viscore.dataManager();
+fMan.putObjects(defaults);
+func = fMan.getEnabledObjects('block');
+thisFunc = func{1};
+slice1 = viscore.dataSlice('Slices', {':', ':', '8'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sfig1 = figure('Name', 'visviews.eventStackedPlot with epoch data');
+sp1 = visviews.eventStackedPlot(sfig1, [], []);
+assertTrue(isvalid(sp1));
+sp1.plot(testVD1, thisFunc, slice1);
+drawnow
+gaps = sp1.getGaps();
+sp1.reposition(gaps);
+fprintf('It should allow callbacks to be registered\n')
+sp1.registerCallbacks([]);
 % 
 % fprintf('It should produce a plot when the data is epoched\n');
 % testVD1 = viscore.blockedData(data, 'Rand1', 'Epoched', true, ...
