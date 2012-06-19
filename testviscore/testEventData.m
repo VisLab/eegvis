@@ -180,4 +180,29 @@ function testGetTypes(event) %#ok<DEFNU>
       fprintf('---Epoch %g should have %g events\n', k, length(epochs(k).event)); 
       assertTrue(isequal(blockList{k}, epochs(k).event));
   end
-  
+  fprintf('The event start times should place them in right epochs\n');
+  epTimes = ev.getBlockStartTimes();
+  evTimes = ev.getStartTimes();
+  bTime = ev.getBlockTime();
+  for k = 1:length(epTimes)
+      nEvents = length(epochs(k).event);
+      fprintf('---Epoch %g should have %g events: [', k, nEvents);
+      fprintf(' %g', EEGEpoch.epoch(k).event);
+      fprintf('] has [');
+      count = 0;
+      myEvents = zeros(1, nEvents);
+      for j = 1:length(evTimes);
+          if epTimes(k) <= evTimes(j) && ...
+                  evTimes(j) <= epTimes(k) + bTime && ...
+                  ev.getEpochs(j) == k
+              count = count + 1;
+              myEvents(count) = j;
+          end
+      end
+      fprintf(' %g', myEvents)
+      fprintf(']\n');
+      assertEqual(nEvents, count);
+      assertTrue(isequal(EEGEpoch.epoch(k).event, myEvents));
+  end
+      
+   

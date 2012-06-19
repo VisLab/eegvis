@@ -136,6 +136,11 @@ classdef eventData < hgsetget
             events = unique(events);
         end % getBlocks
         
+        function blockStartTimes = getBlockStartTimes(obj)
+            % Return a vector of the block or epoch start times
+            blockStartTimes = obj.BlockStartTimes;
+        end % getBlockStartTimes
+        
         function blocklist = getBlockList(obj)
             % Return the cell array of block event lists
             blocklist = obj.BlockList;
@@ -156,6 +161,11 @@ classdef eventData < hgsetget
         function blockTime = getBlockTime(obj)
             % Return the time in seconds of a block
             blockTime = obj.BlockTime;
+        end % getBlockTime
+        
+        function eList = getEpochs(obj, k)
+            % Return the time in seconds of a block
+            eList = obj.EpochList{k};
         end % getBlockTime
         
         function endTimes = getEndTimes(obj, varargin)

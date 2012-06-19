@@ -137,7 +137,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
 
         CurrentSlice = [];           % current data slice
         CurrentEvents = [];          % array with current event numbers
-        Events = [];                 % events currently plotted in this panel
+        Events = [];                 % event object
         HitList = {};                % list of hithandles
         LineWidthSelected = 2.0;     % width of selected event line  
         LineWidthUnselected = 0.5;   % width of unselected event line    
@@ -212,22 +212,24 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
                 return;
             end
             
-            % Extract the signal based on the slice (May not need this)       
-
+            % Extract the slice  
             [dSlice, starts, sizes] = viscore.dataSlice.getSliceEvaluation(...
                                        [e, s, b], slices); %#ok<ASGLU>
             obj.StartBlock = starts(3);
             obj.TotalBlocks = sizes(3);
             
                        % Adjust signals to account for blocking
-            if obj.PlotWindow  % Plot all elements for a window           
-                % If continguous windows are plotted reshape to align
-                obj.XLimOffset = (starts(3) - 1)*obj.Events.getBlockTime();
+            if ~obj.PlotWindow % Plot all windows for an element
+                obj.XLimOffset = 0;
                 obj.XStringBase = [names{3} ' ' ...
                   viscore.dataSlice.rangeString(obj.StartBlock, obj.TotalBlocks)];
-
-            else % Plot all windows for an element
-                obj.XLimOffset = 0;
+            elseif visData.isEpoched() % window and epoched
+                obj.XLimOffset = obj.Events.getStartTimes(obj.StartBlock);
+                obj.XStringBase = [names{3} ' ' ...
+                  viscore.dataSlice.rangeString(obj.StartBlock, obj.TotalBlocks)];
+            else  % Plot all elements for a window           
+                % If continguous windows are plotted reshape to align             
+                obj.XLimOffset = (starts(3) - 1)*obj.Events.getBlockTime();
                 obj.XStringBase = [names{3} ' ' ...
                   viscore.dataSlice.rangeString(obj.StartBlock, obj.TotalBlocks)];
             end
@@ -328,20 +330,18 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
         
         function displayPlot(obj)
             % Plot the events stacked one on top of another
-            obj.reset();
-            % Go no further if events is empty
-            if isempty(obj.Events)
-                return;
-            end        
-              
             numPlots = length(obj.UniqueEvents);
             if numPlots == 0 
                 warning('eventStackedPlot:NaNValues', 'No events');
                 return;
             end
-            %y-axis reversed, so must plot the negative of the events            
+            %y-axis reversed, so must plot the negative of the events 
             sTimes = obj.Events.getStartTimes(obj.CurrentEvents);
             eTimes = obj.Events.getEndTimes(obj.CurrentEvents);
+            if obj.VisData.isEpoched()
+                sTimes = 1000.*(sTimes - obj.XLimOffset);
+                eTimes = 1000.*(eTimes - obj.XLimOffset);
+            end
             tNums = obj.Events.getTypeNumbers(obj.CurrentEvents);
             obj.HitList = cell(1, length(obj.CurrentEvents) + 1);
             obj.HitList{1} = obj.MainAxes;
