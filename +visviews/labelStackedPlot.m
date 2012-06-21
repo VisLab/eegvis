@@ -128,31 +128,28 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
     %    settings  structure or ModelSettings object containing this
     
     properties
-        ColorSelected =   [1, 0, 0];   % face color of selected event
-        ColorUnselected = [0, 1, 0];   % face color of unselected events
-        ColorCertain = [0, 0, 0];      % edge color for certain events
-        ColorUncertain = [0.8, 0.8, 0.8]; % edge color for uncertain events
-        Threshhold = 0.5               % uncertainty threshold (0 and 1)
-        
+        ColorSelected = [1, 0, 0];   % face color of selected event
+        ColorUnselected = [0, 1, 0]; % face color of unselected events
     end % public properties 
     
     properties (Access = private)   
-        BlockEnd = 1;                % ending block of currently plotted slice
-        BlockStart = 1;              % starting block of currently plotted slice
         ColorLines = [0.8, 0.8, 0.8]; % color of grid lines
         CurrentSlice = [];           % current data slice
         CurrentEvents = [];          % array with current event numbers
         Events = [];                 % event object
-        EventStart = 1;              % starting event of currently plotted slice 
-        EventsUnique = 0;            % cell array of unique events
         HitList = {};                % list of hithandles
         PlotWindow = true;           % if true, a window is being plotted
         SelectedBlockOffset = 0;     % start of selected block in seconds
         SelectedHandle = [];         % handle of selected event or empty
         SelectedEvent = [];          % data in selected event or empty
         SelectedTagNumber = [];      % number of selected event within events
+        
+        StartBlock = 1;              % starting block of currently plotted slice
+        StartEvent = 1;              % starting event of currently plotted slice 
+        TotalBlocks = 0;             % total number of blocks in the data
+        UniqueEvents = 0;            % cell array of unique events
         VisData = [];                % original data for interrogation
-        TimeUnits = 's';             % time units of the access
+        TimeUnits = 'sec';           % time units of the access
         XValues = [];                % x values of current plot
     end % private properties
     
@@ -187,7 +184,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             obj.VisData = visData; % Keep data for cursor exploration
 
             obj.Events = visData.getEvents();    
-            if isempty(obj.Events) || obj.Events.getNumberEvents() == 0
+            if isempty(obj.Events)
                 return;
             end
             % Figure out whether the slice is by window or by element
@@ -205,6 +202,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
                 obj.PlotWindow = true; 
             elseif ~isempty(intersect(cDims, 1))  % Plot all windows for an element    
                 obj.PlotWindow = false;
+                return;
             else
                 warning('eventStackedPlot:plotSlice', ...
                         'array slice is empty and cannot be plotted');
@@ -214,70 +212,51 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             % Extract the slice  
             [dSlice, starts, sizes] = viscore.dataSlice.getSliceEvaluation(...
                                        [e, s, b], slices); %#ok<ASGLU>
-            obj.BlockStart = starts(3);
-            obj.BlockEnd = obj.BlockStart + sizes(3) - 1;
+            obj.StartBlock = starts(3);
+            obj.TotalBlocks = sizes(3);
             
                        % Adjust signals to account for blocking
-            if (obj.BlockEnd == obj.BlockStart)  || ...
-                            (~visData.isEpoched() && obj.PlotWindow) 
-                obj.YStringBase = 'Event';
-                numPlots = [1, length(obj.Events.getUniqueTypes())];
-                obj.XLimOffset = (obj.BlockStart - 1)*obj.Events.getBlockTime();
-            else  % Plot vertically
-                numPlots = [obj.BlockStart, obj.BlockEnd];
-                obj.YStringBase = names{3};
-                obj.XLimOffset = 0;
+            obj.XLimOffset = 0;
+            if ~obj.PlotWindow % Plot all windows for an element
+                
+                obj.XStringBase = [names{3} ' ' ...
+                  viscore.dataSlice.rangeString(obj.StartBlock, obj.TotalBlocks)];
+            elseif visData.isEpoched() && obj.PlotWindow % window and epoched
+                sTime = obj.Events.getBlockStartTimes(obj.StartBlock);
+                eTime = obj.Events.getBlockStartTimes(obj.StartBlock + ...
+                    obj.TotalBlocks - 1) + obj.Events.getBlockTime();
+                obj.XStringBase = [names{3} ' ' ...
+                  viscore.dataSlice.rangeString(obj.StartBlock, obj.TotalBlocks) ...
+                  ' (' num2str(sTime) ' : ' num2str(eTime) ' s)'];
+            else  % Plot all elements for a window           
+                % If continguous windows are plotted reshape to align             
+                obj.XLimOffset = (starts(3) - 1)*obj.Events.getBlockTime();
+                obj.XStringBase = [names{3} ' ' ...
+                  viscore.dataSlice.rangeString(obj.StartBlock, obj.TotalBlocks)];
             end
           
            % Adjust the labels
             if visData.isEpoched() % add time scale to x label
                 obj.XValues =  1000*visData.getEpochTimeScale();
                 obj.XValues = [obj.XValues(1), obj.XValues(end)];
+                obj.XStringBase = ['Time(ms) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'ms';
-            elseif ~obj.PlotWindow
-                obj.XValues = [0, obj.Events.getBlockTime()];
-                obj.TimeUnits = 's';
-            else
+            else    
                 obj.XValues = [obj.XLimOffset, ...
-                   obj.Events.getBlockStartTimes(obj.BlockEnd) ...
-                                 + obj.Events.getBlockTime()];
-                obj.TimeUnits = 's';
+                         obj.XLimOffset + obj.Events.getBlockTime()];
+                obj.XStringBase = ['Time(s) [' obj.XStringBase ']'];
+                obj.TimeUnits = 'sec';
             end
            
-            obj.CurrentEvents = obj.Events.getBlocks(obj.BlockStart, ...
-                obj.BlockEnd);
-            obj.EventsUnique = obj.Events.getUniqueTypes();
+            obj.CurrentEvents = obj.Events.getBlocks(obj.StartBlock, ...
+                obj.StartBlock + obj.TotalBlocks - 1);
+            obj.UniqueEvents = obj.Events.getUniqueTypes();
+            obj.YStringBase = 'Events';
             obj.SelectedHandle = [];
             obj.SelectedEvent = [];
             obj.YString = obj.YStringBase;
-            obj.XStringBase = ['Time(' obj.TimeUnits ') [' names{3} ' ' ...
-                  viscore.dataSlice.rangeString(obj.BlockStart, sizes(3)) ']'];
             obj.XString = obj.XStringBase;
-         
-            obj.HitList = cell(1, length(obj.CurrentEvents) + 1);
-            obj.HitList{1} = obj.MainAxes;
-            [xTimes, yTimes] = obj.getPlotPositions();
-            for k = 1:length(obj.CurrentEvents);        
-                h =  plot(obj.MainAxes, xTimes{k}, yTimes{k}, '-s', ...
-                         'Tag', num2str(obj.CurrentEvents(k)), ...
-                          'LineWidth', 4,...
-                          'Color', obj.ColorUnselected, ...
-                          'MarkerEdgeColor', 'k',...
-                          'MarkerFaceColor', obj.ColorUnselected,...
-                          'MarkerSize', 10);
-                obj.HitList{k + 1} = h;
-            end
-           
-            yTickLabels = cell(1, numPlots(2) - numPlots(1) + 1);
-            yTickLabels{1} = num2str(numPlots(1));
-            yTickLabels{end} = num2str(numPlots(2));
-            set(obj.MainAxes,  'YLimMode', 'manual', ...
-                'YLim', [numPlots(1) - 1, numPlots(2) + 1], ...
-                'YTickMode', 'manual', 'YTickLabelMode', 'manual', ...
-                'YTick', numPlots(1):numPlots(2), 'YTickLabel', yTickLabels, ...
-                'XLim', obj.XValues, ...
-                'XLimMode', 'manual', 'XTickMode', 'auto');
-             obj.redraw();
+            obj.displayPlot();
         end % plot
         
         function reset(obj)
@@ -339,9 +318,10 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             event = get(src, 'Tag');
             obj.SelectedEvent = str2double(event); 
             type = obj.Events.getTypes(obj.SelectedEvent); 
-            obj.XString = [obj.XStringBase ' Event('  event '): ' ...
-                  type{1} ' ' ...
-                  num2str(obj.Events.getStartTimes(obj.SelectedEvent)) ' s'];
+            obj.XString = [obj.XStringBase ' {Event('  event '): ' ...
+                  type{1} ' [' ...
+                  num2str(obj.Events.getStartTimes(obj.SelectedEvent)) ...
+                  ', '  num2str(obj.Events.getEndTimes(obj.SelectedEvent)) ']}' ];
             obj.redraw();
         end % buttonDownPreCallback
         
@@ -351,14 +331,25 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
         
         function displayPlot(obj)
             % Plot the events stacked one on top of another
-            numPlots = length(obj.EventsUnique);
-
+            numPlots = length(obj.UniqueEvents);
+            if numPlots == 0 
+                warning('eventStackedPlot:NaNValues', 'No events');
+                return;
+            end
             %y-axis reversed, so must plot the negative of the events 
+            sTimes = obj.Events.getStartTimes(obj.CurrentEvents);
+            eTimes = obj.Events.getEndTimes(obj.CurrentEvents);
+            tOffset = obj.Events.getBlockStartTimes(obj.StartBlock);
+            if obj.VisData.isEpoched()
+                sTimes = 1000.*(sTimes - tOffset) + obj.XValues(1);
+                eTimes = 1000.*(eTimes - tOffset) + obj.XValues(1);
+            end
+            tNums = obj.Events.getTypeNumbers(obj.CurrentEvents);
             obj.HitList = cell(1, length(obj.CurrentEvents) + 1);
             obj.HitList{1} = obj.MainAxes;
-            [xTimes, yTimes] = obj.getPlotPositions();
-            for k = 1:length(obj.CurrentEvents);        
-                h =  plot(obj.MainAxes, xTimes{k}, yTimes{k}, '-s', ...
+            for k = 1:length(obj.CurrentEvents);
+                h =  plot(obj.MainAxes, [sTimes(k); eTimes(k)], ...
+                          [tNums(k); tNums(k)], '-s', ...
                          'Tag', num2str(obj.CurrentEvents(k)), ...
                           'LineWidth', 4,...
                           'Color', obj.ColorUnselected, ...
@@ -380,53 +371,6 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
              obj.redraw();
         end % plot
         
-        function [xTimes, yTimes] = getPlotPositions(obj)
-            xTimes = obj.Events.getStartTimes(obj.CurrentEvents);
-            yTimes = obj.Events.getTypeNumbers(obj.CurrentEvents);
-            if (obj.BlockStart == obj.BlockEnd) && obj.VisData.isEpoched()
-                xTimes = obj.XValues(1) + 1000.*(xTimes - ...
-                    obj.Events.getBlockStartTimes(obj.BlockStart));
-            end
-            xTimes = num2cell(xTimes);
-            yTimes = num2cell(yTimes);
-            if obj.BlockStart == obj.BlockEnd || (obj.PlotWindow && ~obj.VisData.isEpoched)
-                return;
-            end
-            
-            epochNums = obj.Events.getEventBlocks(obj.CurrentEvents);
-            for k = 1:length(obj.CurrentEvents)
-                t = epochNums{k}
-                s = repmat(xTimes{k}, length(t), 1) - ...
-                    obj.Events.getBlockStartTimes(t);
-                if obj.VisData.isEpoched()
-                    s = 1000.*s + obj.XValues(1);
-                end
-                xTimes{k} = s;
-                yTimes{k} = t;
-            end       
-                
-%                   s = 1000.*(s - bTimes(epochNums)) + obj.XValues(1);
-%                   t = repmat(t, length(epochNums), 1);
-            
-           
-            
-            % In hard case --- number of blakcs
-                          
-%             obj.HitList{1} = obj.MainAxes;
-%             for k = 1:length(obj.CurrentEvents);
-%                 s = xTimes{k};
-%                 t = yTimes{k};
-%                 if obj.VisData.isEpoched() %Plot offsets
-%                   epochNums = obj.Events.getEventBlocks(obj.CurrentEvents);
-%                   
-%                   s = repmat(s, length(epochNums), 1);
-%                   s = 1000.*(s - bTimes(epochNums)) + obj.XValues(1);
-%                   t = repmat(t, length(epochNums), 1);
-%                   if length(epochNums) > 1
-%                       tAdjust = 
-%                   end
-%                 end
-        end % getPlotPositions
     end % private methods
     
     methods(Static=true)

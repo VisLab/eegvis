@@ -269,10 +269,6 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
                     obj.Signals = squeeze(obj.Signals');
                 end
                 obj.XLimOffset = (sStart(3) - 1)*nSamples/visData.getSampleRate();
-                obj.XStringBase = [names{1} ' '  ...
-                    viscore.dataSlice.rangeString(obj.StartElement, nElements) ...
-                                  ' ('  names{3} ' ' ...
-                    viscore.dataSlice.rangeString(obj.StartBlock, nBlocks) ')'];
             else % Plot all windows for an element
                 if nElements > 1  % windows for multiple elements individually displayed
                     obj.Signals = permute(obj.Signals, [3, 2, 1]);
@@ -280,27 +276,26 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
                     obj.Signals = (obj.Signals)';
                 end     
                 obj.XLimOffset = 0;
-                obj.XStringBase  = [names{3} ' ' ...
-                    viscore.dataSlice.rangeString(obj.StartBlock, nBlocks) ...
-                    ' (' names{1} ' ' ...
-                    viscore.dataSlice.rangeString(obj.StartElement, nElements) ')'];
+
             end
+           obj.XStringBase  = [names{3} ' ' ...
+               viscore.dataSlice.rangeString(obj.StartBlock, nBlocks) ...
+               ', ' names{1} ' ' ...
+               viscore.dataSlice.rangeString(obj.StartElement, nElements)];
 
             % Adjust the labels
             if visData.isEpoched() % add time scale to x label
                 obj.XValues = 1000*visData.getEpochTimeScale();
-                obj.XStringBase = ['Time(ms) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'ms';
             else
                 obj.XValues = obj.XLimOffset + ...
                     (0:(size(obj.Signals, 2) - 1))./visData.getSampleRate();
-                obj.XStringBase = ['Time(s) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'sec';
             end
             obj.SelectedHandle = [];
-           % obj.SelectedSignal = [];
             obj.YStringBase = obj.SignalLabel;
             obj.YString = obj.YStringBase;
+            obj.XStringBase = ['Time(' obj.TimeUnits ') [' obj.XStringBase ']'];
             obj.XString = obj.XStringBase;
             obj.displayPlot();
         end % plotSlice
@@ -416,12 +411,7 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
         
         function displayPlot(obj)
             % Plot obj.Signals using the visData object for settings
-            obj.reset();  % Clear out the previous plot
-            % Go no further if signals is empty
-            if isempty(obj.Signals)
-                return;
-            end
-            
+ 
             data = obj.Signals;
             % Remove the mean if necessary
             obj.SignalElementMean = [];

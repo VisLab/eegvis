@@ -2,7 +2,24 @@ function test_suite = testSignalStackedPlot %#ok<STOUT>
 % Unit tests for visviews.stackedSignalPlot
 initTestSuite;
 
-function testNormalConstructor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+load('EEGData.mat'); 
+values.EEG = EEG;  
+tEvents = EEG.event;
+types = {tEvents.type}';
+                                      % Convert to seconds since beginning
+startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
+values.event = struct('type', types, 'startTime', num2cell(startTimes));
+values.random = random('exp', 2, [32, 1000, 20]);
+
+load('EEGEpoch.mat'); 
+values.EEGEpoch = EEGEpoch;
+
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testNormalConstructor(values) %#ok<INUSD,DEFNU>
 % testSignalStackedPlot unit test for visviews.stackedSignalPlot constructor
 fprintf('\nUnit tests for visviews.stackedSignalPlot valid constructor\n');
 
@@ -13,7 +30,7 @@ assertTrue(isvalid(sp));
 drawnow
 delete(sfig);
 
-function testBadConstructor %#ok<DEFNU>
+function testBadConstructor(values) %#ok<INUSD,DEFNU>
 % testSignalStackedPlot unit test for signalStackedPlot constructor
 fprintf('\nUnit tests for visviews.signalStackedPlot invalid constructor parameters\n');
 
@@ -36,14 +53,14 @@ f = @() visviews.signalStackedPlot(sfig, [], [], []);
 assertExceptionThrown(f, 'MATLAB:maxrhs');
 delete(sfig);
 
-function testGetDefaultProperties %#ok<DEFNU>
+function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.signalStackedPlot getDefaultProperties
 fprintf('\nUnit tests for visviews.signalStackedPlot getDefaultProperties\n');
 fprintf('It should have a getDefaultProperties method that returns a structure\n');
 s = visviews.signalStackedPlot.getDefaultProperties();
 assertTrue(isa(s, 'struct'));
 
-function testPlot %#ok<DEFNU>
+function testPlot(values) %#ok<INUSD,DEFNU>
 % Unit test visviews.signalStackedPlot plot
 fprintf('\nUnit tests for visviews.signalStackedPlot plot method\n')
 % Generate some data for testing
@@ -246,18 +263,18 @@ sp9.reposition(gaps);
 sp9.registerCallbacks([]);
 drawnow
 
-delete(sfig);
-delete(sfig1);
-delete(sfig2);
-delete(sfig3);
-delete(sfig4);
-delete(sfig5);
-delete(sfig6);
-delete(sfig7);
-delete(sfig8);
-delete(sfig9);
+% delete(sfig);
+% delete(sfig1);
+% delete(sfig2);
+% delete(sfig3);
+% delete(sfig4);
+% delete(sfig5);
+% delete(sfig6);
+% delete(sfig7);
+% delete(sfig8);
+% delete(sfig9);
 
-function testSettingStructureScale %#ok<DEFNU>
+function testSettingStructureScale(values) %#ok<INUSD,DEFNU>
 % test signalStackedPlot setting the scale
 fprintf('\nUnit tests for visviews.signalStackedPlot configuring Scale\n')
 
@@ -305,7 +322,7 @@ drawnow
 assertElementsAlmostEqual(sp.SignalScale, s(5).Value);
 delete(sfig);
 
-function testSettingStructureSignalLabel %#ok<DEFNU>
+function testSettingStructureSignalLabel(values) %#ok<INUSD,DEFNU>
 % test visviews.signalStackedPlot setting axes label
 fprintf('\nUnit tests for visviews.signalStackedPlot setting axis label\n')
 
@@ -353,7 +370,7 @@ assertTrue(strcmp(sp.SignalLabel, s(4).Value));
 delete(sfig);
 
 
-function testConstantAndNaNValues %#ok<DEFNU>
+function testConstantAndNaNValues(values) %#ok<INUSD,DEFNU>
 % Unit test visviews.signalShadowPlot plot constant and NaN
 fprintf('\nUnit tests for visviews.signalShadowPlot plot method with constant and NaN values\n')
 
@@ -426,21 +443,20 @@ delete(sfig2);
 delete(sfig3);
 delete(sfig4);
 
-function testPlotRealData %#ok<DEFNU>
+function testPlotRealData(values) %#ok<DEFNU>
 % Unit test visviews.signalStackedPlot plot real data
 fprintf('\nUnit tests for visviews.signalStackedPlot plot method real data\n')
 % Generate some data for testing
-load('EEGEpoch.mat');
 
 fprintf('It should produce a plot when the data is epoched\n');
-testVD1 = viscore.blockedData(EEGEpoch.data, 'EEGEpoched', 'Epoched', true, ...
-            'SampleRate', EEGEpoch.srate);
+testVD1 = viscore.blockedData(values.EEGEpoch.data, 'EEGEpoched', 'Epoched', true, ...
+            'SampleRate', values.EEGEpoch.srate);
 assertTrue(testVD1.isEpoched())
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
 fun = defFuns{1};
-sfig1 = figure('Name', 'Plot when data is epoched\n');
+sfig1 = figure('Name', 'Plot when data is epoched');
 sp1 = visviews.signalStackedPlot(sfig1, [], []);
 assertTrue(testVD1.isEpoched())
 slice1 = viscore.dataSlice('Slices', {':', ':', '5'}, ...

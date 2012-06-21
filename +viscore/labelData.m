@@ -54,6 +54,8 @@
 %    type        a string identifying the type of event
 %    startTime   double time in seconds of the start of the event from the
 %                beginning
+%    endTime     double specifying the time in sections of the end of
+%                the event from the beginning
 %    block       (optional) number of block in which the event is to be
 %                placed (for epoched data)
 % The event structure array may have other fields, which are ignored.
@@ -101,6 +103,7 @@ classdef eventData < hgsetget
         BlockStartTimes;     % start time of each block in seconds
         BlockTime;           % time in seconds for one block
         EventBlocks;         % cell array of starting blocks by event
+        EventEndTimes;       % double array of event end times
         EventCounts;         % type x blocks array with event counts
         EventStartTimes;     % double array of event start times
         EventTypeNumbers;    % cell array of event type numbers
@@ -151,11 +154,37 @@ classdef eventData < hgsetget
             blocklist = obj.BlockList;
         end % getBlockList
         
+        
+        function range = getBlockRange(obj, k)
+            % Returns the range of block numbers occupied by event k
+            range = floor(obj.SampleRate.* ...
+                [obj.EventStartTimes(k), obj.EventEndTimes(k)]./ ...
+                obj.BlockSize) + 1;
+            if range(1) > length(obj.BlockList)
+                range = [];
+            end
+            range(2) = min(range(2), length(obj.BlockList));
+        end % getBlockRange
+        
         function blockTime = getBlockTime(obj)
-            % Return the time in seconds of the length of a block
+            % Return the time in seconds of a block
             blockTime = obj.BlockTime;
         end % getBlockTime
-
+        
+        function eList = getEventBlock(obj, k)
+            % Return the starting blocks of each event
+            eList = obj.EventBlock{k};
+        end % getEventBlock
+        
+        function endTimes = getEndTimes(obj, varargin)
+            % Return event end times - all or those specified by varargin
+            if nargin == 1
+                endTimes = obj.EventEndTimes;
+            else
+                endTimes = obj.EventEndTimes(varargin{1});
+            end
+        end % getEndTimes
+        
         function event = getEvent(obj, k)
             % Return event k as a structure or empty
             event = [];
@@ -164,7 +193,7 @@ classdef eventData < hgsetget
             end
             event.type = obj.EventTypes{k};
             event.startTime = obj.EventStartTimes(k);
-            event.blocks = obj.EventBlocks{k};
+            event.endTime = obj.EventEndTimes(k);
         end % getEvent
         
         function eBlocks = getEventBlocks(obj, varargin)
@@ -183,15 +212,10 @@ classdef eventData < hgsetget
         end % getEventCounts
         
         function numBlocks = getNumberBlocks(obj)
-            % Return the number of blocks
+            % Returns the current number of blocks
             numBlocks = length(obj.BlockList);
         end % getNumberBlocks
         
-        function numEvents = getNumberEvents(obj)
-            % Return the number of events
-            numEvents = length(obj.EventStartTimes);
-        end % getNumberEvents
-              
         function startTimes = getStartTimes(obj, varargin)
             % Return event start times - all or those specified by varargin
             if nargin == 1
@@ -255,9 +279,13 @@ classdef eventData < hgsetget
             c = viscore.counter.getInstance();
             obj.VersionID = num2str(c.getNext());  %
             obj.BlockTime = blockTime;
-            
-            % Calculate the event counts in each block
+            obj.calculateBlockList();
+        end % reblock
+        
+        function calculateBlockList(obj)
+            % Return the starting block numbers of each event
             numBlocks = length(obj.BlockStartTimes);
+            blockEnds = obj.BlockStartTimes + obj.BlockTime;
             obj.EventCounts = zeros(length(obj.EventUniqueTypes), numBlocks);
             obj.BlockList = cell(numBlocks, 1);
             for k = 1:length(obj.BlockList)
@@ -268,20 +296,24 @@ classdef eventData < hgsetget
                     num2cell(floor(obj.EventStartTimes/obj.BlockTime) + 1);
             end
             for k = 1:length(obj.EventStartTimes)
-                myBlocks = obj.EventBlocks{k};
-                for j = 1:length(myBlocks);
-                    s = myBlocks(j);
-                    obj.BlockList{s}{length(obj.BlockList{s}) + 1} = k;
-                    obj.EventCounts(obj.EventTypeNumbers(k), s) = ...
-                        obj.EventCounts(obj.EventTypeNumbers(k), s) + 1;
+                for j = 1:length(obj.EventBlocks{k});
+                    s = obj.EventBlocks{k}(j);
+                    for n = s:numBlocks
+                        obj.BlockList{n}{length(obj.BlockList{n}) + 1} = k;
+                        obj.EventCounts(obj.EventTypeNumbers(k), n) = ...
+                            obj.EventCounts(obj.EventTypeNumbers(k), n) + 1;
+                        if blockEnds(n) >= obj.EventEndTimes(k)
+                            break;
+                        end
+                    end
                 end
             end
-            
             % Now fix BlockList elements to be arrays
             for k = 1:length(obj.BlockList)
                 obj.BlockList{k} = cell2mat(obj.BlockList{k});
             end
-        end % reblock
+        end % calculateEventBlocks
+        
         
     end % public methods
     
@@ -296,11 +328,14 @@ classdef eventData < hgsetget
             % Set the events
             types = cellfun(@num2str, {p.event.type}', 'UniformOutput', false);
             obj.EventStartTimes = cell2mat({p.event.startTime})';
-            if sum(isnan(obj.EventStartTimes)) > 0 || ...
-                    sum(obj.EventStartTimes) < 0 > 0 || ...
-                    sum(isnan(obj.EventStartTimes)) > 0
+            obj.EventEndTimes = cell2mat({p.event.endTime})';
+            if sum(isnan(obj.EventStartTimes)) > 0 || sum(obj.EventStartTimes) < 0 > 0
                 error('eventData:NonNegativeStart', ...
                     'Event start times must be non negative\n')
+            elseif sum(isnan(obj.EventEndTimes)) > 0 || ...
+                    sum(obj.EventStartTimes > obj.EventEndTimes) > 0
+                error('eventData:StartEndMatch', ...
+                    'Event end times must be greater than or equal to the endTimes\n');
             end
             
             % Process the event types
@@ -335,7 +370,7 @@ classdef eventData < hgsetget
             else
                 obj.Preblocked = false;
                 if isempty(obj.MaxTime)
-                    obj.MaxTime = max(obj.EventStartTimes);
+                    obj.MaxTime = max(obj.EventEndTimes);
                 end
                 
             end
@@ -399,11 +434,13 @@ classdef eventData < hgsetget
             parser.StructExpand = true;
             parser.addRequired('event', ...
                 @(x) (~isempty(x) && isstruct(x)) && ...
-                sum(isfield(x, {'type', 'startTime'})) == 2);
+                sum(isfield(x, {'type', 'startTime', 'endTime'})) == 3);
             parser.addParamValue('BlockStartTimes', [], ...
                 @(x)(isempty(x) || isnumeric(x)));
             parser.addParamValue('BlockTime', 1, ...
                 @(x) validateattributes(x, {'numeric'}, {'scalar', 'positive'}));
+            %             parser.addParamValue('Epoched', false, ...
+            %                 @(x) validateattributes(x, {'logical'}, {}));
             parser.addParamValue('MaxTime', [], ...
                 @(x) (isempty(x) || (isnumeric(x) && isscalar(x) && x > 0)));
         end % getParser

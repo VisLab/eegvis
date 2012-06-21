@@ -155,7 +155,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
         TotalBlocks = 0;             % total number of blocks in the data
         TotalElements = 0;           % total number of elements in the data
         VisData = [];                % original data for interrogation
-        TimeUnits = 'sec';           % time units of the access
+        TimeUnits = 's';           % time units of the access
         XValues = [];                % x values of current plot
     end % private properties
     
@@ -265,36 +265,31 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                      combineString = ''; % only one block so don't combine
                 end
                 obj.XLimOffset = (sStart(3) - 1)*nSamples/visData.getSampleRate();
-                obj.XStringBase = [names{1} ' '  ...
-                    viscore.dataSlice.rangeString(obj.StartElement, nElements) ...
-                                  ' ('  combineString names{3} ' ' ...
-                    viscore.dataSlice.rangeString(obj.StartBlock, obj.TotalBlocks) ')'];
                 obj.YStringBase = names{1};
                 obj.Colors = reshape(obj.Colors, size(bValues, 1), 3);
             else % Plot all windows for an element
                 obj.Signals = permute(obj.Signals, [3, 2, 1]);
                 obj.XLimOffset = 0;
-                obj.XStringBase  = [names{3} ' ' ...
-                    viscore.dataSlice.rangeString(obj.StartBlock, nBlocks) ...
-                    ' (' combineString names{1} ' ' ...
-                    viscore.dataSlice.rangeString(obj.StartElement, obj.TotalElements) ')'];
                 obj.YStringBase = names{3};
                 obj.Colors = reshape(obj.Colors, size(bValues, 2), 3);
             end
+            obj.XStringBase  = [names{3} ' ' ...
+                viscore.dataSlice.rangeString(obj.StartBlock, nBlocks) ...
+                ' (' combineString names{1} ' ' ...
+                viscore.dataSlice.rangeString(obj.StartElement, obj.TotalElements) ')'];
       
             if obj.VisData.isEpoched() % add time scale to x label
                 obj.XValues = 1000*visData.getEpochTimeScale();
-                obj.XStringBase = ['Time(ms) [' obj.XStringBase ']'];
                 obj.TimeUnits = 'ms';
             else
                 obj.XValues = obj.XLimOffset + ...
                     (0:(size(obj.Signals, 2) - 1))/visData.getSampleRate();
-                obj.XStringBase = ['Time(s) [' obj.XStringBase ']'];
-                obj.TimeUnits = 'sec';
+                obj.TimeUnits = 's';
             end
             obj.SelectedHandle = [];
             obj.SelectedSignal = [];
             obj.YString = obj.YStringBase;
+            obj.XStringBase = ['Time(' obj.TimeUnits ') [' obj.XStringBase ']'];
             obj.XString = obj.XStringBase;
             obj.displayPlot();           
         end % plot
@@ -373,12 +368,6 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
         
         function displayPlot(obj)
             % Plot the signals stacked one on top of another
-            obj.reset();
-            % Go no further if signals is empty
-            if isempty(obj.Signals)
-                return;
-            end        
-            
             data = obj.Signals;
             % Remove the mean if necessary
             if obj.RemoveMean

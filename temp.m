@@ -1,4 +1,4 @@
-load('EEGEpoch.mat')
+load('EEGEmotiv.mat')
 
 %%
-[event, sTimes, tScale] = viscore.eventData.getEEGTimes(EEGEpoch);
+[event, sTimes, tScale] = viscore.eventData.getEEGTimes(EEGEmotiv);

@@ -24,8 +24,9 @@ ed1 = viscore.eventData(event);
 assertTrue(isvalid(ed1));
 fprintf('The start times be greater than or equal to 0\n');
 assertTrue(sum(ed1.getStartTimes() < 0) == 0);
+fprintf('The end times be greater than 0\n');
+assertTrue(sum(ed1.getEndTimes() <= 0) == 0);
 fprintf('The block time should be correct\n');
-assertEqual(ed1.getBlockTime, 1);
 
 
 function testBadConstructor(event) %#ok<INUSD,DEFNU>
@@ -95,6 +96,17 @@ function testGetStartTimes(event) %#ok<DEFNU>
   sTimes = ed1.getStartTimes(1:6);
   assertTrue(length(sTimes) == 6);
   
+function testGetEndTimes(event) %#ok<DEFNU>
+% Unit test for viscore.eventData getEndTimes
+  fprintf('\nUnit tests for viscore.eventData getEndTimes\n');
+  ed1 = viscore.eventData(event);
+  fprintf('It should return all end times when called with 1 argument\n');
+  eTimes = ed1.getEndTimes();
+  assertTrue(length(eTimes) == length(event));
+  fprintf('It should return the right number of end times when called with 2 arguments\n');
+  eTimes = ed1.getEndTimes(1:6);
+  assertTrue(length(eTimes) == 6);
+  
 function testGetTypeNumbers(event) %#ok<DEFNU>
 % Unit test for viscore.eventData getTypeNumbers
   fprintf('\nUnit tests for viscore.eventData getTypeNumbers\n');
@@ -126,8 +138,8 @@ function testGetTypes(event) %#ok<DEFNU>
   fprintf('\nUnit tests for viscore.eventData getEventCounts\n');
   ed1 = viscore.eventData(event, 'BlockTime', 1000/128);
   fprintf('It should return an event count array of the correct size\n');
-  startTimes = ed1.getStartTimes();
-  numBlocks = ceil(max(startTimes)/ed1.getBlockTime());
+  endTimes = ed1.getEndTimes();
+  numBlocks = ceil(max(endTimes)/ed1.getBlockTime());
   
   counts = ed1.getEventCounts(1, numBlocks);
   assertEqual(size(counts, 1), length(ed1.getUniqueTypes()));
@@ -145,15 +157,14 @@ function testGetTypes(event) %#ok<DEFNU>
   [events, startTimes, timeScale] = viscore.eventData.getEEGTimes(EEGEpoch);
   assertEqual(length(startTimes), size(EEGEpoch.data, 3));
   assertEqual(length(timeScale), size(EEGEpoch.data, 2));
-  assertTrue(isstruct(events));
           
   function testArtifactData(event) %#ok<DEFNU>
 % Unit test for viscore.eventData getEventCounts 
   load('ArtifactEvents.mat');
   ev = viscore.eventData(event, 'BlockTime', 1000/256);
-  assertEqual(length(event), length(ev.getStartTimes()));
+  assertEqual(length(event), length(ev.getEndTimes()));
   
-  function testGetBlockListEpochData(event) %#ok<INUSD,DEFNU>
+  function testGetBlockListEpochData(event) %#ok<DEFNU>
   % Unit test for viscore.eventData
   fprintf('\nUnit tests for viscore.eventData getBlockList with epoched data\n');
   load('EEGEpoch.mat');
