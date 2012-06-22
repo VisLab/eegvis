@@ -159,287 +159,61 @@ gaps = sp6.getGaps();
 sp6.reposition(gaps);
 drawnow
 
+delete sfig1;
+delete sfig2;
+delete sfig3;
+delete sfig4;
+delete sfig5;
+delete sfig6;
 
-% fprintf('It should work with the artifact data\n');
-% load('EEGArtifact.mat');  
-% load('ArtifactEvents.mat');
-% testVD1 = viscore.blockedData(EEGArtifact.data, 'Artifact', ...
-%     'Events', event, ...
-%     'SampleRate', 256, 'BlockSize', 1000);
-% ev1 = testVD1.getEvents();
-% numBlocks = ceil(size(EEGArtifact.data, 2)/1000);
-% counts = ev1.getEventCounts(1, numBlocks);
-% assertVectorsAlmostEqual(size(counts), ...
-%     [length(ev1.getUniqueTypes()), numBlocks]);
-% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-%     viewTestClass.getDefaultFunctionsNoSqueeze());
-% fMan = viscore.dataManager();
-% fMan.putObjects(defaults);
-% func = fMan.getEnabledObjects('block');
-% thisFunc = func{1};
-% slice1 = viscore.dataSlice('Slices', {':', ':', '8'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% sfig1 = figure('Name', 'visviews.eventStackedPlot with artifact data');
-% sp1 = visviews.eventStackedPlot(sfig1, [], []);
-% assertTrue(isvalid(sp1));
-% sp1.plot(testVD1, thisFunc, slice1);
-% drawnow
-% gaps = sp1.getGaps();
-% sp1.reposition(gaps);
-% fprintf('It should allow callbacks to be registered\n')
-% sp1.registerCallbacks([]);
+% function testSettingStructureScale %#ok<DEFNU>
+% % test eventStackedPlot setting the scale
+% fprintf('\nUnit tests for visviews.eventStackedPlot configuring Scale\n')
 % 
-% fprintf('It should work with the epoched data\n');
-% load('EEGEpoch.mat');  
-% [eventEpoched, startTimes, timeScale] = viscore.eventData.getEEGTimes(EEGEpoch);
-% testVD1 = viscore.blockedData(EEGEpoch.data, 'Epoched', ...
-%     'Events', eventEpoched, 'Epoched', true, ...
-%     'SampleRate', EEGEpoch.srate, 'BlockSize', 1000, ...
-%     'EpochTimeScale', timeScale, 'EpochStartTimes', startTimes);
-% ev1 = testVD1.getEvents();
-% numBlocks = ceil(size(EEGEpoch.data, 3));
-% counts = ev1.getEventCounts(1, numBlocks);
-% assertVectorsAlmostEqual(size(counts), ...
-%     [length(ev1.getUniqueTypes()), numBlocks]);
-% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-%     viewTestClass.getDefaultFunctionsNoSqueeze());
-% fMan = viscore.dataManager();
-% fMan.putObjects(defaults);
-% func = fMan.getEnabledObjects('block');
-% thisFunc = func{1};
-% slice1 = viscore.dataSlice('Slices', {':', ':', '8'}, ...
+% fprintf('It should allow the scale to be changed through the property manager\n')
+% sfig = figure('Name', 'visviews.eventStackedPlot test settings structure scale');
+% spKey = 'Stacked event';
+% sp = visviews.eventStackedPlot(sfig, [], spKey);
+% assertTrue(isvalid(sp));
+% 
+% 
+% % check the underlying configurable object
+% pConf = sp.getConfigObj();
+% assertTrue(isa(pConf, 'visprops.configurableObj'));assertTrue(isa(pConf, 'visprops.configurableObj'));
+% assertTrue(strcmp(spKey, pConf.getObjectID()));
+% 
+% % Create and set the data manager
+% pMan = viscore.dataManager();
+% visprops.configurableObj.updateManager(pMan, {pConf});  
+% sp.updateProperties(pMan);
+% assertElementsAlmostEqual(sp.EventScale, 3);
+% 
+% % Change the event scale to 10 through the property manager
+% cObj = pMan.getObject(spKey);
+% assertTrue(isa(cObj, 'visprops.configurableObj'));
+% s = cObj.getStructure();
+% s(1).Value = 10;
+% cObj.setStructure(s);
+% sp.updateProperties(pMan);
+% assertElementsAlmostEqual(sp.EventScale, s(5).Value);
+% 
+% fprintf('It should still plot after scale has been changed\n')
+% % Generate some data to plot
+% data = random('normal', 0, 1, [32, 1000, 20]);
+% testVD = viscore.blockedData(data, 'Rand1');
+% keyfun = @(x) x.('ShortName');
+% defFuns= visfuncs.functionObj.createObjects( ...
+%     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
+% slice1 = viscore.dataSlice('Slices', {':', ':', '1'}, ...
 %     'DimNames', {'Channel', 'Sample', 'Window'});
-% sfig1 = figure('Name', 'visviews.eventStackedPlot with epoch data');
-% sp1 = visviews.eventStackedPlot(sfig1, [], []);
-% assertTrue(isvalid(sp1));
-% sp1.plot(testVD1, thisFunc, slice1);
+% fun = defFuns{1};
+% sp.plot(testVD, fun, slice1);
+% gaps = sp.getGaps();
+% sp.reposition(gaps);
 % drawnow
-% gaps = sp1.getGaps();
-% sp1.reposition(gaps);
-% fprintf('It should allow callbacks to be registered\n')
-% sp1.registerCallbacks([]);
-% % 
-% % fprintf('It should produce a plot when the data is epoched\n');
-% % testVD1 = viscore.blockedData(data, 'Rand1', 'Epoched', true, ...
-% %             'SampleRate', 250);
-% % assertTrue(testVD1.isEpoched())
-% % keyfun = @(x) x.('ShortName');
-% % defFuns= visfuncs.functionObj.createObjects( ...
-% %     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
-% % fun = defFuns{1};
-% % sfig1 = figure('Name', 'Plot when data is epoched\n');
-% % sp1 = visviews.eventStackedPlot(sfig1, [], []);
-% % assertTrue(testVD1.isEpoched())
-% % sp1.plot(testVD1, fun, slice1);
-% % gaps = sp1.getGaps();
-% % sp1.reposition(gaps);
-% % sp1.registerCallbacks([]);
-% % drawnow
-% % assertAlmostEqual(testVD1.EpochTimes, (0:999)*4);
-% % 
-% % fprintf('It should produce a plot for a slice along dimension 1\n');
-% % sfig2 = figure('Name', 'visviews.eventStackedPlot test plot slice element');
-% % sp2 = visviews.eventStackedPlot(sfig2, [], []);
-% % slice2 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
-% %     'DimNames', {'Channel', 'Sample', 'Window'});
-% % sp2.plot(testVD, fun, slice2);
-% % gaps = sp2.getGaps();
-% % sp2.reposition(gaps);
-% % sp2.registerCallbacks([]);
-% % drawnow
-% % 
-% % fprintf('It should work when the event scale is small\n');
-% % sfig3 = figure('Name', 'visviews.eventStackedPlot test low event scale');
-% % sp3 = visviews.eventStackedPlot(sfig3, [], []);
-% % sp3.EventScale = 3.0;
-% % assertTrue(isvalid(sp3));
-% % % Generate some data to plot
-% % keyfun = @(x) x.('ShortName');
-% % defFuns= visfuncs.functionObj.createObjects( ...
-% %     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
-% % slice3 = viscore.dataSlice('Slices', {':', ':', '1'}, ...
-% %     'DimNames', {'Channel', 'Sample', 'Window'});
-% % fun = defFuns{1};
-% % sp3.plot(testVD, fun, slice3);
-% % gaps = sp3.getGaps();
-% % sp3.reposition(gaps);
-% % sp3.registerCallbacks([]);
-% % drawnow
-% % 
-% % fprintf('It should work when the event scale is large\n')
-% % sfig4 = figure('Name', 'visviews.eventStackedPlot test high event scale');
-% % sp4 = visviews.eventStackedPlot(sfig4, [], []);
-% % sp4.EventScale = 15;
-% % sp4.plot(testVD, fun, slice1);
-% % gaps = sp4.getGaps();
-% % sp4.reposition(gaps);
-% % sp4.registerCallbacks([]);
-% % drawnow
-% % 
-% % fprintf('It should plot smooth events\n');
-% % sfig5 = figure('Name', 'Plot with smoothed events');
-% % sp5 = visviews.eventStackedPlot(sfig5, [], []);
-% % assertTrue(isvalid(sp5));
-% % % Generate some data to plot
-% % nSamples = 1000;
-% % nChans = 32;
-% % x = linspace(0, 1, nSamples);
-% % 
-% % a = 10*rand(nChans, 1);
-% % p = pi*rand(nChans, 1);
-% % data5 = 0.01*random('normal', 0, 1, [nChans, nSamples]);
-% % for k = 1:nChans
-% %     data5(k, :) = data5(k, :) + a(k)*cos(2*pi*x + p(k));
-% % end
-% % data5(1, :) = 2*data5(1, :);
-% % testVD5 = viscore.blockedData(data5, 'Cosine');
-% % sp5.EventScale = 2.0;
-% % keyfun = @(x) x.('ShortName');
-% % defFuns= visfuncs.functionObj.createObjects( ...
-% %     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
-% % slice5 = viscore.dataSlice('Slices', {':', ':', '1'}, ...
-% %     'DimNames', {'Channel', 'Sample', 'Window'});
-% % fun = defFuns{1};
-% % sp5.plot(testVD5, fun, slice5);
-% % gaps = sp5.getGaps();
-% % sp5.reposition(gaps);
-% % sp5.registerCallbacks([]);
-% % drawnow
-% % 
-% % fprintf('It should plot smooth events with a trim percent\n');
-% % sfig6 = figure('Name', 'Plot with smoothed events with out of range event');
-% % sp6 = visviews.eventStackedPlot(sfig6, [], []);
-% % assertTrue(isvalid(sp3));
-% % % Generate some data to plot
-% % data6 = data5;
-% % data6(2,:) = 100*data6(2, :);
-% % testVD6 = viscore.blockedData(data6, 'Large Cosine');
-% % sp6.EventScale = 2.0;
-% % sp6.TrimPercent = 5;
-% % sp6.plot(testVD6, fun, slice3);
-% % gaps = sp6.getGaps();
-% % sp6.reposition(gaps);
-% % sp6.registerCallbacks([]);
-% % 
-% % fprintf('It should produce a plot for a clump of nonepoched windows sliced along dim 3 \n');
-% % sfig7 = figure('Name', 'Plot clump for slice along dimension 3, not epoched');
-% % sp7 = visviews.eventStackedPlot(sfig7, [], []);
-% % assertTrue(isvalid(sp7));
-% % % Generate some data to plot
-% % keyfun = @(x) x.('ShortName');
-% % defFuns= visfuncs.functionObj.createObjects( ...
-% %     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
-% % fun = defFuns{1};
-% % 
-% % testVD7 = viscore.blockedData(dataSmooth, 'Sinusoidal', 'Epoched', false);
-% % slice7 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
-% %     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
-% % sp7.plot(testVD7, fun, slice7);
-% % gaps = sp7.getGaps();
-% % sp7.reposition(gaps);
-% % sp7.registerCallbacks([]);
-% % drawnow
-% % 
-% % 
-% % fprintf('It should produce a single window plot for a clump of epoched windows sliced along dim 3 \n');
-% % sfig8 = figure('Name', 'Plot windows - clump for slice along dimension 3, epoched');
-% % sp8 = visviews.eventStackedPlot(sfig8, [], []);
-% % assertTrue(isvalid(sp8));
-% % % Generate some data to plot
-% % keyfun = @(x) x.('ShortName');
-% % defFuns= visfuncs.functionObj.createObjects( ...
-% %     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
-% % fun = defFuns{1};
-% % 
-% % testVD8 = viscore.blockedData(dataSmooth, 'Sinusoidal', ...
-% %     'Epoched', true, 'SampleRate', 256);
-% % slice8 = viscore.dataSlice('Slices', {':', ':', '4:8'}, ...
-% %     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
-% % sp8.plot(testVD8, fun, slice8);
-% % gaps = sp8.getGaps();
-% % sp8.reposition(gaps);
-% % sp8.registerCallbacks([]);
-% % drawnow
-% % 
-% % fprintf('It should produce a single element plot for a clump of epoched windows sliced along dim 1 \n');
-% % sfig9 = figure('Name', 'Plot element - clump for slice along dimension 1, epoched');
-% % sp9 = visviews.eventStackedPlot(sfig9, [], []);
-% % assertTrue(isvalid(sp9));
-% % % Generate some data to plot
-% % keyfun = @(x) x.('ShortName');
-% % defFuns= visfuncs.functionObj.createObjects( ...
-% %     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
-% % fun = defFuns{1};
-% % 
-% % testVD9 = viscore.blockedData(dataSmooth, 'Sinusoidal', ...
-% %     'Epoched', true, 'SampleRate', 256);
-% % slice9 = viscore.dataSlice('Slices', {'4:8', ':', ':'}, ...
-% %     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 1);
-% % sp9.plot(testVD9, fun, slice9);
-% % gaps = sp9.getGaps();
-% % sp9.reposition(gaps);
-% % sp9.registerCallbacks([]);
-% % drawnow
-% % 
-% % delete(sfig);
-% % delete(sfig1);
-% % delete(sfig2);
-% % delete(sfig3);
-% % delete(sfig4);
-% % delete(sfig5);
-% % delete(sfig6);
-% % delete(sfig7);
-% % delete(sfig8);
-% % delete(sfig9);
-% % 
-% % function testSettingStructureScale %#ok<DEFNU>
-% % % test eventStackedPlot setting the scale
-% % fprintf('\nUnit tests for visviews.eventStackedPlot configuring Scale\n')
-% % 
-% % fprintf('It should allow the scale to be changed through the property manager\n')
-% % sfig = figure('Name', 'visviews.eventStackedPlot test settings structure scale');
-% % spKey = 'Stacked event';
-% % sp = visviews.eventStackedPlot(sfig, [], spKey);
-% % assertTrue(isvalid(sp));
-% % 
-% % 
-% % % check the underlying configurable object
-% % pConf = sp.getConfigObj();
-% % assertTrue(isa(pConf, 'visprops.configurableObj'));assertTrue(isa(pConf, 'visprops.configurableObj'));
-% % assertTrue(strcmp(spKey, pConf.getObjectID()));
-% % 
-% % % Create and set the data manager
-% % pMan = viscore.dataManager();
-% % visprops.configurableObj.updateManager(pMan, {pConf});  
-% % sp.updateProperties(pMan);
-% % assertElementsAlmostEqual(sp.EventScale, 3);
-% % 
-% % % Change the event scale to 10 through the property manager
-% % cObj = pMan.getObject(spKey);
-% % assertTrue(isa(cObj, 'visprops.configurableObj'));
-% % s = cObj.getStructure();
-% % s(1).Value = 10;
-% % cObj.setStructure(s);
-% % sp.updateProperties(pMan);
-% % assertElementsAlmostEqual(sp.EventScale, s(5).Value);
-% % 
-% % fprintf('It should still plot after scale has been changed\n')
-% % % Generate some data to plot
-% % data = random('normal', 0, 1, [32, 1000, 20]);
-% % testVD = viscore.blockedData(data, 'Rand1');
-% % keyfun = @(x) x.('ShortName');
-% % defFuns= visfuncs.functionObj.createObjects( ...
-% %     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
-% % slice1 = viscore.dataSlice('Slices', {':', ':', '1'}, ...
-% %     'DimNames', {'Channel', 'Sample', 'Window'});
-% % fun = defFuns{1};
-% % sp.plot(testVD, fun, slice1);
-% % gaps = sp.getGaps();
-% % sp.reposition(gaps);
-% % drawnow
-% % assertElementsAlmostEqual(sp.EventScale, s(5).Value);
-% % delete(sfig);
-% % 
+% assertElementsAlmostEqual(sp.EventScale, s(5).Value);
+% delete(sfig);
+% 
 % % function testSettingStructureEventLabel %#ok<DEFNU>
 % % % test visviews.eventStackedPlot setting axes label
 % % fprintf('\nUnit tests for visviews.eventStackedPlot setting axis label\n')
