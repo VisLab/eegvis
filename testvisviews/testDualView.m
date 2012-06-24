@@ -3,21 +3,27 @@ function test_suite = testDualView %#ok<STOUT>
 initTestSuite;
 
 function values = setup %#ok<DEFNU>
-load('EEGData.mat'); 
-values.EEG = EEG;  
+load('EEGData.mat');
+values.EEG = EEG;
 tEvents = EEG.event;
 types = {tEvents.type}';
-                                      % Convert to seconds since beginning
-startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
-values.event = struct('type', types, 'startTime', num2cell(startTimes));
+% Convert to seconds since beginning
+startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
+values.event = struct('type', types, 'startTime', num2cell(startTimes), ...
+    'certainty', ones(length(startTimes), 1));
 values.random = random('exp', 2, [32, 1000, 20]);
 
-load('EEGEpoch.mat'); 
+load('EEGEpoch.mat');
 values.EEGEpoch = EEGEpoch;
+
+load('EEGArtifact.mat');
+values.EEGArtifact = EEGArtifact;
+load('ArtifactLabels.mat');
+values.artifactEvents = artifactEvents;
+values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
-
 
 function testNormalConstructor(values) %#ok<DEFNU>
 % Unit test for normal dualView normal constructor
@@ -45,8 +51,8 @@ for k = 1:length(uKeys)
     fprintf('%s: \n', uKeys{k} );
     kvalues = bv1.getUnmapped(uKeys{k});
     for j = 1:length(kvalues)
-      s = bv1.getSourceMap(kvalues{j});
-      visviews.clickable.printStructure(s);  
+        s = bv1.getSourceMap(kvalues{j});
+        visviews.clickable.printStructure(s);
     end
 end
 
@@ -70,8 +76,8 @@ for k = 1:length(uKeys)
     fprintf('%s: \n', uKeys{k} );
     kvalues = bv2.getUnmapped(uKeys{k});
     for j = 1:length(kvalues)
-      s = bv2.getSourceMap(kvalues{j});
-      visviews.clickable.printStructure(s);  
+        s = bv2.getSourceMap(kvalues{j});
+        visviews.clickable.printStructure(s);
     end
 end
 
@@ -93,15 +99,15 @@ for k = 1:length(uKeys)
     fprintf('%s: \n', uKeys{k} );
     kvalues = bv3.getUnmapped(uKeys{k});
     for j = 1:length(kvalues)
-      s = bv3.getSourceMap(kvalues{j});
-      visviews.clickable.printStructure(s);  
+        s = bv3.getSourceMap(kvalues{j});
+        visviews.clickable.printStructure(s);
     end
 end
 
 fprintf('It should create a graph when the Functions parameter is passed to constructor\n');
 f = visviews.dualView.getDefaultFunctions();
 testVD4 = viscore.blockedData(values.EEG.data, 'Testing data and function structure passed in constructor');
-bv4 = visviews.dualView('VisData', testVD4, 'Functions', f); 
+bv4 = visviews.dualView('VisData', testVD4, 'Functions', f);
 drawnow
 assertTrue(isvalid(bv4));
 
@@ -109,73 +115,72 @@ f = visviews.dualView.getDefaultFunctions();
 fMan = viscore.dataManager();
 fMan.putObjects(visfuncs.functionObj.createObjects('visfuncs.functionObj', f));
 testVD5 = viscore.blockedData(values.EEG.data, 'Testing data and function manager passed in constructor');
-bv5 = visviews.dualView('VisData', testVD5, 'Functions', fMan); 
+bv5 = visviews.dualView('VisData', testVD5, 'Functions', fMan);
 drawnow
 assertTrue(isvalid(bv5));
 f = visviews.dualView.getDefaultFunctions();
 fns = visfuncs.functionObj.createObjects('visfuncs.functionObj', f);
 testVD6 = viscore.blockedData(values.EEG.data, 'Testing data and list of function objects passed in constructor');
-bv6 = visviews.dualView('VisData', testVD6, 'Functions', fns); 
+bv6 = visviews.dualView('VisData', testVD6, 'Functions', fns);
 drawnow
 assertTrue(isvalid(bv6));
-delete(bv0)
-delete(bv1)
-delete(bv2)
-delete(bv3)
-delete(bv4)
-delete(bv5)
-%delete(bv6)
+if values.deleteFigures
+    delete(bv0)
+    delete(bv1)
+    delete(bv2)
+    delete(bv3)
+    delete(bv4)
+    delete(bv5)
+    delete(bv6)
+end
 
 function testLinkageBoxPlot(values) %#ok<DEFNU>
 % Unit test for normal dualView normal constructor
 fprintf('\nUnit test for visviews.dualView for testing box plot linkage\n');
-testVD = viscore.blockedData(values.EEG.data, 'Box plot linkage');
+testVD1 = viscore.blockedData(values.EEG.data, 'Box plot linkage');
 fprintf('It should produce a valid plot when blockboxplots are linked\n');
 pS = viewTestClass.getDefaultPlotsBlockBoxPlotLinked();
 assertEqual(length(pS), 4);
-bv3 = visviews.dualView('VisData', testVD, 'Plots', pS');
+bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
 drawnow
-assertTrue(isvalid(bv3));
-keys = bv3.getSourceMapKeys();
+assertTrue(isvalid(bv1));
+keys = bv1.getSourceMapKeys();
 fprintf('\nSources:\n');
 for k = 1:length(keys)
-    visviews.clickable.printStructure(bv3.getSourceMap(keys{k}));
+    visviews.clickable.printStructure(bv1.getSourceMap(keys{k}));
 end
 fprintf('\nUnmapped sources:\n')
-uKeys = bv3.getUnmappedKeys();
+uKeys = bv1.getUnmappedKeys();
 for k = 1:length(uKeys)
     fprintf('%s: \n', uKeys{k} );
-    kvalues = bv3.getUnmapped(uKeys{k});
+    kvalues = bv1.getUnmapped(uKeys{k});
     for j = 1:length(kvalues)
-      s = bv3.getSourceMap(kvalues{j});
-      visviews.clickable.printStructure(s);  
+        s = bv1.getSourceMap(kvalues{j});
+        visviews.clickable.printStructure(s);
     end
 end
-delete(bv3)
 
-function testLinkageImagePlot(values) %#ok<DEFNU>
-%Unit test for normal dualView normal constructor
-fprintf('\nUnit test for visviews.dualView for testing block image plot linkage\n');
-testVD = viscore.blockedData(values.EEG.data, 'Image plot linkage');
 fprintf('It should produce a valid plot when a imageBoxplot is linked to a boxBoxPlot\n');
+testVD2 = viscore.blockedData(values.EEG.data, 'Image plot linkage');
+
 pS = viewTestClass.getDefaultPlotsBlockImagePlotLinked();
 assertEqual(length(pS), 5);
-bv3 = visviews.dualView('VisData', testVD, 'Plots', pS');
+bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
 drawnow
-assertTrue(isvalid(bv3));
-keys = bv3.getSourceMapKeys();
+assertTrue(isvalid(bv2));
+keys = bv2.getSourceMapKeys();
 fprintf('\nSources:\n');
 for k = 1:length(keys)
-    visviews.clickable.printStructure(bv3.getSourceMap(keys{k}));
+    visviews.clickable.printStructure(bv2.getSourceMap(keys{k}));
 end
 fprintf('\nUnmapped sources:\n')
-uKeys = bv3.getUnmappedKeys();
+uKeys = bv2.getUnmappedKeys();
 for k = 1:length(uKeys)
     fprintf('%s: \n', uKeys{k} );
-    kvalues = bv3.getUnmapped(uKeys{k});
+    kvalues = bv2.getUnmapped(uKeys{k});
     for j = 1:length(kvalues)
-      s = bv3.getSourceMap(kvalues{j});
-      visviews.clickable.printStructure(s);  
+        s = bv2.getSourceMap(kvalues{j});
+        visviews.clickable.printStructure(s);
     end
 end
 
@@ -183,30 +188,36 @@ fprintf('It should produce a valid plot when a imageBoxplot is linked to two box
 pS = viewTestClass.getPlotsBlockImageMultipleLinked();
 assertEqual(length(pS), 5);
 load chanlocs.mat;
-testVD4 = viscore.blockedData(values.EEG.data, 'Image plot linking two different box plots', ...
+testVD3 = viscore.blockedData(values.EEG.data, 'Image plot linking two different box plots', ...
     'ElementLocations', chanlocs);
-bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
+bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
 drawnow
-assertTrue(isvalid(bv4));
-keys = bv4.getSourceMapKeys();
+assertTrue(isvalid(bv3));
+keys = bv3.getSourceMapKeys();
 fprintf('\nSources:\n');
 for k = 1:length(keys)
-    visviews.clickable.printStructure(bv4.getSourceMap(keys{k}));
+    visviews.clickable.printStructure(bv3.getSourceMap(keys{k}));
 end
 fprintf('\nUnmapped sources:\n')
-uKeys = bv4.getUnmappedKeys();
+uKeys = bv3.getUnmappedKeys();
 for k = 1:length(uKeys)
     fprintf('%s: \n', uKeys{k} );
-    kvalues = bv4.getUnmapped(uKeys{k});
+    kvalues = bv3.getUnmapped(uKeys{k});
     for j = 1:length(kvalues)
-      s = bv4.getSourceMap(kvalues{j});
-      visviews.clickable.printStructure(s);  
+        s = bv3.getSourceMap(kvalues{j});
+        visviews.clickable.printStructure(s);
     end
 end
 
-function testBlockScalpPlot(values) %#ok<DEFNU>
-% Unit test for blockScalpPlot
-fprintf('\nUnit test for visviews.dualView for blockScalpPlot\n');
+if values.deleteFigures
+    delete(bv1);
+    delete(bv2);
+    delete(bv3);
+end
+
+function testSpecializedPlot(values) %#ok<DEFNU>
+% Unit test for visviews.dualView specialized plots
+fprintf('\nUnit test for visviews.dualView specialized plots\n');
 fprintf('It should produce a valid plot when a blockScalpPlot is used\n');
 pS = viewTestClass.getDefaultPlotsScalp();
 assertEqual(length(pS), 8);
@@ -215,61 +226,49 @@ testVD1 = viscore.blockedData(values.EEG.data, 'Shows block scalp plot', ...
 bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
 assertTrue(isvalid(bv1));
 drawnow
-%delete(bv3)
-%delete(bv4)
-%delete(bv5)
 
-
-
-function testDetailOnly(values) %#ok<DEFNU>
-% Unit test for dualView when only detail plots are specified
-fprintf('\nUnit test for visviews.dualView for detail only plots\n');
 fprintf('It should produce a valid plot when only details are used\n');
 pS = viewTestClass.getDefaultPlotsDetailOnly();
 assertEqual(length(pS), 2);
-testVD1 = viscore.blockedData(values.EEG.data, 'Shows details only');
-bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
+testVD2 = viscore.blockedData(values.EEG.data, 'Shows details only');
+bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
+assertTrue(isvalid(bv2));
 drawnow
-delete(bv1)
 
-function testSummaryOnly(values) %#ok<DEFNU>
-% Unit test for dualView when only summary plots are specified
-fprintf('\nUnit test for visviews.dualView for summary only plots\n');
 fprintf('It should produce a valid plot when only summaries are used\n');
 pS = viewTestClass.getDefaultPlotsSummaryOnly();
 assertEqual(length(pS), 3);
-testVD1 = viscore.blockedData(values.EEG.data, 'Shows summary only');
-bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
-assertTrue(isvalid(bv1));
+testVD3 = viscore.blockedData(values.EEG.data, 'Shows summary only');
+bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
+assertTrue(isvalid(bv3));
 drawnow
-%delete(bv1)
 
-function testTwoShadow(values) %#ok<DEFNU>
-% Unit test for dualView when two shadow plots are specified
-fprintf('\nUnit test for visviews.dualView for two shadow plots\n');
 fprintf('It should produce a valid plot when two shadow plots are used\n');
 pS = viewTestClass.getDefaultPlotsTwoShadowPlots();
 assertEqual(length(pS), 6);
-testVD1 = viscore.blockedData(values.EEG.data, 'Shows two shadow plots');
-bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
-assertTrue(isvalid(bv1));
+testVD4 = viscore.blockedData(values.EEG.data, 'Shows two shadow plots');
+bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
+assertTrue(isvalid(bv4));
 drawnow
-%delete(bv1)
 
-function testOneSummaryTwoDetail(values) %#ok<DEFNU>
-% Unit test for dualView one summary and two detail plots
-fprintf('\nUnit test for visviews.dualView for one summary and two details\n');
 fprintf('It should produce a valid plot when one summary and two details are used\n');
 f = viewTestClass.getDefaultOneFunction();
 fns = visfuncs.functionObj.createObjects('visfuncs.functionObj', f);
 assertEqual(length(fns), 1);
 pS = viewTestClass.getDefaultPlotsOneSummaryTwoDetails();
 assertEqual(length(pS), 3);
-testVD1 = viscore.blockedData(values.EEG.data, 'One summary two details');
-bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS', 'Functions', fns);
-assertTrue(isvalid(bv1));
+testVD5 = viscore.blockedData(values.EEG.data, 'One summary two details');
+bv5 = visviews.dualView('VisData', testVD5, 'Plots', pS', 'Functions', fns);
+assertTrue(isvalid(bv5));
 drawnow
-%delete(bv1)
+
+if values.deleteFigures
+    delete(bv1);
+    delete(bv2);
+    delete(bv3);
+    delete(bv4);
+    delete(bv5);
+end
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>
 % Unit test visviews.dualView constant and NaN
@@ -305,10 +304,13 @@ testVD4 = viscore.blockedData(data, 'Data empty');
 bv4 =  visviews.dualView('VisData', testVD4);
 assertTrue(isvalid(bv4));
 drawnow
-delete(bv1);
-delete(bv2);
-delete(bv3);
-delete(bv4);
+
+if values.deleteFigures
+    delete(bv1);
+    delete(bv2);
+    delete(bv3);
+    delete(bv4);
+end
 
 function testEventPlots(values) %#ok<DEFNU>
 % Unit test for event plots
@@ -323,26 +325,41 @@ bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
 assertTrue(isvalid(bv1));
 drawnow
 
-fprintf('It should produce a valid figure for artifacts\n');
+fprintf('It should produce a valid figure for artifacts with VEP events\n');
 pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
-load('EEGArtifact.mat');
-load('ArtifactEvents.mat');
-testVD2 = viscore.blockedData(EEGArtifact.data, 'Artifact', 'Events', event, ...
-    'BlockSize', 1000, 'SampleRate', EEGArtifact.srate);
+events = viscore.blockedEvents.getEEGTimes(values.EEGArtifact);
+testVD2 = viscore.blockedData(values.EEGArtifact.data, ...
+    'Artifact (VEP events)', 'Events', events, ...
+    'BlockSize', 1000, 'SampleRate', values.EEGArtifact.srate);
 bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
 assertTrue(isvalid(bv2));
+drawnow
+
+fprintf('It should produce a valid figure for artifacts with artifact events\n');
+pS = viewTestClass.getDefaultPlotsWithEvents();
+assertEqual(length(pS), 10);
+testVD3 = viscore.blockedData(values.EEGArtifact.data, ...
+    'Artifact (Artifact events)', 'Events', values.artifactEvents, ...
+    'BlockSize', 1000, 'SampleRate', values.EEGArtifact.srate);
+bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
+assertTrue(isvalid(bv3));
 drawnow
 
 fprintf('It should produce a valid figure for epoched data\n');
 pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
-[events, estarts, escales] = viscore.eventData.getEEGTimes(values.EEGEpoch);
-testVD3 = viscore.blockedData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
+[events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
+testVD4 = viscore.blockedData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
     'SampleRate', values.EEGEpoch.srate, 'EpochStartTimes', estarts, ...
     'EpochTimeScale', escales, 'Epoched', true);
-bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
-assertTrue(isvalid(bv3));
+bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
+assertTrue(isvalid(bv4));
 drawnow
-%delete(bv1)
-%delete(bv2)
+
+if values.deleteFigures
+   delete(bv1)
+   delete(bv2)
+   delete(bv3)
+   delete(bv4)
+end

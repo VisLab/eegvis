@@ -1,18 +1,18 @@
-% viscore.eventData   manages an array of events for block visualizations
+% viscore.blockedEvents   manages an array of events for block visualizations
 %
 % Usage:
-%   >>  viscore.eventData(event)
-%   >>  obj = viscore.eventData(event)
-%   >>  obj = viscore.eventData(..., 'Name1', 'Value1', ...)
+%   >>  viscore.blockedEvents(events)
+%   >>  obj = viscore.blockedEvents(events)
+%   >>  obj = viscore.blockedEvents(..., 'Name1', 'Value1', ...)
 %
 % Description:
-% viscore.eventData(event) creates an object to hold events for
+% viscore.blockedEvents(event) creates an object to hold events for
 %    visualization. The event parameter is an array of structures.
 %    The visualization is assumed to be divided into (potentially
 %    overlapping) fixed length blocks that are used for summaries.
 %
 %
-% viscore.eventData(events, 'Name1', 'Value1', ...) specifies
+% viscore.blockedEvents(events, 'Name1', 'Value1', ...) specifies
 %     optional name/value parameter pairs:
 %
 %   'BlockStartTimes'   optional vector of start times (in seconds) of blocks
@@ -26,18 +26,18 @@
 % types of events that should appear first (and hence are displayed more
 % prominently). Any event types not mentioned are not displayed.
 %
-% obj = viscore.eventData(...) returns a handle to the newly created
+% obj = viscore.blockedEvents(...) returns a handle to the newly created
 % object.
 %
 % Example 1:
 % Create a blocked data object for a random array
 %   data = random('normal', 0, 1, [32, 1000, 20]);
-%   bd = viscore.eventData(data);
+%   bd = viscore.blockedEvents(data);
 %
 % Example 2:
 % Reblock a data object in blocks of 500 frames
 %   data = random('normal', 0, 1, [32, 1000, 20]);
-%   bd = viscore.eventData(data, 'Normal(0, 1)');
+%   bd = viscore.blockedEvents(data, 'Normal(0, 1)');
 %   bd.reblock(500);
 %   [rows, cols, blks] = bd.getDataSize();
 %
@@ -54,19 +54,23 @@
 %    type        a string identifying the type of event
 %    startTime   double time in seconds of the start of the event from the
 %                beginning
-%    block       (optional) number of block in which the event is to be
+%    certainty  (optional) measure between 0 and 1 indicating how
+%                certain this event is (for computed events).  If omitted, 
+%                the certainty is 1
+%    blocks     (optional) number of blocks in which the event is to be
 %                placed (for epoched data)
 % The event structure array may have other fields, which are ignored.
 %
 % Notes:
-%   - the block field is needed because EEGLAB duplicates events for
-%     overlapping blocks
+%   - the blocks field is needed windows may overlap and EEG duplicates
+%     events in overlapping blocks so times can't always be used to
+%     determine membership
 %
 % Class documentation:
 % Execute the following in the MATLAB command window to view the class
-% documentation for viscore.eventData:
+% documentation for viscore.blockedEvents:
 %
-%    doc viscore.eventData
+%    doc viscore.blockedEvents
 %
 % See also: viscore.blockData
 %
@@ -89,17 +93,18 @@
 % along with this program; if not, write to the Free Software
 % Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 %
-% $Log: eventData.m,v $
+% $Log: blockedEvents.m,v $
 % $Revision: 1.00 04-Dec-2011 09:11:20 krobbins $
 % $Initial version $
 %
 
-classdef eventData < hgsetget
+classdef blockedEvents < hgsetget
     
     properties (Access = private)
         BlockList = {};      % cell array indexing events in block
         BlockStartTimes;     % start time of each block in seconds
         BlockTime;           % time in seconds for one block
+        Certainty;           % values between 0 and 1 indicating certainty
         EventBlocks;         % cell array of starting blocks by event
         EventCounts;         % type x blocks array with event counts
         EventStartTimes;     % double array of event start times
@@ -112,12 +117,12 @@ classdef eventData < hgsetget
     
     methods
         
-        function obj = eventData(event, varargin)
+        function obj = blockedEvents(event, varargin)
             % Constructor parses parameters and sets up initial data
             c = viscore.counter.getInstance();
             obj.VersionID = num2str(c.getNext());  % Get a unique ID
             obj.parseParameters(event, varargin{:});
-        end % eventData constructor
+        end % blockedEvents constructor
         
         function events = getBlocks(obj, startBlock, endBlock)
             % Return the row vector of doubles containing event numbers
@@ -155,6 +160,15 @@ classdef eventData < hgsetget
             % Return the time in seconds of the length of a block
             blockTime = obj.BlockTime;
         end % getBlockTime
+        
+        function certainty = getCertainty(obj, varargin)
+            % Return event start times - all or those specified by varargin
+            if nargin == 1
+                certainty = obj.Certainty;
+            else
+                certainty = obj.Certainty(varargin{1});
+            end
+        end % getCertainty
 
         function event = getEvent(obj, k)
             % Return event k as a structure or empty
@@ -288,7 +302,7 @@ classdef eventData < hgsetget
     methods(Access = private)
         function parseParameters(obj, event, varargin)
             % Parse parameters provided by user in constructor
-            parser = viscore.eventData.getParser();
+            parser = viscore.blockedEvents.getParser();
             parser.parse(event, varargin{:})
             % Get the parsed results
             p = parser.Results;
@@ -299,15 +313,24 @@ classdef eventData < hgsetget
             if sum(isnan(obj.EventStartTimes)) > 0 || ...
                     sum(obj.EventStartTimes) < 0 > 0 || ...
                     sum(isnan(obj.EventStartTimes)) > 0
-                error('eventData:NonNegativeStart', ...
+                error('blockedEvents:NonNegativeStart', ...
                     'Event start times must be non negative\n')
+            end
+            if isfield(p.event, 'certainty')
+               obj.Certainty = cell2mat({p.event.certainty}');
+               if sum(obj.Certainty < 0) + sum(obj.Certainty > 1) > 0
+                   error('blockedEvents:CertaintyOutOfRange', ...
+                       'Event certainties must be between 0 and 1 inclusive');
+               end
+            else
+               obj.Certainty = ones(length(obj.EventStartTimes), 1);
             end
             
             % Process the event types
             [obj.EventUniqueTypes, ia, obj.EventTypeNumbers] = ...
                 unique(types);        %#ok<ASGLU>
             if isempty(obj.EventUniqueTypes{1})
-                error('eventData:NonemptyType', ...
+                error('blockedEvents:NonemptyType', ...
                     'Event types must be non empty\n');
             end
             
@@ -365,17 +388,16 @@ classdef eventData < hgsetget
             end
             eLatencies = double(cell2mat({EEG.urevent(uEvents).latency}'));
             startTimes = (round(eLatencies) - 1)./EEG.srate;
-            endTimes = startTimes;
-            
+           
             % Now look at the epochs
             if ~isfield(EEG,'epoch') ||  isempty(EEG.epoch) % not epoched
                 event = struct('type', types, 'startTime', num2cell(startTimes), ...
-                    'endTime', num2cell(endTimes));
+                    'certainty', ones(length(startTimes), 1));
                 return;
             end
             epochList = {EEG.event.epoch}';
             event = struct('type', types, 'startTime', num2cell(startTimes), ...
-                'endTime', num2cell(endTimes), 'block', epochList);
+                 'certainty', ones(length(startTimes), 1), 'block', epochList);
             if ~isstruct(EEG) ||~isfield(EEG, 'times')
                 epochScale = (0:(length(EEG.epoch) - 1))'/EEG.srate;
             else
@@ -394,12 +416,12 @@ classdef eventData < hgsetget
         end  % getEpochTimes
         
         function parser = getParser()
-            % Create a parser for eventData
+            % Create a parser for blockedEvents
             parser = inputParser;
             parser.StructExpand = true;
             parser.addRequired('event', ...
                 @(x) (~isempty(x) && isstruct(x)) && ...
-                sum(isfield(x, {'type', 'startTime'})) == 2);
+                sum(isfield(x, {'type', 'startTime', 'certainty'})) == 3);
             parser.addParamValue('BlockStartTimes', [], ...
                 @(x)(isempty(x) || isnumeric(x)));
             parser.addParamValue('BlockTime', 1, ...
@@ -410,4 +432,4 @@ classdef eventData < hgsetget
         
     end % static methods
     
-end % eventData
+end % blockedEvents

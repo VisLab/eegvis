@@ -132,7 +132,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
         ColorUnselected = [0, 1, 0];   % face color of unselected events
         ColorCertain = [0, 0, 0];      % edge color for certain events
         ColorUncertain = [0.8, 0.8, 0.8]; % edge color for uncertain events
-        Threshhold = 0.5               % uncertainty threshold (0 and 1)
+        Threshold = 0.5               % uncertainty threshold (0 and 1)
         
     end % public properties 
     
@@ -257,14 +257,19 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             obj.HitList = cell(1, length(obj.CurrentEvents) + 1);
             obj.HitList{1} = obj.MainAxes;
             [xTimes, yTimes] = obj.getPlotPositions();
-            for k = 1:length(obj.CurrentEvents);        
+            certainties = obj.Events.getCertainty(obj.CurrentEvents);
+            for k = 1:length(obj.CurrentEvents);   
+                if certainties(k) >= obj.Threshold
+                    c = obj.ColorCertain;
+                else
+                    c = obj.ColorUncertain;
+                end
                 h =  plot(obj.MainAxes, xTimes{k}, yTimes{k}, '-s', ...
                          'Tag', num2str(obj.CurrentEvents(k)), ...
-                          'LineWidth', 4,...
+                          'LineWidth', 2, 'MarkerSize', 10, ...
                           'Color', obj.ColorUnselected, ...
-                          'MarkerEdgeColor', 'k',...
-                          'MarkerFaceColor', obj.ColorUnselected,...
-                          'MarkerSize', 10);
+                          'MarkerEdgeColor', c,...
+                          'MarkerFaceColor', obj.ColorUnselected);
                 obj.HitList{k + 1} = h;
             end
            
@@ -348,38 +353,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
     end % public methods
     
     methods (Access = private)
-        
-        function displayPlot(obj)
-            % Plot the events stacked one on top of another
-            numPlots = length(obj.EventsUnique);
 
-            %y-axis reversed, so must plot the negative of the events 
-            obj.HitList = cell(1, length(obj.CurrentEvents) + 1);
-            obj.HitList{1} = obj.MainAxes;
-            [xTimes, yTimes] = obj.getPlotPositions();
-            for k = 1:length(obj.CurrentEvents);        
-                h =  plot(obj.MainAxes, xTimes{k}, yTimes{k}, '-s', ...
-                         'Tag', num2str(obj.CurrentEvents(k)), ...
-                          'LineWidth', 4,...
-                          'Color', obj.ColorUnselected, ...
-                          'MarkerEdgeColor', 'k',...
-                          'MarkerFaceColor', obj.ColorUnselected,...
-                          'MarkerSize', 10);
-                obj.HitList{k + 1} = h;
-            end
-           
-            yTickLabels = cell(1, numPlots);
-            yTickLabels{1} = '1';
-            yTickLabels{numPlots} = num2str(numPlots);
-            set(obj.MainAxes,  'YLimMode', 'manual', ...
-                'YLim', [0, numPlots + 1], ...
-                'YTickMode', 'manual', 'YTickLabelMode', 'manual', ...
-                'YTick', 1:numPlots, 'YTickLabel', yTickLabels, ...
-                'XLim', obj.XValues, ...
-                'XLimMode', 'manual', 'XTickMode', 'auto');
-             obj.redraw();
-        end % plot
-        
         function [xTimes, yTimes] = getPlotPositions(obj)
             xTimes = obj.Events.getStartTimes(obj.CurrentEvents);
             yTimes = obj.Events.getTypeNumbers(obj.CurrentEvents);
@@ -395,7 +369,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             
             epochNums = obj.Events.getEventBlocks(obj.CurrentEvents);
             for k = 1:length(obj.CurrentEvents)
-                t = epochNums{k}
+                t = epochNums{k};
                 s = repmat(xTimes{k}, length(t), 1) - ...
                     obj.Events.getBlockStartTimes(t);
                 if obj.VisData.isEpoched()
@@ -404,29 +378,8 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
                 xTimes{k} = s;
                 yTimes{k} = t;
             end       
-                
-%                   s = 1000.*(s - bTimes(epochNums)) + obj.XValues(1);
-%                   t = repmat(t, length(epochNums), 1);
-            
-           
-            
-            % In hard case --- number of blakcs
-                          
-%             obj.HitList{1} = obj.MainAxes;
-%             for k = 1:length(obj.CurrentEvents);
-%                 s = xTimes{k};
-%                 t = yTimes{k};
-%                 if obj.VisData.isEpoched() %Plot offsets
-%                   epochNums = obj.Events.getEventBlocks(obj.CurrentEvents);
-%                   
-%                   s = repmat(s, length(epochNums), 1);
-%                   s = 1000.*(s - bTimes(epochNums)) + obj.XValues(1);
-%                   t = repmat(t, length(epochNums), 1);
-%                   if length(epochNums) > 1
-%                       tAdjust = 
-%                   end
-%                 end
         end % getPlotPositions
+        
     end % private methods
     
     methods(Static=true)
@@ -435,23 +388,72 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             % Structure specifying how to set configurable public properties
             cName = 'visviews.eventStackedPlot';
             settings = struct( ...
-                'Enabled',       {true,           true}, ...
-                'Category',      {cName,          cName}, ...
-                'DisplayName',   {'Color selected',  'Color unselected'}, ...
-                'FieldName',     {'ColorSelected',   'ColorUnselected'}, ...
-                'Value',         {[1, 0, 0],         [0, 1, 0]}, ...
+                'Enabled',       { ...
+                       true, ... %1
+                       true, ... %2
+                       true, ... %3
+                       true, ... %4                      
+                       true  ... %5
+                      }, ...
+                'Category',      { ...
+                       cName, ... %1
+                       cName, ... %2
+                       cName, ... %3
+                       cName, ... %4                      
+                       cName  ... %5
+                      }, ...
+                'DisplayName',   { ...
+                       'Threshold',       ... %1
+                       'Color certain',   ... %2
+                       'Color uncertain', ... %3
+                       'Color selected',  ... %4                      
+                       'Color unselected' ... %5   
+                       }, ...
+                'FieldName',     { ...
+                       'Threshold',      ... %1
+                       'ColorCertain',   ... %2
+                       'ColorUncertain', ... %3
+                       'ColorSelected',  ... %4                      
+                       'ColorUnselected' ... %5   
+                       }, ...              
+                'Value',         { ...
+                       0.5,              ... %1
+                       [0, 0, 0],        ... %2
+                       [0.8, 0.8, 0.8],  ... %3
+                       [1, 0, 0],        ... %4                      
+                       [0, 1, 0]         ... %5    
+                       }, ...               
                 'Type',          { ...
-                'visprops.colorProperty', ...
-                'visprops.colorProperty'}, ...
-                'Editable',      {true,              true}, ...
-                'Options',       {'',         ''}, ...
+                       'visprops.doubleProperty', ... %1
+                       'visprops.colorProperty',  ... %2
+                       'visprops.colorProperty',  ... %3
+                       'visprops.colorProperty',  ... %4                      
+                       'visprops.colorProperty'   ... %5    
+                       }, ...                               
+                'Editable',      { ...
+                       true, ... %1
+                       true, ... %2
+                       true, ... %3
+                       true, ... %4                      
+                       true  ... %5               
+                        }, ...
+                'Options',      { ...
+                       [0, 1], ... %1
+                       '',     ... %2
+                       '',     ... %3
+                       '',     ... %4                      
+                       ''      ... %5       
+                       }, ...
                 'Description',   { ...
-                'Color of selected event', ...
-                'Color of unselected event'} ...
+                       'Threshold for event certainty (must be in [0, 1])', ... %1
+                       'Marker outline color for certain event',            ... %2
+                       'Marker outline color for uncertain event',          ... %3                       
+                       'Marker face color for selected event',              ... %4 
+                       'Marker face color for unselected event',            ... %5
+                       } ...
                 );
         end % getDefaultProperties
-        
-        
+               
     end % static methods
     
 end % eventStackedPlot

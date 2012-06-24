@@ -203,25 +203,31 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             else
                 obj.CurrentSlice = dSlice;
             end
-            
+            obj.Events = visData.getEvents();  
+            if isempty(obj.Events);
+                return;
+            end
+
              % Calculate sizes and number of clumps, adjust for uneven clumps
             [e, s, b] = visData.getDataSize();
             [slices, names] = obj.CurrentSlice.getParameters(3);  
             [dSlice, starts, sizes] = viscore.dataSlice.getSliceEvaluation(...
                 [e, s, b], slices); %#ok<ASGLU>
+            if isempty(starts) || isempty(sizes)
+                return;
+            end
             obj.StartBlock = starts(3);
             obj.StartElement = starts(1);
             obj.NumberBlocks = sizes(3);
             obj.NumberElements = sizes(1);
            
-            obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
             obj.Events = visData.getEvents();  
             if isempty(obj.Events);
                 return;
             end
             obj.UniqueTypes = obj.Events.getUniqueTypes();
             obj.NumberEvents = size(obj.UniqueTypes, 1);
-            colors = obj.getColors();
+            colors = obj.createColors();
             iMap = image(colors, 'Parent', obj.MainAxes, 'Tag', 'ImageMap');
             set(iMap, 'HitTest', 'off') %Get position from axes not image
             
@@ -281,10 +287,23 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
     
     methods (Access = 'private')
         
-        function colors = getColors(obj)
-            % Returns the range of block numbers occupied by event k
+        function colors = createColors(obj)
+            % Return the range of block numbers occupied by event k
             counts = obj.Events.getEventCounts(obj.StartBlock, ...
                 obj.StartBlock + obj.NumberBlocks - 1);
+            
+            % Calculate the number of clumps and adjust for uneven clumps
+            obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
+            if obj.ClumpFactor > 1
+                leftOvers = obj.NumberClumps*obj.ClumpFactor - obj.NumberBlocks;
+                if leftOvers > 0
+                    counts = [counts, zeros(obj.NumberEvents, leftOvers)];
+                end
+                counts = reshape(counts', obj.ClumpFactor, obj.NumberClumps*obj.NumberEvents);
+                counts = viscore.dataSlice.combineDims(counts, 1, obj.CombineMethod);
+            else
+                counts = counts';
+            end
             mask = zeros(1, obj.NumberEvents*obj.NumberClumps);
             for k = 2:length(obj.Levels)
                 mask(counts >= obj.Levels(k - 1) & ...

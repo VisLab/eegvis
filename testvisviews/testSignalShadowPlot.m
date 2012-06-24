@@ -356,7 +356,7 @@ fprintf('It should produce a plot epoched data with time scale 3\n');
 sfig1 = figure('Name', 'Epoched with time scale');
 sp1 = visviews.signalShadowPlot(sfig1, [], []);
 assertTrue(isvalid(sp));
-[event, startTimes, timeScale] = viscore.eventData.getEEGTimes(EEGEpoch); 
+[event, startTimes, timeScale] = viscore.blockedEvents.getEEGTimes(EEGEpoch);  %#ok<ASGLU>
 testVD1 = viscore.blockedData(EEGEpoch.data, 'EpochedTimeScale', ...
     'Epoched', true, 'EpochTimeScale', timeScale);
 sp1.plot(testVD1, fun, slice1);

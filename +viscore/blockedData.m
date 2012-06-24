@@ -29,7 +29,7 @@
 %   'Epoched'          if true, data is epoched and can't be reblocked
 %   'EpochStartTimes'  if data is epoched, times in seconds of epoch beginnings
 %   'EpochTimes'       if data is epoched, times corresponding to epoch samples
-%   'Events'           eventData object if this data has events 
+%   'Events'           blockedEvents object if this data has events 
 %   'PadValue'         numeric value to pad uneven blocks (defaults to 0)
 %
 % obj = viscore.blockedData(...) returns a handle to the newly created
@@ -180,7 +180,7 @@ classdef blockedData < hgsetget
         end % getEpochTimes
         
         function events = getEvents(obj)
-            % Return the eventData object containing events for this data
+            % Return the blockedEvents object containing events for this data
             events = obj.Events;
         end % getEvents
         
@@ -373,7 +373,7 @@ classdef blockedData < hgsetget
                 maxTime = obj.BlockSize*size(obj.Data, obj.BlockDim);
             end
             
-            obj.Events = viscore.eventData(pdata.Events, ...
+            obj.Events = viscore.blockedEvents(pdata.Events, ...
                 'BlockStartTimes', bStarts, 'MaxTime', maxTime, ...
                 'BlockTime', obj.BlockSize./obj.SampleRate);
         end % setEvents     
