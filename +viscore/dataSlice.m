@@ -104,7 +104,7 @@ classdef dataSlice < hgsetget
     
    properties(Constant = true)
         ValidMethods = ... % allowed methods for combining dimensions
-            {'mean', 'median', 'max', 'min'};
+            {'mean', 'median', 'max', 'min', 'sum'};
     end % constant properties
     
     methods
@@ -206,6 +206,8 @@ classdef dataSlice < hgsetget
                     eString = 'max(data, [], dims(k))';
                 case 'min'
                     eString = 'min(data, [], dims(k))';
+                case 'sum'
+                    eString = 'sum(data, dims(k))';
                 otherwise
                     eString = '';
             end
@@ -264,12 +266,6 @@ classdef dataSlice < hgsetget
             
             [dSlice, sStart, sSizes] = ...
                 viscore.dataSlice.getSliceEvaluation(size(data), slices);
-%             nd = max(ndims(data), 3); % Always return slice starts at least 3
-%             sizes = ones(1, nd);
-%             s = size(data);
-%             sizes(1:length(s)) = size(data);
-%             [dSlice, sStart, sSizes] = ...
-%                     viscore.dataSlice.getSliceEvaluation(sizes, slices);
             if isempty(slices)
                 return;
             elseif isempty(sStart)

@@ -2,7 +2,14 @@ function test_suite = testDataSlice %#ok<STOUT>
 % Unit tests for dataSlice
 initTestSuite;
 
-function testNormalConstructor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values = [];
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+
+function testNormalConstructor(values) %#ok<INUSD,DEFNU>
 % Unit test for dataSlice normal constructor normal constructor
 fprintf('\nUnit tests for dataSlice for normal constructor\n');
 
@@ -109,7 +116,7 @@ fprintf('It should use throw an exception when a non-character is passed\n');
 ds = @() viscore.dataSlice('CombineMethod', []);
 assertExceptionThrown(ds, 'MATLAB:invalidType');
 
-function testGetSliceParameters %#ok<DEFNU>
+function testGetSliceParameters(values) %#ok<DEFNU>
 % Unit test for dataSlice getSliceParameters
 fprintf('\nUnit tests for the getSliceParameters method of dataSlice:\n');
 
@@ -145,7 +152,7 @@ assertTrue(~isempty(slices));
 assertTrue(~isempty(names));
 
 
-function testSlicesToString %#ok<DEFNU>
+function testSlicesToString(values) %#ok<INUSD,DEFNU>
 % Unit test for dataSlice static slicesToString method
 fprintf('\nUnit tests for static slicesToString method of dataSlice:\n');
 
@@ -156,7 +163,7 @@ sString = viscore.dataSlice.slicesToString(slices);
 assertTrue(ischar(sString));
 
 
-function testGetDataSlice %#ok<DEFNU>
+function testGetDataSlice(values) %#ok<INUSD,DEFNU>
 % Unit test for dataSlice getDataSlice static method 
 fprintf('\nTesting getDataSlice static method of dataSlice\n');
 
@@ -232,7 +239,7 @@ assertEqual(start(3), 2);
 assertVectorsAlmostEqual(sSizes, [32, 1000, 4]);
 
 
-function testGetSliceEvaluation %#ok<DEFNU>
+function testGetSliceEvaluation(values) %#ok<INUSD,DEFNU>
 % Unit test for dataSlice getSliceEvaluation static method 
 fprintf('\nTesting getSliceEvaluation static method of dataSlice\n');
 
@@ -284,7 +291,7 @@ assertVectorsAlmostEqual(sStart, [1, 3, 1, 1]);
 assertTrue(strcmp(eSlice, ':,[3],:,:'));
 assertVectorsAlmostEqual(sSlice, [32, 1, 20, 36]);
 
-function testRangeString %#ok<DEFNU>
+function testRangeString(values) %#ok<INUSD,DEFNU>
 % Unit test for dataSlice rangeString static method 
 fprintf('\nTesting rangeString static method of dataSlice\n');
 fprintf('It should just have string representing a single value if numValues is 1\n');
@@ -294,3 +301,11 @@ fprintf('It should have a colon range if numValues > 1\n');
 assertTrue(strcmp('1:4', viscore.dataSlice.rangeString(1, 4)));
 assertTrue(strcmp('3:4', viscore.dataSlice.rangeString(3, 2)));
 
+function testCombineDims(values) %#ok<INUSD,DEFNU>
+% Unit test for dataSlice combineDims static method 
+fprintf('\nTesting combineDims static method of dataSlice\n');
+data = random('normal', 0, 1, [32, 1000, 20, 5]);
+fprintf('It should just combine dimensions correctly for mean\n')
+
+dComb = viscore.dataSlice.combineDims(data, 3, 'mean');
+assertVectorsAlmostEqual(dComb, mean(data, 3));

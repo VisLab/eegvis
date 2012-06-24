@@ -121,9 +121,9 @@ classdef vectorProperty < visprops.doubleProperty
                     throw(obj.getException('convertValueToMATLAB', ...
                                            'Can''t have an empty string'));
                 end
-                mValue = str2double(jValue);
+                mValue = str2num(jValue);
                 if isempty(mValue) || ~isnumeric(mValue) || ...
-                        isnan(mValue) || ~isvector(mValue)
+                    sum(isnan(mValue)) ~= 0 || ~isvector(mValue)
                     throw(obj.getException('convertValueToMATLAB', ...
                                            'Value isn''t numeric vector'));
                 elseif ~testInLimits(obj, mValue)
