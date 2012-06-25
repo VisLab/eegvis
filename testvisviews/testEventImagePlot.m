@@ -117,7 +117,7 @@ ep3.reposition(gaps);
 sfig4 = figure('Name', 'Grouping of 2');
 ep4 = visviews.eventImagePlot(sfig4, [], []);
 assertTrue(isvalid(ep4));
-ep4.ClumpFactor = 2;
+ep4.ClumpSize = 2;
 ep4.plot(testVD, thisFunc, slice1);
 drawnow
 gaps = ep4.getGaps();
@@ -127,7 +127,7 @@ fprintf('It should produce a plot for identity slice with 1 group\n');
 sfig5 = figure('Name', 'Group of one');
 ep5 = visviews.eventImagePlot(sfig5, [], []);
 assertTrue(isvalid(ep5));
-ep5.ClumpFactor = 20;
+ep5.ClumpSize = 20;
 ep5.plot(testVD, thisFunc, slice1);
 drawnow
 gaps = ep5.getGaps();
@@ -138,7 +138,7 @@ fprintf('It should produce a plot for identity slice with uneven grouping\n');
 sfig6 = figure('Name', 'Ungrouped group to compare with uneven grouping');
 ep6 = visviews.eventImagePlot(sfig6, [], []);
 assertTrue(isvalid(ep6));
-ep6.ClumpFactor = 3;
+ep6.ClumpSize = 3;
 ep6.plot(testVD, thisFunc, slice1);
 gaps = ep6.getGaps();
 ep6.reposition(gaps);
@@ -149,7 +149,7 @@ slice7 = viscore.dataSlice('Slices', {':', ':', '5:9'}, ...
 sfig7 = figure('Name', 'Ungrouped comparison for uneven  small group');
 ep7 = visviews.eventImagePlot(sfig7, [], []);
 assertTrue(isvalid(ep7));
-ep7.ClumpFactor = 4;
+ep7.ClumpSize = 4;
 ep7.plot(testVD, thisFunc, slice7);
 gaps = ep7.getGaps();
 ep7.reposition(gaps);
@@ -162,7 +162,7 @@ slice8 = viscore.dataSlice('Slices', {'32', ':', '5'}, ...
 sfig8 = figure('Name', 'One element grouped by 3');
 ep8 = visviews.eventImagePlot(sfig8, [], []);
 assertTrue(isvalid(ep8));
-ep8.ClumpFactor = 3;
+ep8.ClumpSize = 3;
 ep8.plot(testVD, thisFunc, slice8);
 drawnow
 gaps = ep8.getGaps();
@@ -194,7 +194,7 @@ ep11 = visviews.eventImagePlot(sfig11, [], []);
 assertTrue(isvalid(ep11));
 slice11 = viscore.dataSlice('Slices', {':', ':', '14:15'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
-ep11.ClumpFactor = 3;
+ep11.ClumpSize = 3;
 ep11.plot(testVD, thisFunc, slice11);
 gaps = ep11.getGaps();
 ep11.reposition(gaps);

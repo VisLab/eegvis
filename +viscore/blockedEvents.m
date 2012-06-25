@@ -190,6 +190,11 @@ classdef blockedEvents < hgsetget
             end
         end % getStartTimes
         
+       function count = getEventCount(obj, eventType, block) 
+            % Return types x blocks array of counts
+            count = obj.EventCounts(eventType, block);
+        end % getEventCounts
+        
         function counts = getEventCounts(obj, startBlock, endBlock) %#ok<MANU>
             % Return types x blocks array of counts
             counts = eval(['obj.EventCounts(:, ' ...
