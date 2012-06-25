@@ -180,9 +180,9 @@ ep9.reposition(gaps);
 
 fprintf('It should produce a plot for a slice of windows that falls off the end\n');
 sfig10 = figure('Name', 'Slice of windows off the end');
-ep10 = visviews.eventImagePlot(sfig3, [], []);
+ep10 = visviews.eventImagePlot(sfig10, [], []);
 assertTrue(isvalid(ep10));
-slice10 = viscore.dataSlice('Slices', {':', ':', '15:21'}, ...
+slice10 = viscore.dataSlice('Slices', {':', ':', '25:34'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
 ep10.plot(testVD, thisFunc, slice10);
 gaps = ep10.getGaps();
@@ -213,12 +213,9 @@ counts = ev12.getEventCounts(1, numBlocks);
 assertVectorsAlmostEqual(size(counts), ...
     [length(ev12.getUniqueTypes()), numBlocks]);
 ep12.plot(testVD12, thisFunc, slice1);
-drawnow
 gaps = ep12.getGaps();
 ep12.reposition(gaps);
-fprintf('It should allow callbacks to be registered\n')
-ep12.registerCallbacks(ep12);
-
+drawnow
 if values.deleteFigures
     delete(sfig1);
     delete(sfig2);
@@ -356,7 +353,6 @@ ep1.plot(testVD, thisFunc, slice1);
 gaps = ep1.getGaps();
 ep1.reposition(gaps);
 drawnow
-ep1.registerCallbacks(ep1);
 if values.deleteFigures
    delete(sfig1);
 end

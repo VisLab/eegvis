@@ -300,7 +300,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                     counts = [counts, zeros(obj.NumberEvents, leftOvers)];
                 end
                 counts = reshape(counts', obj.ClumpFactor, obj.NumberClumps*obj.NumberEvents);
-                counts = viscore.dataSlice.combineDims(counts, 1, obj.CombineMethod)';
+                counts = viscore.dataSlice.combineDims(counts, 1, obj.CombineMethod);
+                counts = reshape(counts, obj.NumberClumps, obj.NumberEvents)';
             end
             mask = zeros(1, obj.NumberEvents*obj.NumberClumps);
             for k = 2:length(obj.Levels)

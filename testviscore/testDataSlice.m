@@ -116,7 +116,7 @@ fprintf('It should use throw an exception when a non-character is passed\n');
 ds = @() viscore.dataSlice('CombineMethod', []);
 assertExceptionThrown(ds, 'MATLAB:invalidType');
 
-function testGetSliceParameters(values) %#ok<DEFNU>
+function testGetSliceParameters(values) %#ok<INUSD,DEFNU>
 % Unit test for dataSlice getSliceParameters
 fprintf('\nUnit tests for the getSliceParameters method of dataSlice:\n');
 
@@ -305,7 +305,11 @@ function testCombineDims(values) %#ok<INUSD,DEFNU>
 % Unit test for dataSlice combineDims static method 
 fprintf('\nTesting combineDims static method of dataSlice\n');
 data = random('normal', 0, 1, [32, 1000, 20, 5]);
-fprintf('It should just combine dimensions correctly for mean\n')
+fprintf('It should just combine dimensions correctly for mean\n');
 
 dComb = viscore.dataSlice.combineDims(data, 3, 'mean');
 assertVectorsAlmostEqual(dComb, mean(data, 3));
+
+fprintf('It should combine dimensions correctly for sum\n');
+dComb2 = viscore.dataSlice.combineDims(data, 1, 'sum');
+assertVectorsAlmostEqual(dComb2, sum(data, 1));
