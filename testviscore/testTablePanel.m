@@ -2,7 +2,13 @@ function test_suite = testTablePanel %#ok<STOUT>
 % Unit tests for viscore.tablePanel
 initTestSuite;
 
-function testNormalConstructor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values.deleteFigures = true;
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testNormalConstructor(values) %#ok<DEFNU>
 % Unit test for viscore.tableConfig normal constructor
 fprintf('\nUnit tests for viscore.tableConfig valid constructor\n');
 
@@ -21,5 +27,8 @@ tdata(1, :) = {true, 'Help me', 'This', 'Tag1'};
 tdata(2, :) = {false, 'Help you', 'That', 'Tag2'};
 tp.setTableData(tdata);
 assertTrue(isvalid(tp));
-delete(sfig);
+
+if values.deleteFigures
+   delete(sfig);
+end
 

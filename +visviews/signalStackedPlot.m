@@ -5,17 +5,17 @@
 %   >>  obj = visviews.signalStackedPlot(parent, manager, key)
 %
 % Description:
-% obj = visviews.signalStackedPlot(parent, manager, key) shows each 
-%     member of a slice of signals offset vertically, with the lowest numbered 
-%     member at the top and the highest number slice at the bottom. 
-%     The stacked signal plot can show three possible slices: by channel, 
-%     by sample, or by window. Plotting by window is the most traditional display. 
-% 
+% obj = visviews.signalStackedPlot(parent, manager, key) shows each
+%     member of a slice of signals offset vertically, with the lowest numbered
+%     member at the top and the highest number slice at the bottom.
+%     The stacked signal plot can show three possible slices: by channel,
+%     by sample, or by window. Plotting by window is the most traditional display.
+%
 %     The parent is a graphics handle to the container for this plot. The
 %     manager is an viscore.dataManager object containing managed objects
 %     for the configurable properties of this object, and |key| is a string
 %     identifying this object in the property manager GUI.
-% 
+%
 %
 % obj = visviews.signalStackedPlot(parent, manager, key) returns a handle to
 %     the newly created object.
@@ -24,40 +24,40 @@
 %
 %
 % Configurable properties:
-% The visviews.signalStackedPlot has five configurable parameters: 
+% The visviews.signalStackedPlot has five configurable parameters:
 %
 % ClippingOn    is a boolean, which if true causes the individual signals
-%               to be truncated so that they appear inside the axes. 
+%               to be truncated so that they appear inside the axes.
 %
-% CombineMethod specifies how to combine multiple blocks 
-%               when displaying a clumped slice.  The value can be 
-%               'max', 'min', 'mean', 'median', or 
-%               'none' (the default). 
+% CombineMethod specifies how to combine multiple blocks
+%               when displaying a clumped slice.  The value can be
+%               'max', 'min', 'mean', 'median', or
+%               'none' (the default).
 %
-% RemoveMean    is a boolean flag specifiying whether to remove the 
-%               the individual channel means for the data before 
+% RemoveMean    is a boolean flag specifiying whether to remove the
+%               the individual channel means for the data before
 %               trimming or plotting.
 %
-% SignalLabel   is a string identifying the units of the signal. 
+% SignalLabel   is a string identifying the units of the signal.
 %
-% SignalScale   is a numerical factor specifying the vertical spacing 
-%               of the individual line plots. The spacing is SignalScale 
-%               times the 10% trimmed mean of the standard deviation 
+% SignalScale   is a numerical factor specifying the vertical spacing
+%               of the individual line plots. The spacing is SignalScale
+%               times the 10% trimmed mean of the standard deviation
 %               of the data.
 %
-% TrimPercent   is a numerical value specifying the percentage of 
-%               extreme points to remove from the window before 
+% TrimPercent   is a numerical value specifying the percentage of
+%               extreme points to remove from the window before
 %               plotting. If the percentage is t, the largest
 %               t/2 percentage and the smallest t/2 percentage of the
 %               data points are removed (over all elements or channels).
-%               The signal scale is calculated relative to the trimmed 
+%               The signal scale is calculated relative to the trimmed
 %               signal and all of the signals are clipped at the
 %               trim cutoff before plotting.
 %
-% Example: 
+% Example:
 % Create a stacked signal plot for random signals
 %
-%   % Create a sinusoidal data set with random amplitude and phase 
+%   % Create a sinusoidal data set with random amplitude and phase
 %   data = random('normal', 0, 1, [32, 1000, 20]);
 %   testVD = viscore.blockedData(data, 'Rand1');
 %
@@ -73,7 +73,7 @@
 %   sp = visviews.signalStackedPlot(sfig, [], []);
 %   sp.SignalScale = 2.0;
 %   sp.plot(testVD, thisFunc, thisSlice);
-%  
+%
 %   % Adjust the margins
 %   gaps = sp.getGaps();
 %   sp.reposition(gaps);
@@ -89,7 +89,7 @@
 %    to determine the plot spacing.
 %
 % Class documentation:
-% Execute the following in the MATLAB command window to view the class 
+% Execute the following in the MATLAB command window to view the class
 % documentation for visviews.signalStackedPlot:
 %
 %    doc visviews.signalStackedPlot
@@ -120,7 +120,7 @@
 % Initial version $
 %
 
-classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable 
+classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
     %Panel that plots individual element or window signals
     %
     % Inputs:
@@ -133,16 +133,16 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
         RemoveMean = true;           % remove the mean prior to plotting
         SignalLabel = '{\mu}V';      % label indicating units of the signal
         SignalScale = 1;             % scale factor to calculate plot spacing
-        TrimPercent = 0;             % percentage of extreme points to trim 
-    end % public properties 
+        TrimPercent = 0;             % percentage of extreme points to trim
+    end % public properties
     
-    properties (Access = private)   
+    properties (Access = private)
         ClippingTolerance = 0.05;    % clipped this much inside axes
         Colors = [];                 % needed for clickable
         CurrentSlice = [];           % current data slice
         HitList = {};                % list of hithandles
-        LineWidthSelected = 2.0;     % width of selected signal line  
-        LineWidthUnselected = 0.5;   % width of unselected signal line    
+        LineWidthSelected = 2.0;     % width of selected signal line
+        LineWidthUnselected = 0.5;   % width of unselected signal line
         PlotSpacing = [];            % spacing between plot axes
         PlotWindow = true;           % if true, a window is being plotted
         SelectedBlockOffset = 0;     % start of selected block in seconds
@@ -151,7 +151,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
         SelectedTagNumber = [];      % number of selected signal within signals
         Signals = [];                % data currently plotted in this panel
         StartBlock = 1;              % starting block of currently plotted slice
-        StartElement = 1;            % starting element of currently plotted slice 
+        StartElement = 1;            % starting element of currently plotted slice
         TotalBlocks = 0;             % total number of blocks in the data
         TotalElements = 0;           % total number of elements in the data
         VisData = [];                % original data for interrogation
@@ -183,16 +183,18 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
         function plot(obj, visData, bFunction, dSlice)
             % Plot specified data slice of visData using bFunction's colors
             obj.reset();
-            if isempty(visData)
+            if isempty(visData) || isempty(bFunction)
+                warning('signalStackedPlot:emptyFunctionOrData', ...
+                    'Missing summary function or block data for this plot');
                 return;
             end
             bFunction.setData(visData);
-            obj.VisData = visData; % Keep data for cursor exploration 
-                           
+            obj.VisData = visData; % Keep data for cursor exploration
+            
             % Figure out whether the slice is by window or by element
             if isempty(dSlice)
-               obj.CurrentSlice = viscore.dataSlice(...
-                                      'CombineMethod', obj.CombineMethod);
+                obj.CurrentSlice = viscore.dataSlice(...
+                    'CombineMethod', obj.CombineMethod);
             else
                 obj.CurrentSlice = dSlice;
             end
@@ -204,38 +206,38 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 warning('signalStackedPlot:emptyBlockValues', ...
                     'Slice has no values');
                 return;
-            end           
+            end
             [obj.TotalElements, obj.TotalBlocks] = size(bValues); % Capture size before combining
             if isempty(cDims) || ~isempty(intersect(cDims, 3))  % Plot all elements for a window
                 if (obj.TotalBlocks > 1) && obj.VisData.isEpoched()
                     combDim = 2;
                 elseif (obj.TotalBlocks > 1)
                     combDim = -2;   % Combine for colors
-                end         
-                obj.PlotWindow = true; 
-            elseif ~isempty(intersect(cDims, 1))  % Plot all windows for an element 
+                end
+                obj.PlotWindow = true;
+            elseif ~isempty(intersect(cDims, 1))  % Plot all windows for an element
                 if obj.TotalElements > 1
-                    combDim = 1;  
-                end         
+                    combDim = 1;
+                end
                 obj.PlotWindow = false;
             else
                 warning('signalStackedPlot:plotSlice', ...
-                        'array slice is empty and cannot be plotted');
+                    'array slice is empty and cannot be plotted');
                 return;
             end
             
-            % Compute colors and adjust label of multiple blocks 
+            % Compute colors and adjust label of multiple blocks
             if  combDim ~= 0    % Combine blocks if necessary
                 bValues = viscore.dataSlice.combineDims(...
-                                       bValues, abs(combDim), combMethod);
+                    bValues, abs(combDim), combMethod);
             end
-                    
+            
             % Extract the signal based on the slice
             if obj.PlotWindow && ~obj.VisData.isEpoched()
                 cDims = [];
             end
             [obj.Signals, sStart] = viscore.dataSlice.getDataSlice(visData.getData(), ...
-                                     slices, cDims, obj.CombineMethod);
+                slices, cDims, obj.CombineMethod);
             if isempty(obj.Signals)
                 warning('signalStackedPlot:plotSlice', ...
                     'must have at least 2 samples to plot');
@@ -244,17 +246,17 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             
             obj.StartElement = sStart(1);
             obj.StartBlock = sStart(3);
- 
+            
             % Adjust signals to account for blocking
             if combDim > 0   % Adjust the label if necessary
-                  combineString = [obj.CombineMethod ' '];
+                combineString = [obj.CombineMethod ' '];
             else
-                  combineString = '';
+                combineString = '';
             end
             
             [nElements, nSamples, nBlocks] = size(obj.Signals);
             obj.Colors = bFunction.getBlockColors(bValues);
-            if obj.PlotWindow  % Plot all elements for a window           
+            if obj.PlotWindow  % Plot all elements for a window
                 % If continguous windows are plotted reshape to align
                 if ~obj.VisData.isEpoched() && nBlocks > 1  % windows displayed consecutively
                     obj.Signals = permute(obj.Signals, [2, 3, 1]);
@@ -262,7 +264,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                     obj.Signals = squeeze(obj.Signals');
                     combineString = '';  % blocks contiguous so don't combine
                 elseif obj.TotalBlocks == 1
-                     combineString = ''; % only one block so don't combine
+                    combineString = ''; % only one block so don't combine
                 end
                 obj.XLimOffset = (sStart(3) - 1)*nSamples/visData.getSampleRate();
                 obj.YStringBase = names{1};
@@ -277,7 +279,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 viscore.dataSlice.rangeString(obj.StartBlock, nBlocks) ...
                 ' (' combineString names{1} ' ' ...
                 viscore.dataSlice.rangeString(obj.StartElement, obj.TotalElements) ')'];
-      
+            
             if obj.VisData.isEpoched() % add time scale to x label
                 obj.XValues = 1000*visData.getBlockTimeScale();
                 obj.TimeUnits = 'ms';
@@ -291,46 +293,46 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             obj.YString = obj.YStringBase;
             obj.XStringBase = ['Time(' obj.TimeUnits ') [' obj.XStringBase ']'];
             obj.XString = obj.XStringBase;
-            obj.displayPlot();           
+            obj.displayPlot();
         end % plot
         
         function reset(obj)
             obj.reset@visviews.axesPanel();
             obj.HitList = {};
         end % reset
-
+        
         function s = updateString(obj, point)
             % Return [Block, Element, Function] value string for point
             s = '';   % String to be returned
-           % try   % Use exception handling for small round-off errors
-                [x, y, xInside, yInside] = obj.getDataCoordinates(point); %#ok<ASGLU>
-                if ~xInside || ~yInside
-                    return;
+            % try   % Use exception handling for small round-off errors
+            [x, y, xInside, yInside] = obj.getDataCoordinates(point); %#ok<ASGLU>
+            if ~xInside || ~yInside
+                return;
+            end
+            
+            if ~obj.VisData.isEpoched()
+                t = x + obj.SelectedBlockOffset;
+                sample = floor(obj.VisData.getSampleRate()*(t)) + 1;
+                s = {['t: ' num2str(t) ' ' obj.TimeUnits]; ...
+                    ['s: ' num2str(sample)]};
+                if ~isempty(obj.SelectedHandle)
+                    rs = floor(obj.VisData.getSampleRate()*(x - obj.XLimOffset)) + 1;
+                    s{3} = ['raw: '  num2str(obj.SelectedSignal(rs)) ...
+                        ' ' obj.SignalLabel];
                 end
-                
-                if ~obj.VisData.isEpoched()
-                    t = x + obj.SelectedBlockOffset;
-                    sample = floor(obj.VisData.getSampleRate()*(t)) + 1;
-                    s = {['t: ' num2str(t) ' ' obj.TimeUnits]; ...
-                        ['s: ' num2str(sample)]};
-                    if ~isempty(obj.SelectedHandle)
-                        rs = floor(obj.VisData.getSampleRate()*(x - obj.XLimOffset)) + 1;
-                        s{3} = ['raw: '  num2str(obj.SelectedSignal(rs)) ...
-                            ' ' obj.SignalLabel];
-                    end
-                else
-                    a = (x - obj.VisData.getBlockTimeScale(1))./1000;
-                    a = floor(obj.VisData.getSampleRate()*a) + 1;
-                    s = {['et: ' num2str(x) ' ' obj.TimeUnits]; ...
-                        ['es: ' num2str(a)]};
-                    if ~isempty(obj.SelectedHandle)
-                        z = {['v: '  num2str(obj.SelectedSignal(a)) ...
-                            ' ' obj.SignalLabel]};
-                        s = [s; z];
-                    end;
-                end
-           % catch  ME  %#ok<NASGU>   ignore errors on cursor sweep
-           % end
+            else
+                a = (x - obj.VisData.getBlockTimeScale(1))./1000;
+                a = floor(obj.VisData.getSampleRate()*a) + 1;
+                s = {['et: ' num2str(x) ' ' obj.TimeUnits]; ...
+                    ['es: ' num2str(a)]};
+                if ~isempty(obj.SelectedHandle)
+                    z = {['v: '  num2str(obj.SelectedSignal(a)) ...
+                        ' ' obj.SignalLabel]};
+                    s = [s; z];
+                end;
+            end
+            % catch  ME  %#ok<NASGU>   ignore errors on cursor sweep
+            % end
         end % updateString
         
         function buttonDownPreCallback(obj, src, eventdata, master)  %#ok<INUSD>
@@ -357,7 +359,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 if ~obj.PlotWindow && ~obj.VisData.isEpoched()
                     obj.SelectedBlockOffset = obj.VisData.getBlockSize() * ...
                         (selected - 1) /obj.VisData.getSampleRate();
-                 end
+                end
             end
             obj.redraw();
         end % buttonDownPreCallback
@@ -396,7 +398,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             elseif plotSpacing == 0;
                 plotSpacing = 0.1;
             end
-            %y-axis reversed, so must plot the negative of the signals            
+            %y-axis reversed, so must plot the negative of the signals
             eps = plotSpacing*obj.ClippingTolerance;
             obj.HitList = cell(1, numPlots + 1);
             obj.HitList{1} = obj.MainAxes;
@@ -424,7 +426,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 'XTickMode', 'auto', ...
                 'XLim', [obj.XValues(1), obj.XValues(end)], 'XLimMode', 'manual', ...
                 'XTickMode', 'auto');
-             obj.redraw();
+            obj.redraw();
         end % plot
         
     end % private methods
@@ -453,12 +455,12 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 ['If true, individual signals are clipped ' ...
                 'to fall within the plot window'], ...
                 ['Specifies how to combine multiple windows ' ...
-                 'into a single window for plotting'], ...
+                'into a single window for plotting'], ...
                 'If true, remove mean before plotting', ...
                 'Label indicating signal units', ...
                 ['Scale factor for plotting individual signal plots ' ...
                 '(must be positive)'], ...
-                 ['Percentage of extreme points (half on each end ' ...
+                ['Percentage of extreme points (half on each end ' ...
                 'before calculating limits']} ...
                 );
         end % getDefaultProperties

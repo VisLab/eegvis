@@ -1,7 +1,14 @@
 function test_suite = testTableConfig %#ok<STOUT>
 initTestSuite;
 
-function testConstructor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values.deleteFigures = true;
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+
+function testConstructor(values) %#ok<DEFNU>
 % Unit test for viscore.tableConfig constructor
 fprintf('\nUnit tests for viscore.tableConfig valid constructor\n');
 
@@ -15,9 +22,11 @@ title = 'test figure';
 plistc = viscore.tableConfig(selector, title);
 assertTrue(isvalid(plistc));
 drawnow
-delete(plistc);
+if values.deleteFigures
+   delete(plistc);
+end
 
-function testColorMap2String %#ok<DEFNU>
+function testColorMap2String(values) %#ok<INUSD,DEFNU>
 % Unit test for viscore.tableConfig constructor
 fprintf('\nUnit tests for viscore.tableConfig colorMap2String static method\n');
 
@@ -32,7 +41,7 @@ fprintf('%s : %s\n', x, w);
 assertTrue(strcmpi(w, x) == 1);
 
 
-function testConfigFromVariables %#ok<DEFNU>
+function testConfigFromVariables(values) %#ok<DEFNU>
 % Unit test for viscore.tableConfig load and save
 fprintf('\nUnit tests for viscore.tableConfig getting and setting configuration\n');
 fprintf('It should get and set the configuration\n');
@@ -66,5 +75,7 @@ for k = 1:length(objList2)
     s = objList2{k}.getConfiguration();
     assertTrue(isa(s, 'struct'));
 end
-delete(bfc);
-delete(bfc2)
+if values.deleteFigures
+    delete(bfc);
+    delete(bfc2);
+end

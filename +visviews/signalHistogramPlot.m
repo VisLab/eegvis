@@ -127,12 +127,19 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
                 'ActivePositionProperty', 'position');
         end % blockHistogramPlot constructor
         
-        function plot(obj, visData, bFunction, dSlice)  %#ok<INUSL>
+        function plot(obj, visData, bFunction, dSlice)  
             % Plot the signal, ignoring the block function
             obj.reset();
             set(obj.MainAxes, 'Box', 'on',  'Tag', 'signalHistogramPlot', ...
                 'ActivePositionProperty', 'position');
             hold(obj.MainAxes, 'on');
+            
+            if isempty(visData) || isempty(bFunction)
+                warning('signalHistogramPlot:emptyFunctionOrData', ...
+                    'Missing summary function or block data for this plot');
+                return;
+            end  
+            bFunction.setData(visData);
   
             if isempty(dSlice)
                 obj.CurrentSlice = viscore.dataSlice();

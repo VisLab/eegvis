@@ -2,7 +2,13 @@ function test_suite = testTableTestObj %#ok<STOUT>
 % Unit tests for tableTestObj
 initTestSuite;
 
-function testConstuctor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values = [];
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testConstuctor(values) %#ok<DEFNU>
 % Unit test for tableTestObj for normal constructor
 fprintf('\nUnit tests for tableTestObject:\n');
 
@@ -25,7 +31,6 @@ fs = tableTestObj.getDefaults();
 bf = tableTestObj([], fs(1));
 def = bf.getDefinition();
 assertTrue(strcmp(def, 'visviews.blockImagePlot'));
-
 
 fprintf('It should clone an object which is distinct, but has the same values\n');
 fs = tableTestObj.getDefaults();    

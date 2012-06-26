@@ -247,6 +247,11 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             obj.reset();
             
             % Get needed information from the data and function objects
+            if isempty(visData) || isempty(bFunction)
+                warning('blockScalpePlot:emptyFunctionOrData', ...
+                    'Missing summary function or block data for this plot');
+                return;
+            end
             bFunction.setData(visData);
             obj.CurrentFunction = bFunction; 
             if isempty(dSlice)

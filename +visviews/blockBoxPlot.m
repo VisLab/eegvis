@@ -205,6 +205,11 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             % Sets up the plot hierarchy but may not display plot
             obj.reset();
             % Get needed information from the data and function objects
+            if isempty(visData) || isempty(bFunction)
+                warning('blockBoxPlot:emptyFunctionOrData', ...
+                    'Missing summary function or block data for this plot');
+                return;
+            end            
             bFunction.setData(visData);
             obj.CurrentFunction = bFunction;
             if isempty(dSlice)

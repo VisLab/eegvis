@@ -131,6 +131,12 @@ classdef blockHistogramPlot < visviews.axesPanel & visprops.configurable
             set(obj.MainAxes, 'Box', 'on',  'Tag', 'blockHistogramPlot', ...
                 'ActivePositionProperty', 'position');
             hold(obj.MainAxes, 'on');
+            
+            if isempty(visData) || isempty(bFunction)
+                warning('blockHistogramPlot:emptyFunctionOrData', ...
+                    'Missing summary function or block data for this plot');
+                return;
+            end       
             bFunction.setData(visData);    % Make sure data is correct
             obj.CurrentFunction = bFunction; % Remember for data explorer
   

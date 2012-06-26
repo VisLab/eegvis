@@ -191,9 +191,11 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
         function plot(obj, visData, bFunction, dSlice)
             % Plot the events for the specified data slice
             obj.reset();
-            if isempty(visData)
+            if isempty(visData) || isempty(bFunction)
+                warning('eventStackedPlot:emptyFunctionOrData', ...
+                    'Missing summary function or block data for this plot');
                 return;
-            end
+            end       
             bFunction.setData(visData);
             obj.VisData = visData; % Keep data for cursor exploration
 

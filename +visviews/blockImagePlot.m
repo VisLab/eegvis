@@ -189,6 +189,11 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             obj.reset();
             
             % Get needed information from the data and function objects
+            if isempty(visData) || isempty(bFunction)
+                warning('blockImagePlot:emptyFunctionOrData', ...
+                    'Missing summary function or block data for this plot');
+                return;
+            end       
             bFunction.setData(visData);    % Make sure data is correct
             obj.CurrentFunction = bFunction; % Remember for data explorer
             if isempty(dSlice)

@@ -3,7 +3,7 @@ function test_suite = testBlockedData %#ok<STOUT>
 initTestSuite;
 
 function values = setup %#ok<DEFNU>
-load('EEGData.mat'); 
+load('EEG.mat'); 
 values.EEG = EEG;  
 tEvents = EEG.event;
 types = {tEvents.type}';
