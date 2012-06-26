@@ -285,7 +285,7 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
 
             % Adjust the labels
             if visData.isEpoched() % add time scale to x label
-                obj.XValues = 1000*visData.getEpochTimeScale();
+                obj.XValues = 1000*visData.getBlockTimeScale();
                 obj.TimeUnits = 'ms';
             else
                 obj.XValues = obj.XLimOffset + ...
@@ -320,18 +320,18 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
                 
                 if ~obj.VisData.isEpoched()
                     t = x + obj.SelectedBlockOffset;
-                    sample = floor(obj.VisData.SampleRate*(t)) + 1;
+                    sample = floor(obj.VisData.getSampleRate()*(t)) + 1;
                     s = {['t: ' num2str(t) ' ' obj.TimeUnits]; ...
                          ['s: ' num2str(sample)]; ...
                          ['v: ' num2str(y) ' ' obj.SignalLabel]};  
                     if ~isempty(obj.SelectedHandle)
-                       rs = floor(obj.VisData.SampleRate*(x - obj.XLimOffset)) + 1;
+                       rs = floor(obj.VisData.getSampleRate()*(x - obj.XLimOffset)) + 1;
                        s{4} = ['raw: '  num2str(obj.SelectedSignal(rs)) ...
                                ' ' obj.SignalLabel];
                     end
                 else
                     a = (x - obj.VisData.EpochTimes(1))./1000;
-                    a = floor(obj.VisData.SampleRate*a) + 1;
+                    a = floor(obj.VisData.getSampleRate()*a) + 1;
                     s = {['et: ' num2str(x) ' ' obj.TimeUnits]; ...
                           ['es: ' num2str(a)]; ...
                           ['v: ' num2str(y) ' ' obj.SignalLabel]};  

@@ -26,16 +26,16 @@
 %% Configurable properties
 % The |visviews.blockImagePlot| has four configurable parameters: 
 %
-% |ClumpFactor| specifies the number of consecutive windows or epochs 
-% represented by each pixel column. When the |ClumpFactor| is one (the default), 
-% each pixel column represents its own window. If |ClumpFactor| is greater than 
+% |ClumpSize| specifies the number of consecutive windows or epochs 
+% represented by each pixel column. When the |ClumpSize| is one (the default), 
+% each pixel column represents its own window. If |ClumpSize| is greater than 
 % one, each pixel column represents several consecutive blocks. 
 % Users can trade-off clump size versus block size to see different 
 % representations of the data.
 %
 % |CombineMethod| specifies how to combine multiple blocks into a 
 % single block to determine an overall block value. The value can be be
-% |'max'|  (default), |'min'|, |'mean'|, or  |'median'|. Detail plots use this 
+% |'max'| (default), |'min'|, |'mean'|, |'median'| or |'sum'|. Detail plots use this 
 % block value to determine slice colors. 
 %
 % For example, with 32 channels, a clump size of 3, a block size of 
@@ -73,13 +73,11 @@
     testVD = viscore.blockedData(data, 'Exponenitally distributed');
     
     % Create a kurtosis block function object
-    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
                visfuncs.functionObj.getDefaultFunctions());
-    thisFunc = defaults{1};
-    thisFunc.setData(testVD);
     
     % Plot the block function
-    bp.plot(testVD, thisFunc, []);
+    bp.plot(testVD, funs{1}, []);
    
     % Adjust the margins
     gaps = bp.getGaps();
@@ -92,19 +90,18 @@
     % Create a block box plot
     sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
     bp = visviews.blockImagePlot(sfig, [], []);
-    bp.ClumpFactor = 3;
+    bp.ClumpSize = 3;
 
     % Generate some data to plot
     data = random('exp', 1, [32, 1000, 20]);
     testVD = viscore.blockedData(data, 'Exponenitally distributed');
     
     % Create a kurtosis block function object
-    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
                visfuncs.functionObj.getDefaultFunctions());
-    thisFunc = defaults{1};
     
     % Plot the block function
-    bp.plot(testVD, thisFunc, []);
+    bp.plot(testVD, funs{1}, []);
    
     % Adjust the margins
     gaps = bp.getGaps();

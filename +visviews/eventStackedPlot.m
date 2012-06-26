@@ -1,4 +1,4 @@
-% visviews.eventStackedPlot()  display stacked view of individual element or window events
+% visviews.eventStackedPlot()  display stacked view of individual events
 %
 % Usage:
 %   >>  visviews.eventStackedPlot(parent, manager, key)
@@ -8,9 +8,15 @@
 % obj = visviews.eventStackedPlot(parent, manager, key) shows each 
 %     member of a slice of events offset vertically, with the lowest numbered 
 %     member at the top and the highest number slice at the bottom. 
-%     The stacked event plot can show three possible slices: by channel, 
-%     by sample, or by window. Plotting by window is the most traditional display. 
-% 
+%     The stacked event plot shows individual events as a function of time.
+%     When a single time window, or group of time windows from a block-type
+%     plot is the source (slice along dimension 3), the windows are
+%     displayed consecutively and the event types are stacked vertically.
+%     When multiple time windows from an element-type plot (slice along
+%     dimension 1) then windows are stacked vertically and all event types
+%     are collapsed.  Multiple epoch displays also stack windows
+%     vertically.
+%
 %     The parent is a graphics handle to the container for this plot. The
 %     manager is an viscore.dataManager object containing managed objects
 %     for the configurable properties of this object, and |key| is a string
@@ -26,40 +32,45 @@
 % Configurable properties:
 % The visviews.eventStackedPlot has five configurable parameters: 
 %
-% ClippingOn    is a boolean, which if true causes the individual events
-%               to be truncated so that they appear inside the axes. 
+% CertaintyThreshold is a number between 0 and 1 inclusively, specifying a
+%    certainty threshold for displaying events. Events whose certainty is
+%    below the threshold will be ignored in the display. This feature is
+%    useful for displaying computed events such as classification labels
+%    because the user can choose to display only those events that are
+%    likely to have happened. By defaults, events have a certainty value
+%    of 1, meaning that there is not doubt that they occurred, while a
+%    certainty value of 0 means that there is no certainty that they
+%    occurred. Set the certainty threshold to 0 to include all events,
+%    regardless of certainty. 
+%
+% ColorCertain is a 3-element row vector specifying the edge color 
+%     for markers designating events whose certainty value is above
+%     the certainty treshold.
+%
+% ColorUncertain is a 3-element row vector specifying the edge color 
+%     for markers designating events whose certainty values is less
+%     than or equal to the certainty threshold.
+%
+% ColorSelected is a 3-element row vector specifying the face color 
+%     for a marker designating an event that has been selected.
+%
+% ColorUnselected is a 3-element row vector specifying the face color 
+%     for markers designating events not currently selected.
 %
 % CombineMethod specifies how to combine multiple blocks 
 %               when displaying a clumped slice.  The value can be 
 %               'max', 'min', 'mean', 'median', or 
 %               'none' (the default). 
 %
-% RemoveMean    is a boolean flag specifiying whether to remove the 
-%               the individual channel means for the data before 
-%               trimming or plotting.
-%
-% SignalLabel   is a string identifying the units of the event. 
-%
-% SignalScale   is a numerical factor specifying the vertical spacing 
-%               of the individual line plots. The spacing is SignalScale 
-%               times the 10% trimmed mean of the standard deviation 
-%               of the data.
-%
-% TrimPercent   is a numerical value specifying the percentage of 
-%               extreme points to remove from the window before 
-%               plotting. If the percentage is t, the largest
-%               t/2 percentage and the smallest t/2 percentage of the
-%               data points are removed (over all elements or channels).
-%               The event scale is calculated relative to the trimmed 
-%               event and all of the events are clipped at the
-%               trim cutoff before plotting.
-%
 % Example: 
-% Create a stacked event plot for random events
+% Create a stacked event plot for EEG data
 %
-%   % Create a sinusoidal data set with random amplitude and phase 
-%   data = random('normal', 0, 1, [32, 1000, 20]);
-%   testVD = viscore.blockedData(data, 'Rand1');
+%   % Load the sample EEG structure
+%   load('EEGData.mat');
+%   
+%   events = viscore.eventData.getEEGTimes(EEG);
+%   testVD = viscore.blockedData(data, 'Rand1', 'SampleRate', EEG.srate, ...
+%             'Events', events);
 %
 %   % Create a block function and a slice
 %   defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
@@ -69,10 +80,9 @@
 %               'DimNames', {'Channel', 'Sample', 'Window'});
 %
 %   % Create the figure and plot the data
-%   sfig  = figure('Name', 'Stacked event plot with random data');
-%   sp = visviews.eventStackedPlot(sfig3, [], []);
-%   sp.SignalScale = 2.0;
-%   sp.plot(testVD3, thisFunc, thisSlice);
+%   sfig  = figure('Name', 'Stacked event plot for EEG');
+%   sp = visviews.eventStackedPlot(sfig, [], []);
+%   sp.plot(testVD, thisFunc, thisSlice);
 %  
 %   % Adjust the margins
 %   gaps = sp.getGaps();
@@ -128,11 +138,12 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
     %    settings  structure or ModelSettings object containing this
     
     properties
+        CertaintyThreshold = 0.5       % certainty threshold (0 and 1)
         ColorSelected =   [1, 0, 0];   % face color of selected event
         ColorUnselected = [0, 1, 0];   % face color of unselected events
         ColorCertain = [0, 0, 0];      % edge color for certain events
         ColorUncertain = [0.8, 0.8, 0.8]; % edge color for uncertain events
-        Threshold = 0.5               % uncertainty threshold (0 and 1)
+
         
     end % public properties 
     
@@ -231,7 +242,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
           
            % Adjust the labels
             if visData.isEpoched() % add time scale to x label
-                obj.XValues =  1000*visData.getEpochTimeScale();
+                obj.XValues =  1000*visData.getBlockTimeScale();
                 obj.XValues = [obj.XValues(1), obj.XValues(end)];
                 obj.TimeUnits = 'ms';
             elseif ~obj.PlotWindow
@@ -259,7 +270,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             [xTimes, yTimes] = obj.getPlotPositions();
             certainties = obj.Events.getCertainty(obj.CurrentEvents);
             for k = 1:length(obj.CurrentEvents);   
-                if certainties(k) >= obj.Threshold
+                if certainties(k) >= obj.CertaintyThreshold
                     c = obj.ColorCertain;
                 else
                     c = obj.ColorUncertain;
@@ -293,35 +304,24 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
         function s = updateString(obj, point)
             % Return [Block, Element, Function] value string for point
             s = '';   % String to be returned
-            try   % Use exception handling for small round-off errors
+            %try   % Use exception handling for small round-off errors
                 [x, y, xInside, yInside] = obj.getDataCoordinates(point); %#ok<ASGLU>
                 if ~xInside || ~yInside
                     return;
                 end
                 
                 if ~obj.VisData.isEpoched()
-                    t = x + obj.SelectedBlockOffset;
-                    sample = floor(obj.VisData.SampleRate*(t)) + 1;
-                    s = {['t: ' num2str(t) ' ' obj.TimeUnits]; ...
-                        ['s: ' num2str(sample)]};
-                    if ~isempty(obj.SelectedHandle)
-                        rs = floor(obj.VisData.SampleRate*(x - obj.XLimOffset)) + 1;
-                        s{3} = ['raw: '  num2str(obj.SelectedSignal(rs)) ...
-                            ' ' obj.SignalLabel];
-                    end
+                    sample = floor(obj.VisData.getSampleRate()*(x)) + 1;
+                    s = {['t: ' num2str(x) ' ' obj.TimeUnits]; ...
+                         ['s: ' num2str(sample)]};
                 else
-                    a = (x - obj.VisData.EpochTimes(1))./1000;
-                    a = floor(obj.VisData.SampleRate*a) + 1;
+                    a = (x - obj.VisData.getBlockTimes(1))./1000;
+                    a = floor(obj.VisData.getSampleRate()*a) + 1;
                     s = {['et: ' num2str(x) ' ' obj.TimeUnits]; ...
-                        ['es: ' num2str(a)]};
-                    if ~isempty(obj.SelectedHandle)
-                        z = {['v: '  num2str(obj.SelectedSignal(a)) ...
-                            ' ' obj.SignalLabel]};
-                        s = [s; z];
-                    end;
+                         ['es: ' num2str(a)]};
                 end
-            catch  ME  %#ok<NASGU>   ignore errors on cursor sweep
-            end
+            %catch  ME  %#ok<NASGU>   ignore errors on cursor sweep
+            %end
         end % updateString
         
         function buttonDownPreCallback(obj, src, eventdata, master)  %#ok<INUSD>
@@ -403,17 +403,17 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
                        cName  ... %5
                       }, ...
                 'DisplayName',   { ...
-                       'Threshold',       ... %1
-                       'Color certain',   ... %2
-                       'Color uncertain', ... %3
-                       'Color selected',  ... %4                      
-                       'Color unselected' ... %5   
+                       'Certainty threshold',  ... %1
+                       'Color certain',        ... %2
+                       'Color uncertain',      ... %3
+                       'Color selected',       ... %4                      
+                       'Color unselected'      ... %5   
                        }, ...
                 'FieldName',     { ...
-                       'Threshold',      ... %1
-                       'ColorCertain',   ... %2
-                       'ColorUncertain', ... %3
-                       'ColorSelected',  ... %4                      
+                       'CertaintyThreshold',   ... %1
+                       'ColorCertain',         ... %2
+                       'ColorUncertain',       ... %3
+                       'ColorSelected',        ... %4                      
                        'ColorUnselected' ... %5   
                        }, ...              
                 'Value',         { ...

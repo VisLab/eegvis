@@ -65,26 +65,23 @@
 
 
 %% Example 1
-% Create a boxplot of kurtosis of 32 exponentially distributed channels
+% Create a boxplot of kurtosis for EEG data
 
     % Create a block box plot
-    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
+    sfig = figure('Name', 'Kurtosis for EEG data');
     bp = visviews.elementBoxPlot(sfig, [], []);
 
-    % Generate some data to plot
-    data = random('exp', 1, [32, 1000, 20]);
-    testVD = viscore.blockedData(data, 'Exponenitally distributed');
-    
-    % Create a kurtosis block function object
-    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-               visfuncs.functionObj.getDefaultFunctions());
-    thisFunc = defaults{1};
-    thisFunc.setData(testVD);
-    
-    % Plot the block function
-    bp.plot(testVD, thisFunc, []);
+    % Read some eeg data to display
+    load('EEG.mat');  % Saved EEGLAB EEG data
+    testVD = viscore.blockedData(EEG.data, 'Sample EEG data', ...
+         'SampleRate', EEG.srate);
    
-    % Adjust the margins
+    % Create a kurtosis block function object
+    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+               visfuncs.functionObj.getDefaultFunctions());
+    
+    % Plot the block function, adjusting margins for display
+    bp.plot(testVD, funs{1}, []);
     gaps = bp.getGaps();
     bp.reposition(gaps);
 
@@ -95,22 +92,18 @@
     % Create a block box plot
     sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
     bp = visviews.elementBoxPlot(sfig, [], []);
-    bp.ClumpFactor = 3;
+    bp.ClumpSize = 3;
 
     % Generate some data to plot
     data = random('exp', 1, [32, 1000, 20]);
     testVD = viscore.blockedData(data, 'Exponenitally distributed');
     
     % Create a kurtosis block function object
-    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
                visfuncs.functionObj.getDefaultFunctions());
-    thisFunc = defaults{1};
-    thisFunc.setData(testVD);
     
-    % Plot the block function
-    bp.plot(testVD, thisFunc, []);
-   
-    % Adjust the margins
+    % Plot the block function, adjusting margins for display
+    bp.plot(testVD, funs{1}, []);
     gaps = bp.getGaps();
     bp.reposition(gaps);
     

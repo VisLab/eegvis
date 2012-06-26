@@ -102,7 +102,6 @@ assertTrue(isvalid(sp2));
 sp2.plot(testVD2, fun, slice2);
 gaps = sp2.getGaps();
 sp2.reposition(gaps);
-drawnow
 
 fprintf('It should produce a plot for single epoch of data\n');
 slice3 = viscore.dataSlice('Slices', {':', ':', '2'}, ...
@@ -113,12 +112,11 @@ assertTrue(isvalid(sp3));
 [event, epochStarts, epochScale] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
 testVD3 = viscore.blockedData(values.EEGEpoch.data, 'EEGEpoch', ...
     'SampleRate', values.EEGEpoch.srate, 'Events', event, ...
-    'EpochStartTimes', epochStarts, 'EpochTimeScale', epochScale, ...
+    'BlockStartTimes', epochStarts, 'BlockTimeScale', epochScale, ...
        'Epoched', true);
 sp3.plot(testVD3, fun, slice3);
 gaps = sp3.getGaps();
 sp3.reposition(gaps);
-drawnow
 
 fprintf('It should produce a plot for multiple epochs of data\n');
 slice4 = viscore.dataSlice('Slices', {':', ':', '2:5'}, ...
@@ -129,7 +127,6 @@ assertTrue(isvalid(sp4));
 sp4.plot(testVD3, fun, slice4);
 gaps = sp4.getGaps();
 sp4.reposition(gaps);
-drawnow
 
 fprintf('It should produce a plot a slice along dimension 1 when epoched\n');
 slice5 = viscore.dataSlice('Slices', {'1', ':', ':'}, ...
@@ -140,8 +137,6 @@ assertTrue(isvalid(sp5));
 sp5.plot(testVD3, fun, slice5);
 gaps = sp5.getGaps();
 sp5.reposition(gaps);
-drawnow
-
 
 fprintf('It should produce a plot a slice along dimension 1 with multiple elements, when epoched\n');
 slice5 = viscore.dataSlice('Slices', {'2:3', ':', '5:12'}, ...
@@ -152,7 +147,6 @@ assertTrue(isvalid(sp5));
 sp5.plot(testVD3, fun, slice5);
 gaps = sp5.getGaps();
 sp5.reposition(gaps);
-drawnow
 
 fprintf('It should produce a plot a slice along dimension 1 with multiple elements, when not epoched\n');
 slice6 = viscore.dataSlice('Slices', {'2:3', ':', '5:12'}, ...
@@ -240,7 +234,6 @@ if values.deleteFigures
     delete(sfig2);
     delete(sfig3);
     delete(sfig4);
-
 end
 
 function testPropertyStructure(values) %#ok<DEFNU>
@@ -266,7 +259,7 @@ assertTrue(strcmp(spKey, pConf.getObjectID()));
 pMan = viscore.dataManager();
 visprops.configurableObj.updateManager(pMan, {pConf});  
 sp.updateProperties(pMan);
-assertElementsAlmostEqual(sp.Threshold, 0.5);
+assertElementsAlmostEqual(sp.CertaintyThreshold, 0.5);
 
 % Change the event threshold through the property manager
 cObj = pMan.getObject(spKey);
@@ -275,7 +268,7 @@ s = cObj.getStructure();
 s(1).Value = 1;
 cObj.setStructure(s);
 sp.updateProperties(pMan);
-assertElementsAlmostEqual(sp.Threshold, s(1).Value);
+assertElementsAlmostEqual(sp.CertaintyThreshold, s(1).Value);
 
 fprintf('It should still plot after threshold has been changed\n');
 testVD = viscore.blockedData(values.EEG.data, 'EEG', ...

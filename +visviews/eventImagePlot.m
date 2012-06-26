@@ -23,12 +23,12 @@
 % visviews.eventImagePlot is configurable, resizable, clickable, and cursor explorable.
 %
 % Configurable properties:
-% The visviews.eventImagePlot has five configurable parameters: 
+% The visviews.eventImagePlot has eight configurable parameters: 
 %
-% Background color specifies the color of the pixels that are below the
+% Background specifies the color of the pixels that are below the
 %   lowest threshold level.
 %
-% CertainyThreshold is a number between 0 and 1 inclusively, specifying a
+% CertaintyThreshold is a number between 0 and 1 inclusively, specifying a
 %    certainty threshold for displaying events. Events whose certainty is
 %    below the threshold will be ignored in the display. This feature is
 %    useful for displaying computed events such as classification labels
@@ -78,19 +78,19 @@
 % Create an event image plot for the sample data
 %
 %    % Create a block box plot
-%    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-%    bp = visviews.eventImagePlot(sfig, [], []);
+%    sfig = figure('Name', 'Kurtosis for EEG data');
+%    ep = visviews.eventImagePlot(sfig, [], []);
 %
 %    % Generate some data to plot
-%    load('EEGData.mat');  % Saved EEGLAB EEG data
+%    load('EEG.mat');  % Saved EEGLAB EEG data
 %    events = viscore.blockedEvents.getEEGTimes(EEG);
 %    testVD = viscore.blockedData(EEG.data, 'Sample EEG data', ...
 %          'SampleRate', EEG.srate, 'Events', events);
-%    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
 %               visfuncs.functionObj.getDefaultFunctions());
 %
 %    % Plot the block function
-%    ep.plot(testVD, thisFunc{1}, []);
+%    ep.plot(testVD, funs{1}, []);
 %   
 %    % Adjust the margins
 %    gaps = ep.getGaps();
@@ -109,11 +109,11 @@
 %
 %    doc visviews.eventImagePlot
 %
-% See also: visviews.axesPanel, visviews.blockBoxPlot, visviews.clickable,
+% See also: visviews.axesPanel, visviews.blockImagePlot, visviews.clickable,
 %           visprops.configurable, visviews.cursorExplorable,
-%           visviews.elementBoxPlot, and visviews.resizable
+%           and visviews.resizable
 
-% Copyright (C) 2011  Kay Robbins, UTSA, krobbins@cs.utsa.edu
+% Copyright (C) 2012  Kay Robbins, UTSA, krobbins@cs.utsa.edu
 %
 % This program is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -130,7 +130,7 @@
 % Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 % $Log: eventImagePlot.m,v $
-% Revision: 1.00  04-Dec-2011 09:11:20  krobbins $
+% Revision: 1.00  25-Jun-2012 16:41:55  krobbins $
 % Initial version $
 %
 

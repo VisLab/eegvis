@@ -31,16 +31,16 @@
 % alternating colors help users distinguish the individual boxes. The
 % default is |[0.7, 0.7, 0.7; 1, 0, 1]|.
 %
-% |ClumpFactor| specifies the number of consecutive windows or epochs 
-% represented by each box. When the |ClumpFactor| is one (the default), 
-% each box represents its own window. If |ClumpFactor| is greater than 
+% |ClumpSize| specifies the number of consecutive windows or epochs 
+% represented by each box. When the |ClumpSize| is one (the default), 
+% each box represents its own window. If |ClumpSize| is greater than 
 % one, each box represents several consecutive blocks. 
 % Users can trade-off clump size versus block size to see different 
 % representations of the data.
 %
 % |CombineMethod| specifies how to combine multiple blocks into a 
 % single block to determine an overall block value. The value can be 
-% |'max'|  (default), |'min'|, |'mean'|, or  |'median'|. Detail plots use 
+% |'max'|  (default), |'min'|, |'mean'|, |'median'| or |'sum'|. Detail plots use 
 % the combined block value to determine slice colors. 
 %
 % Suppose the plot has 128 channels, a clump size of 3, a block size of 
@@ -67,26 +67,23 @@
 %
 
 %% Example 1
-% Create a boxplot of kurtosis of 32 exponentially distributed channels
+% Create a boxplot of kurtosis for EEG data
 
     % Create a element box plot
-    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
+    sfig = figure('Name', 'Kurtosis for EEG data');
     bp = visviews.blockBoxPlot(sfig, [], []);
 
-    % Generate some data to plot
-    data = random('exp', 1, [32, 1000, 20]);
-    testVD = viscore.blockedData(data, 'Exponenitally distributed');
-    
+    % Read some eeg data to display
+    load('EEG.mat');  % Saved EEGLAB EEG data
+    testVD = viscore.blockedData(EEG.data, 'Sample EEG data', ...
+         'SampleRate', EEG.srate);
+
     % Create a kurtosis block function object
-    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
                visfuncs.functionObj.getDefaultFunctions());
-    thisFunc = defaults{1};
-    thisFunc.setData(testVD);
     
-    % Plot the block function
-    bp.plot(testVD, thisFunc, []);
-   
-    % Adjust the margins
+    % Plot the block function, adjusting margins for display
+    bp.plot(testVD, funs{1}, []);
     gaps = bp.getGaps();
     bp.reposition(gaps);
 
@@ -97,22 +94,18 @@
     % Create a block box plot
     sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
     bp = visviews.blockBoxPlot(sfig, [], []);
-    bp.ClumpFactor = 3;
+    bp.ClumpSize = 3;
 
     % Generate some data to plot
     data = random('exp', 1, [32, 1000, 20]);
     testVD = viscore.blockedData(data, 'Exponenitally distributed');
     
     % Create a kurtosis block function object
-    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
                visfuncs.functionObj.getDefaultFunctions());
-    thisFunc = defaults{1};
-    thisFunc.setData(testVD);
     
-    % Plot the block function
-    bp.plot(testVD, thisFunc, []);
-   
-    % Adjust the margins
+    % Plot the block function, adjusting margins for display
+    bp.plot(testVD, funs{1}, []);
     gaps = bp.getGaps();
     bp.reposition(gaps);
     

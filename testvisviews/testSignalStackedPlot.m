@@ -117,7 +117,7 @@ gaps = sp1.getGaps();
 sp1.reposition(gaps);
 sp1.registerCallbacks([]);
 drawnow
-assertAlmostEqual(testVD1.getEpochTimeScale(), (0:999)*4/1000);
+assertAlmostEqual(testVD1.getBlockTimeScale(), (0:999)*4/1000);
 
 fprintf('It should produce a plot for a slice along dimension 1\n');
 sfig2 = figure('Name', 'visviews.signalStackedPlot test plot slice element');

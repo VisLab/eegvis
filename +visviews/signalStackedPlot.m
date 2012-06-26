@@ -70,9 +70,9 @@
 %
 %   % Create the figure and plot the data
 %   sfig  = figure('Name', 'Stacked signal plot with random data');
-%   sp = visviews.signalStackedPlot(sfig3, [], []);
+%   sp = visviews.signalStackedPlot(sfig, [], []);
 %   sp.SignalScale = 2.0;
-%   sp.plot(testVD3, thisFunc, thisSlice);
+%   sp.plot(testVD, thisFunc, thisSlice);
 %  
 %   % Adjust the margins
 %   gaps = sp.getGaps();
@@ -279,7 +279,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 viscore.dataSlice.rangeString(obj.StartElement, obj.TotalElements) ')'];
       
             if obj.VisData.isEpoched() % add time scale to x label
-                obj.XValues = 1000*visData.getEpochTimeScale();
+                obj.XValues = 1000*visData.getBlockTimeScale();
                 obj.TimeUnits = 'ms';
             else
                 obj.XValues = obj.XLimOffset + ...
@@ -302,7 +302,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
         function s = updateString(obj, point)
             % Return [Block, Element, Function] value string for point
             s = '';   % String to be returned
-            try   % Use exception handling for small round-off errors
+           % try   % Use exception handling for small round-off errors
                 [x, y, xInside, yInside] = obj.getDataCoordinates(point); %#ok<ASGLU>
                 if ~xInside || ~yInside
                     return;
@@ -310,17 +310,17 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 
                 if ~obj.VisData.isEpoched()
                     t = x + obj.SelectedBlockOffset;
-                    sample = floor(obj.VisData.SampleRate*(t)) + 1;
+                    sample = floor(obj.VisData.getSampleRate()*(t)) + 1;
                     s = {['t: ' num2str(t) ' ' obj.TimeUnits]; ...
                         ['s: ' num2str(sample)]};
                     if ~isempty(obj.SelectedHandle)
-                        rs = floor(obj.VisData.SampleRate*(x - obj.XLimOffset)) + 1;
+                        rs = floor(obj.VisData.getSampleRate()*(x - obj.XLimOffset)) + 1;
                         s{3} = ['raw: '  num2str(obj.SelectedSignal(rs)) ...
                             ' ' obj.SignalLabel];
                     end
                 else
-                    a = (x - obj.VisData.EpochTimes(1))./1000;
-                    a = floor(obj.VisData.SampleRate*a) + 1;
+                    a = (x - obj.VisData.getBlockTimeScale(1))./1000;
+                    a = floor(obj.VisData.getSampleRate()*a) + 1;
                     s = {['et: ' num2str(x) ' ' obj.TimeUnits]; ...
                         ['es: ' num2str(a)]};
                     if ~isempty(obj.SelectedHandle)
@@ -329,8 +329,8 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                         s = [s; z];
                     end;
                 end
-            catch  ME  %#ok<NASGU>   ignore errors on cursor sweep
-            end
+           % catch  ME  %#ok<NASGU>   ignore errors on cursor sweep
+           % end
         end % updateString
         
         function buttonDownPreCallback(obj, src, eventdata, master)  %#ok<INUSD>

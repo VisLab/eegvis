@@ -13,7 +13,6 @@ values.event = struct('type', types, 'startTime', num2cell(startTimes), ...
     'certainty', ones(length(startTimes), 1));
 values.random = random('normal', 0, 1, [32, 1000, 20]);
 
-
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
 
@@ -39,7 +38,7 @@ f = @() viscore.blockedData(values.random);
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 
-function testReblockSimple(values) %#ok<INUSD,DEFNU>
+function testReblockSimple(values) %#ok<DEFNU>
 % Unit test for viscore.blockedData reblocking
 fprintf('\nUnit tests for viscore.blockedData reblocking\n');
 
@@ -118,32 +117,32 @@ fprintf('\nUnit tests for viscore.blockedData epoch start times\n');
 
 fprintf('Non-epoched data should have empty epoch start times\n');
 testVD1 = viscore.blockedData(values.random, 'Rand normal');
-assertTrue(isempty(testVD1.getEpochStartTimes()));
+assertTrue(isempty(testVD1.getBlockStartTimes()));
 
 fprintf('Epoched data with no start times should have defaults\n');
 testVD2 = viscore.blockedData(values.random, 'Random normal epoched', 'Epoched', true);
-assertElementsAlmostEqual(testVD2.getEpochStartTimes(), (0:19)*1000);
+assertElementsAlmostEqual(testVD2.getBlockStartTimes(), (0:19)*1000);
 
 fprintf('Epoched data with no start times should be correct when sampling rate not 1\n');
 testVD3 = viscore.blockedData(values.random, 'Rand normal sample rate 2', 'Epoched', true, ...
     'SampleRate', 2);
-assertElementsAlmostEqual(testVD3.getEpochStartTimes(), (0:19)*500);
-fprintf('Epoched data should have blocksize that agrees with epoch size\n');
+assertElementsAlmostEqual(testVD3.getBlockStartTimes(), (0:19)*500);
+fprintf('Blocked data should have blocksize that agrees with epoch size\n');
 assertEqual(testVD3.getBlockSize(), 1000);
 
 fprintf('Epoched data with explicit start times should match\n');
 testVD4 = viscore.blockedData(values.random, 'Rand normal start times', 'Epoched', true, ...
-    'EpochStartTimes', (0:19)*2000);
-assertElementsAlmostEqual(testVD4.getEpochStartTimes(), (0:19)*2000);
+    'BlockStartTimes', (0:19)*2000);
+assertElementsAlmostEqual(testVD4.getBlockStartTimes(), (0:19)*2000);
 
-fprintf('Epoched data with no sampling rate and epoch times should have correct defaults\n')
+fprintf('Epoched data with no sampling rate and block times should have correct defaults\n')
 testVD5 = viscore.blockedData(values.random, 'Rand normal', 'Epoched', true);
-assertElementsAlmostEqual(testVD5.getEpochTimeScale(), 0:999);
+assertElementsAlmostEqual(testVD5.getBlockTimeScale(), 0:999);
 
-fprintf('Epoched data with sampling rate and no epoch times should have correctdefaults\n')
+fprintf('Epoched data with sampling rate and no block times should have correct defaults\n')
 testVD5 = viscore.blockedData(values.random, 'Rand normal', 'Epoched', true, ...
     'SampleRate', 250);
-assertElementsAlmostEqual(testVD5.getEpochTimeScale(), (0:999)*4/1000);
+assertElementsAlmostEqual(testVD5.getBlockTimeScale(), (0:999)*4/1000);
 
 function testReblock(values) %#ok<DEFNU>
 % Unit test for blockedData reblock

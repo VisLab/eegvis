@@ -25,16 +25,16 @@
 % Configurable properties:
 % The visviews.blockImagePlot has four configurable parameters: 
 %
-% ClumpFactor specifies the number of consecutive windows or epochs 
-%    represented by each pixel column. When the ClumpFactor is one (the default), 
-%    each pixel column represents its own window. If ClumpFactor is greater than 
+% ClumpSize specifies the number of consecutive windows or epochs 
+%    represented by each pixel column. When the ClumpSize is one (the default), 
+%    each pixel column represents its own window. If ClumpSize is greater than 
 %    one, each pixel column represents several consecutive blocks. 
 %    Users can trade-off clump size versus block size to see different 
 %    representations of the data.
 %
 % CombineMethod specifies how to combine multiple blocks into a 
 %    single block to determine an overall block value. The value can be be
-%   'max'  (default), 'min', 'mean', or  'median'. Detail plots use this 
+%   'max' (default), 'min', 'mean', 'median' or 'sum'. Detail plots use this 
 %    block value to determine slice colors. 
 %
 %    For example, with 32 channels, a clump size of 3, a block size of 
@@ -71,13 +71,11 @@
 %    testVD = viscore.blockedData(data, 'Exponenitally distributed');
 %    
 %    % Create a kurtosis block function object
-%    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
 %               visfuncs.functionObj.getDefaultFunctions());
-%    thisFunc = defaults{1};
-%    thisFunc.setData(testVD);
 %    
 %    % Plot the block function
-%    bp.plot(testVD, thisFunc, []);
+%    bp.plot(testVD, funs{1}, []);
 %   
 %    % Adjust the margins
 %    gaps = bp.getGaps();
@@ -125,7 +123,8 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
     
     properties
         % configurable properties
-        ClumpFactor = 1.0;       % number of blocks in each box plot (clump)
+        Background = [0.7, 0.7, 0.7]; % color of the image background 
+        ClumpSize = 1.0;         % number of blocks in each box plot (clump)
         CombineMethod = 'max';   % method for combining blocks when grouped
     end % public properties
     
@@ -165,16 +164,16 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             dSlice = [];
             if clump <= 0 || clump >= obj.NumberClumps + 1 || ...
                     obj.NumberClumps ~= ...      % needs to be recalculated
-                    ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
+                    ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
                 return;
             end
             clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
-            if obj.ClumpFactor == 1
+            if obj.ClumpSize == 1
                 s = num2str(clump + obj.StartBlock - 1);
             else
-                startBlock = (clump - 1)* obj.ClumpFactor + obj.StartBlock; % adjust to win num
+                startBlock = (clump - 1)* obj.ClumpSize + obj.StartBlock; % adjust to win num
                 endBlock = min(obj.StartBlock + obj.NumberBlocks - 1, ...
-                               startBlock + obj.ClumpFactor - 1);
+                               startBlock + obj.ClumpSize - 1);
                 s = [num2str(startBlock) ':' num2str(endBlock)];
             end
             [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
@@ -209,13 +208,13 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             [obj.NumberElements, obj.NumberBlocks] = size(data);
             
             % Calculate the number of clumps and adjust for uneven clumps
-            obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
-            if obj.ClumpFactor > 1
-                leftOvers = obj.NumberClumps*obj.ClumpFactor - obj.NumberBlocks;
+            obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
+            if obj.ClumpSize > 1
+                leftOvers = obj.NumberClumps*obj.ClumpSize - obj.NumberBlocks;
                 if leftOvers > 0
                     data = [data, nan(obj.NumberElements, leftOvers)];
                 end
-                data = reshape(data', obj.ClumpFactor, obj.NumberClumps*obj.NumberElements);
+                data = reshape(data', obj.ClumpSize, obj.NumberClumps*obj.NumberElements);
                 data = viscore.dataSlice.combineDims(data, 1, obj.CombineMethod);
             else
                 data = data';
@@ -283,7 +282,7 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             if cNum < 1 || cNum > obj.NumberClumps
                 return;
             end
-            w = min(ceil((x - 0.5)*double(obj.ClumpFactor)), obj.NumberBlocks) ...
+            w = min(ceil((x - 0.5)*double(obj.ClumpSize)), obj.NumberBlocks) ...
                   + obj.StartBlock - 1; 
             y = ceil(y - 0.5);
             
@@ -300,13 +299,13 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
 
         function [xTickMarks, xTickLabels, xStringBase] = getClumpTicks(obj, clumpName)
             % Calculate the x tick marks and labels based on clumps
-            if obj.NumberClumps <= 1 && obj.ClumpFactor == 1
+            if obj.NumberClumps <= 1 && obj.ClumpSize == 1
                 xTickMarks = 1;
                 xTickLabels = {num2str(obj.StartBlock)};
             elseif obj.NumberClumps <= 1
                 xTickMarks = 1;
                 xTickLabels = {'1'};
-            elseif obj.ClumpFactor == 1;
+            elseif obj.ClumpSize == 1;
                 xTickMarks = [1, obj.NumberClumps];
                 xTickLabels = {num2str(obj.StartBlock), ...
                     num2str(obj.StartBlock + obj.NumberClumps - 1)};
@@ -314,7 +313,7 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
                 xTickMarks = [1, obj.NumberClumps];
                 xTickLabels = {'1', num2str(obj.NumberClumps)};
             end
-            if obj.ClumpFactor > 1
+            if obj.ClumpSize > 1
                 if ~isempty(clumpName)
                     cName = [clumpName 's '];
                 else
@@ -323,7 +322,7 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
                 xStringBase = [cName ...
                     num2str(obj.StartBlock) ':' ...
                     num2str(obj.StartBlock + obj.NumberBlocks -1) ...
-                    ' clumps of ' num2str(obj.ClumpFactor)];
+                    ' clumps of ' num2str(obj.ClumpSize)];
                 
             else
                 xStringBase = clumpName;
@@ -338,21 +337,40 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             % Structure specifying how to set configurable public properties
             cName = 'visviews.blockImagePlot';
             settings = struct( ...
-                'Enabled',       {true, true}, ...
-                'Category',      {cName, cName}, ...
-                'DisplayName',   { ...
-                'Blocks per clump', ...
-                'Combine method'}, ...
-                'FieldName',     {'ClumpFactor',          'CombineMethod'}, ...
-                'Value',         {1,                      'max'}, ...
-                'Type',          { ...
-                'visprops.unsignedIntegerProperty', ...
-                'visprops.enumeratedProperty'}, ...
-                'Editable',      {true,                    true}, ...
-                'Options',       {[1, inf],  {'max', 'min', 'mean', 'median'}}, ...
+                'Enabled',       { ... % display in property manager?
+                 true,             ... %1 blocks/clump
+                 true              ... %2 method for combining clumps
+                }, ...
+                'Category',      { ... % category for property
+                cName,             ... %1 blocks/clump
+                cName              ... %2 method for combining clumps
+                }, ...
+                'DisplayName',   { ... % display name in property manager
+                'Clump size',      ... %1 blocks/clump
+                'Combine method'   ... %2 method for combining clumps
+                }, ...
+                'FieldName',     { ... % name of public property
+                'ClumpSize',       ... %1 blocks/clump
+                'CombineMethod'    ... %2 method for combining clumps
+                }, ...
+                'Value',         { ... % default or initial value
+                1,                 ... %1 blocks/clump        
+                'max'              ... %2 method for combining clumps
+                }, ...
+                'Type',          { ...  % type of property for validation
+                'visprops.unsignedIntegerProperty', ...  %1 blocks/clump
+                'visprops.enumeratedProperty' ... %2 method for combining clumps
+                }, ...
+                'Editable',      { ... % grayed out if false
+                true,              ... %1 blocks/clump    
+                true               ... %2 method for combining clumps
+                }, ...
+                'Options',       { ...
+                [1, inf],          ...  %1 blocks/clump
+                {'max', 'min', 'mean', 'median', 'sum'}}, ... %2 method for combining clumps
                 'Description',   {...
-                'Number of blocks grouped into a clump represented by one image pixel column', ...
-                'Method for combining blocks in a clump'} ...
+                'Number of blocks grouped into a clump represented by one image pixel column', ... %1
+                'Method for combining blocks in a clump'} ... %2
                 );
         end % getDefaultProperties
         

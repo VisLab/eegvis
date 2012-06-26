@@ -351,8 +351,8 @@ pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
 [events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
 testVD4 = viscore.blockedData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
-    'SampleRate', values.EEGEpoch.srate, 'EpochStartTimes', estarts, ...
-    'EpochTimeScale', escales, 'Epoched', true);
+    'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
+    'BlockTimeScale', escales, 'Epoched', true);
 bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
 assertTrue(isvalid(bv4));
 drawnow

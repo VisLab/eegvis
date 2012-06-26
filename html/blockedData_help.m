@@ -25,24 +25,24 @@
 % <html>
 % <table>
 % <thead><tr><td>Name</td><td>Value</td></tr></thead>
-% <tr><td><tt>'SampleRate'</tt></td>
-%      <td>sampling rate in Hz for data (defaults to 1)</td></tr>
-% <tr><td><tt>'BlockSize'</tt></td>
-%      <td>window size for reblocking the data</td></tr>
 % <tr><td><tt>'BlockDim'</tt></td>
 %      <td>array dimension for reblocking (defaults to 2)</td></tr>
+% <tr><td><tt>'BlockSize'</tt></td>
+%      <td>window size for reblocking the data</td></tr>
+% <tr><td><tt>'BlockStartTimes'</tt></td>
+%      <td>times in seconds of block beginnings</td></tr>
+% <tr><td><tt>'BlockTimeScale'</tt></td>
+%      <td>times (in time units) corresponding to block samples</td></tr>
 % <tr><td><tt>'ElementLocations'</tt></td>
 %      <td>structure of element (channel) locations</td></tr>
 % <tr><td><tt>'Epoched'</tt></td>
 %      <td>if true, data is epoched and can't be reblocked</td></tr>
-% <tr><td><tt>'EpochStartTimes'</tt></td>
-%      <td>if data is epoched, times in seconds of epoch beginnings</td></tr>
-% <tr><td><tt>'EpochTimes'</tt></td>
-%      <td>if data is epoched, times corresponding to epoch samples</td></tr>
 % <tr><td><tt>'Events'</tt></td>
 %      <td>eventData object if this data has events</td></tr> 
 % <tr><td><tt>'PadValue'</tt></td>
 %      <td>numeric value to pad uneven blocks (defaults to 0)</td></tr>
+% <tr><td><tt>'SampleRate'</tt></td>
+%      <td>sampling rate in Hz for data (defaults to 1)</td></tr>
 % </table>
 % </html>
 %
@@ -71,8 +71,9 @@
 % * This data object has a version ID that changes each time the data
 % is modified. The version ID enables functions to know whether
 % to recompute their values.
-% * The BlockDim is set in the constructor and later changes do not affect
+% * The |BlockDim| is set in the constructor and later changes do not affect
 %    the blocking.
+% * The |BlockTimeScale| is in ms if epoched and s if not epoched.
 %
 %% Class documentation
 % Execute the following in the MATLAB command window to view the class 

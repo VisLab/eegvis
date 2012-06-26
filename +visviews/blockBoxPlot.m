@@ -30,16 +30,16 @@
 %     alternating colors help users distinguish the individual boxes. The
 %     default is [0.7, 0.7, 0.7; 1, 0, 1].
 %
-% ClumpFactor specifies the number of consecutive windows or epochs 
-%    represented by each box. When the |ClumpFactor| is one (the default), 
-%    each box represents a signle window or element. If |ClumpFactor| is greater than 
+% ClumpSize specifies the number of consecutive windows or epochs 
+%    represented by each box. When the |ClumpSize| is one (the default), 
+%    each box represents a single window or element. If |ClumpSize| is greater than 
 %    one, each box represents several consecutive blocks. 
 %    Users can trade-off clump size versus block size to see different 
 %    representations of the data.
 %
 % CombineMethod specifies how to combine multiple blocks into a 
 %    single block to determine an overall block value. The value can be 
-%   'max'  (default), 'min', 'mean', or  'median'. Detail plots use the 
+%   'max' (default), 'min', 'mean', 'median', or 'sum'. Detail plots use the 
 %    combined block value to determine slice colors. 
 %
 %    Suppose the plot has 128 channels, a clump size of 3, and a block size of 
@@ -66,26 +66,23 @@
 %
 %
 % Example: 
-% % Create a boxplot of kurtosis of 32 exponentially distributed channels
+% % Create a boxplot of kurtosis for EEG data
 %
 %    % Create a block box plot
-%    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
+%    sfig = figure('Name', 'Kurtosis for EEG data');
 %    bp = visviews.blockBoxPlot(sfig, [], []);
 %
-%    % Generate some data to plot
-%    data = random('exp', 1, [32, 1000, 20]);
-%    testVD = viscore.blockedData(data, 'Exponenitally distributed');
+%    % Read some eeg data to display
+%    load('EEG.mat');  % Saved EEGLAB EEG data
+%    testVD = viscore.blockedData(EEG.data, 'Sample EEG data', ...
+%         'SampleRate', EEG.srate);
 %    
 %    % Create a kurtosis block function object
-%    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
 %               visfuncs.functionObj.getDefaultFunctions());
-%    thisFunc = defaults{1};
-%    thisFunc.setData(testVD);
 %    
-%    % Plot the block function
-%    bp.plot(testVD, thisFunc, []);
-%   
-%    % Adjust the margins
+%    % Plot the block function, adjusting margins for display
+%    bp.plot(testVD, funs{1}, []);
 %    gaps = bp.getGaps();
 %    bp.reposition(gaps);
 %
@@ -132,7 +129,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
     properties
         % configurable properties
         BoxColors = [0.7, 0.7, 0.7; 1, 0, 1];     % alternating box colors
-        ClumpFactor = 1.0;       % number of blocks in each box plot (clump)
+        ClumpSize = 1.0;       % number of blocks in each box plot (clump)
         CombineMethod = 'max';   % method of combining blocks in a clump
     end % public properties
     
@@ -173,16 +170,16 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             
             if clump <= 0 || clump >= obj.NumberClumps + 1 || ...
                     obj.NumberClumps ~= ...  % needs to be recalculated
-                    ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
+                    ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
                 return;
             end
             clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
-            if obj.ClumpFactor == 1
+            if obj.ClumpSize == 1
                 s = num2str(clump + obj.StartBlock - 1);
             else
-                startBlock = (clump - 1)* obj.ClumpFactor + obj.StartBlock; % adjust to win num
+                startBlock = (clump - 1)* obj.ClumpSize + obj.StartBlock; % adjust to win num
                 endBlock = min(obj.StartBlock + obj.NumberBlocks - 1, ...
-                               startBlock + obj.ClumpFactor - 1);
+                               startBlock + obj.ClumpSize - 1);
                 s = [num2str(startBlock) ':' num2str(endBlock)];
             end
             [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
@@ -228,9 +225,9 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             limits = bFunction.getBlockLimits();
             
             % Calculate the number of clumps and adjust for uneven clumps
-            obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpFactor));
+            obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
             data = data(:);
-            groups = repmat(1:obj.NumberClumps, obj.NumberElements*obj.ClumpFactor, 1);
+            groups = repmat(1:obj.NumberClumps, obj.NumberElements*obj.ClumpSize, 1);
             groups = groups(:);
             
             % Draw the box plot
@@ -324,7 +321,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 return;
             end
             
-            w = min(ceil((x - 0.5)*double(obj.ClumpFactor)), obj.NumberBlocks) ...
+            w = min(ceil((x - 0.5)*double(obj.ClumpSize)), obj.NumberBlocks) ...
                 + obj.StartBlock - 1;
             s = {[obj.CursorString{1} num2str(w)]; ...
                 [obj.CursorString{2} num2str(ceil(y - 0.5))]};
@@ -338,13 +335,13 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
         function [xTickMarks, xTickLabels, xStringBase] = ...
                 getClumpTicks(obj, blockName, elementName)
             % Calculate the tick marks and labels based on clumps
-            if obj.NumberClumps <= 1 && obj.ClumpFactor == 1
+            if obj.NumberClumps <= 1 && obj.ClumpSize == 1
                 xTickMarks = 1;
                 xTickLabels = {num2str(obj.StartBlock)};
             elseif obj.NumberClumps <= 1
                 xTickMarks = 1;
                 xTickLabels = {'1'};
-            elseif obj.ClumpFactor == 1;
+            elseif obj.ClumpSize == 1;
                 xTickMarks = [1, obj.NumberClumps];
                 xTickLabels = {num2str(obj.StartBlock), ...
                     num2str(obj.StartBlock + obj.NumberClumps - 1)};
@@ -352,13 +349,13 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 xTickMarks = [1, obj.NumberClumps];
                 xTickLabels = {'1', num2str(obj.NumberClumps)};
             end
-            if obj.ClumpFactor == 1 || obj.NumberBlocks == 1
+            if obj.ClumpSize == 1 || obj.NumberBlocks == 1
                 xStringBase = blockName;
             else
                 xStringBase = [blockName 's' ...
                     num2str(obj.StartBlock) ':' ...
                     num2str(obj.StartBlock + obj.NumberBlocks -1) ...
-                    ' clumps of ' num2str(obj.ClumpFactor)];                   
+                    ' clumps of ' num2str(obj.ClumpSize)];                   
             end
             
             % Add an indicator of which elements being plotted
@@ -380,31 +377,59 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             % Structure specifying how to set configurable public properties
             cName = 'visviews.blockBoxPlot';
             settings = struct( ...
-                'Enabled',       {true, true,   true,  true}, ...
-                'Category',      {cName, cName, cName, cName}, ...
-                'DisplayName',   {...
-                'Box plot colors', ...
-                'Blocks per clump (boxplot)', ...
-                'Combination method', ...
-                'Link details on click'}, ...
-                'FieldName',     {'BoxColors', 'ClumpFactor', 'CombineMethod', 'LinkDetails'}, ...
-                'Value',         { ...
-                [0.7, 0.7, 0.7; 0, 0, 1], ...
-                1, ...
-                'max', ...
-                true}, ...
-                'Type',          {...
-                'visprops.colorListProperty', ...
-                'visprops.unsignedIntegerProperty', ...
-                'visprops.enumeratedProperty', ...
-                'visprops.logicalProperty'}, ...
-                'Editable',      {true, true, true, true}, ...
-                'Options',       {'', [1, inf], {'max', 'min', 'mean', 'median'}, ''}, ...
+                'Enabled',       { ... % display in property manager?
+                true,             ... %1 box plot colors
+                true,             ... %2 blocks/clump
+                true,             ... %3 method for combining clumps
+                true              ... %4 link to details on click
+                }, ...
+                'Category',      {  ... % category for property
+                cName,             ... %1 box plot colors
+                cName,             ... %2 blocks/clump
+                cName,             ... %3 method for combining clumps
+                cName              ... %4 link to details on click
+                }, ...
+                'DisplayName',   {  ... % display name in property manager
+                'Box plot colors',    ... %1 alternating box plot colors
+                'Clump size',         ... %2 blocks/clump
+                'Combination method', ... %3 method for combining clumps
+                'Link to details'     ... %4 link to details on click
+                }, ...
+                'FieldName',     {  ... % name of public property
+                'BoxColors',        ... %1 alternating box plot colors
+                'ClumpSize',        ... %2 blocks/clump
+                'CombineMethod',    ... %3 method for combining clumps
+                'LinkDetails'       ... %4 link to details on click
+                }, ...
+                'Value',         {  ... % default or initial value
+                [0.7, 0.7, 0.7; 0, 0, 1], ... %1 alternating box plot colors
+                1,                  ... %2 blocks/clump
+                'max',              ... %3 method for combining clumps
+                true,               ... %4 link to details on click
+                }, ...
+                'Type',          {  ... % type of property for validation
+                'visprops.colorListProperty', ... %1 alternating box plot colors
+                'visprops.unsignedIntegerProperty', ... %2 blocks/clump
+                'visprops.enumeratedProperty', ... %3 method for combining clumps
+                'visprops.logicalProperty' ... %4 link to details on click
+                }, ... 
+                'Editable',      {  ... % grayed out if false
+                true,               ... %1 alternating box plot colors
+                true,               ... %2 blocks/clump
+                true,               ... %3 method for combining clumps
+                true                ... %4 link to details on click
+                }, ...
+                'Options',       {  ... % restrictions on input values
+                '',                 ... %1 alternating box plot colors
+                [1, inf],           ... %2 blocks/clump
+                {'max', 'min', 'mean', 'median', 'sum'}, ... %3 method for combining clumps
+                ''                  ... %4 link to details on click
+                }, ...
                 'Description',   {...
-                'blockBoxPlot alternating box colors (cannot be empty)', ...
-                'Number of blocks grouped into a clump represented by one box plot', ...
-                'Method for combining blocks in a clump', ...
-                'If true, click causes detail plot redisplay'} ...
+                'blockBoxPlot alternating box colors (cannot be empty)', ... %1
+                'Number of blocks grouped into a clump represented by one box plot', ... %2
+                'Method for combining blocks in a clump', ... %3
+                'If true, click causes detail plot redisplay'} ... %4
                 );
         end % getDefaultProperties
         

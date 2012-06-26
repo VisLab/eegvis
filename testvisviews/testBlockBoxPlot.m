@@ -145,7 +145,7 @@ fMan.putObjects(defaults);
 func = fMan.getEnabledObjects('block');
 thisFunc = func{1};
 thisFunc.setData(testVD);
-bp1.ClumpFactor = 2;
+bp1.ClumpSize = 2;
 bp1.plot(testVD, thisFunc, slice1);
 drawnow
 gaps = bp1.getGaps();
@@ -171,7 +171,7 @@ fMan.putObjects(defaults);
 func = fMan.getEnabledObjects('block');
 thisFunc = func{1};
 thisFunc.setData(testVD);
-bp.ClumpFactor = 20;
+bp.ClumpSize = 20;
 slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 bp.plot(testVD, thisFunc, slice1);
@@ -198,7 +198,7 @@ fMan.putObjects(defaults);
 func = fMan.getEnabledObjects('block');
 thisFunc = func{1};
 thisFunc.setData(testVD);
-bp.ClumpFactor = 20;
+bp.ClumpSize = 20;
 slice1 = viscore.dataSlice('Slices', {'3', ':', '2'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 bp.plot(testVD, thisFunc, slice1);
@@ -243,7 +243,7 @@ fMan.putObjects(defaults);
 func = fMan.getEnabledObjects('block');
 thisFunc = func{1};
 thisFunc.setData(testVD);
-bp1.ClumpFactor = 3;
+bp1.ClumpSize = 3;
 
 bp1.plot(testVD, thisFunc, slice1);
 gaps = bp1.getGaps();
@@ -368,7 +368,7 @@ bp1 = visviews.blockBoxPlot(sfig1, [], []);
 assertTrue(isvalid(bp1));
 slice1 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
-bp1.ClumpFactor = 2;
+bp1.ClumpSize = 2;
 bp1.plot(testVD, thisFunc, slice1);
 gaps = bp1.getGaps();
 bp1.reposition(gaps);
@@ -381,7 +381,7 @@ bp2 = visviews.blockBoxPlot(sfig2, [], []);
 assertTrue(isvalid(bp2));
 slice2 = viscore.dataSlice('Slices', {':', ':', '14:15'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
-bp2.ClumpFactor = 3;
+bp2.ClumpSize = 3;
 bp2.plot(testVD, thisFunc, slice2);
 gaps = bp2.getGaps();
 bp2.reposition(gaps);
@@ -395,7 +395,7 @@ bp3 = visviews.blockBoxPlot(sfig3, [], []);
 assertTrue(isvalid(bp3));
 slice3 = viscore.dataSlice('Slices', {':', ':', '14:20'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
-bp3.ClumpFactor = 3;
+bp3.ClumpSize = 3;
 bp3.plot(testVD, thisFunc, slice3);
 gaps = bp3.getGaps();
 bp3.reposition(gaps);
@@ -407,7 +407,7 @@ bp4 = visviews.blockBoxPlot(sfig4, [], []);
 assertTrue(isvalid(bp4));
 slice4 = viscore.dataSlice('Slices', {'14:18', ':', '14:20'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
-bp4.ClumpFactor = 3;
+bp4.ClumpSize = 3;
 bp4.plot(testVD, thisFunc, slice4);
 gaps = bp4.getGaps();
 bp4.reposition(gaps);
@@ -419,7 +419,7 @@ bp5 = visviews.blockBoxPlot(sfig5, [], []);
 assertTrue(isvalid(bp5));
 slice5 = viscore.dataSlice('Slices', {'3', ':', '14:20'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
-bp5.ClumpFactor = 3;
+bp5.ClumpSize = 3;
 bp5.plot(testVD, thisFunc, slice5);
 gaps = bp5.getGaps();
 bp5.reposition(gaps);
@@ -454,7 +454,7 @@ bp1 = visviews.blockBoxPlot(sfig1, [], []);
 assertTrue(isvalid(bp1));
 slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
-bp1.ClumpFactor = 1;
+bp1.ClumpSize = 1;
 bp1.plot(testVD1, thisFunc, slice1);
 gaps = bp1.getGaps();
 bp1.reposition(gaps);
@@ -501,13 +501,13 @@ ds4 = bp.getClumpSlice(21);
 assertTrue(isempty(ds4));
 
 fprintf('It should produce an empty slice when clump factor has changed without replotting\n');
-bp.ClumpFactor = 3;
+bp.ClumpSize = 3;
 ds1 = bp.getClumpSlice(1);
 assertTrue(isempty(ds1));
 
 
 fprintf('It should produce a correct slice with a clump factor\n');
-bp.ClumpFactor = 3;
+bp.ClumpSize = 3;
 bp.plot(testVD, thisFunc, []);
 gaps = bp.getGaps();
 bp.reposition(gaps);
@@ -527,7 +527,7 @@ assertTrue(strcmp(slices2{3}, '7:9'));
 assertTrue(strcmp(slices3{3}, '19:20'));
 
 fprintf('It should produce a correct slice with an unclumped a middle slice\n')
-bp.ClumpFactor  = 1;
+bp.ClumpSize  = 1;
 plotSlice = viscore.dataSlice('Slices', {'7:18', ':', '12:15'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
 bp.plot(testVD, thisFunc, plotSlice);
@@ -550,7 +550,7 @@ assertTrue(strcmp(slices3{3}, '15'));
 assertTrue(isempty(ds4));
 
 fprintf('It should produce a correct slice with an clumped a middle slice\n')
-bp.ClumpFactor  = 3;
+bp.ClumpSize  = 3;
 plotSlice = viscore.dataSlice('Slices', {'7:18', ':', '2:15'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
 bp.plot(testVD, thisFunc, plotSlice);
