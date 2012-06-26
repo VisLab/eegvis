@@ -80,10 +80,6 @@
 %% Example 1: 
 % Create an event image plot for the sample data
 
-   % Create a block box plot
-   sfig = figure('Name', 'Kurtosis for EEG data');
-   ep = visviews.eventImagePlot(sfig, [], []);
-
    % Read some eeg data and create a data object
    load('EEG.mat');  % Saved EEGLAB EEG data
    events = viscore.blockedEvents.getEEGTimes(EEG); % Extract the events
@@ -95,32 +91,28 @@
               visfuncs.functionObj.getDefaultFunctions());
 
    % Plot the block function
+   sfig = figure('Name', 'Kurtosis for EEG data');
+   ep = visviews.eventImagePlot(sfig, [], []);
    ep.plot(testVD, funs{1}, []);
-  
-   % Adjust the margins
    gaps = ep.getGaps();
    ep.reposition(gaps);
 
 %% Example 2
 % Create a block image plot of kurtosis of clumps of 3 windows 
 
-    % Create a block box plot
-    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-    ep = visviews.eventImagePlot(sfig, [], []);
-    ep.ClumpSize = 3;
-
-    % Generate some data to plot
-    load('EEGData.mat');  % Saved EEGLAB EEG data
+    % Read in some EEG data
+    load('EEG.mat');  % Saved EEGLAB EEG data
     events = viscore.blockedEvents.getEEGTimes(EEG);
     testVD = viscore.blockedData(EEG.data, 'Sample EEG data', ...
          'SampleRate', EEG.srate, 'Events', events);
     funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
               visfuncs.functionObj.getDefaultFunctions());
     
-    % Plot the block function
+    % Plot the block function, adjusting the margins
+    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
+    ep = visviews.eventImagePlot(sfig, [], []);
+    ep.ClumpSize = 3;
     ep.plot(testVD, funs{1}, []);
-   
-    % Adjust the margins
     gaps = ep.getGaps();
     ep.reposition(gaps);
     

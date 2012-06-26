@@ -68,13 +68,11 @@
 %   thisSlice = viscore.dataSlice('Slices', {':', ':', '1'}, ...
 %               'DimNames', {'Channel', 'Sample', 'Window'});
 %
-%   % Create the figure and plot the data
+%   % Create the figure and plot the data, adjusting the margins
 %   sfig  = figure('Name', 'Stacked signal plot with random data');
 %   sp = visviews.signalStackedPlot(sfig, [], []);
 %   sp.SignalScale = 2.0;
 %   sp.plot(testVD, thisFunc, thisSlice);
-%
-%   % Adjust the margins
 %   gaps = sp.getGaps();
 %   sp.reposition(gaps);
 %

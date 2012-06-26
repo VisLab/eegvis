@@ -43,13 +43,11 @@
 %   testVD = viscore.blockedData(data, 'Exponenitally distributed');
 %    
 %   % Create a kurtosis block function object
-%   defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%   funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
 %              visfuncs.functionObj.getDefaultFunctions());
-%   thisFunc = defaults{1};
-%   thisFunc.setData(testVD);
 %    
 %   % Plot the block function histogram
-%   bp.plot(testVD, thisFunc, []);
+%   bp.plot(testVD, funs{1}, []);
 %   
 %   % Adjust the margins
 %   gaps = bp.getGaps();

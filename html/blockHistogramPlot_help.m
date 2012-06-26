@@ -36,24 +36,18 @@
 %% Example 
 % Create a histogram summary of kurtosis of 32 exponentially distributed channels
 
-    % Create a block histobram plot
-    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-    bp = visviews.blockHistogramPlot(sfig, [], []);
-
     % Generate some data to plot
     data = random('exp', 1, [32, 1000, 20]);
     testVD = viscore.blockedData(data, 'Exponenitally distributed');
     
     % Create a kurtosis block function object
-    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
                visfuncs.functionObj.getDefaultFunctions());
-    thisFunc = defaults{1};
-    thisFunc.setData(testVD);
-    
-    % Plot the block function
-    bp.plot(testVD, thisFunc, []);
-   
-    % Adjust the margins
+
+    % Plot the block function, adjusting the margins
+    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
+    bp = visviews.blockHistogramPlot(sfig, [], []);
+    bp.plot(testVD, funs{1}, []);
     gaps = bp.getGaps();
     bp.reposition(gaps);
 

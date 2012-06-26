@@ -75,13 +75,9 @@
 %    slice. The default value is true.
 %
 % Example: 
-% Create an event image plot for the sample data
+% Create an event image plot for the sample EEG data
 %
-%    % Create a block box plot
-%    sfig = figure('Name', 'Kurtosis for EEG data');
-%    ep = visviews.eventImagePlot(sfig, [], []);
-%
-%    % Generate some data to plot
+%    % Read in some EEG data
 %    load('EEG.mat');  % Saved EEGLAB EEG data
 %    events = viscore.blockedEvents.getEEGTimes(EEG);
 %    testVD = viscore.blockedData(EEG.data, 'Sample EEG data', ...
@@ -89,10 +85,10 @@
 %    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
 %               visfuncs.functionObj.getDefaultFunctions());
 %
-%    % Plot the block function
+%    % Plot the block function, adjusting the margins
+%    sfig = figure('Name', 'Kurtosis for EEG data');
+%    ep = visviews.eventImagePlot(sfig, [], []);
 %    ep.plot(testVD, funs{1}, []);
-%   
-%    % Adjust the margins
 %    gaps = ep.getGaps();
 %    ep.reposition(gaps);
 %

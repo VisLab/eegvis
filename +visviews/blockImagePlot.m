@@ -62,10 +62,6 @@
 % Example: 
 % Create a block image plot of kurtosis of 32 exponentially distributed channels
 %
-%    % Create a block box plot
-%    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-%    bp = visviews.blockImagePlot(sfig, [], []);
-%
 %    % Generate some data to plot
 %    data = random('exp', 1, [32, 1000, 20]);
 %    testVD = viscore.blockedData(data, 'Exponenitally distributed');
@@ -74,10 +70,10 @@
 %    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
 %               visfuncs.functionObj.getDefaultFunctions());
 %    
-%    % Plot the block function
+%    % Plot the block function, adjusting the margins
+%    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
+%    bp = visviews.blockImagePlot(sfig, [], []);
 %    bp.plot(testVD, funs{1}, []);
-%   
-%    % Adjust the margins
 %    gaps = bp.getGaps();
 %    bp.reposition(gaps);
 %

@@ -79,12 +79,10 @@
 %   thisSlice = viscore.dataSlice('Slices', {':', ':', '1'}, ...
 %               'DimNames', {'Channel', 'Sample', 'Window'});
 %
-%   % Create the figure and plot the data
+%   % Create the figure and plot the data, adjusting the margins
 %   sfig  = figure('Name', 'Stacked event plot for EEG');
 %   sp = visviews.eventStackedPlot(sfig, [], []);
 %   sp.plot(testVD, thisFunc, thisSlice);
-%  
-%   % Adjust the margins
 %   gaps = sp.getGaps();
 %   sp.reposition(gaps);
 %
@@ -104,12 +102,13 @@
 %
 %    doc visviews.eventStackedPlot
 %
-% See also: visviews.clickable, visviews.configurable, visviews.resizable, and
+% See also: visviews.clickable, visviews.configurable, 
+%           visviews.eventImagePlot, visviews.resizable, and
 %           visviews.shadowSignalPlot
 %
 
 
-% Copyright (C) 2011  Kay Robbins, UTSA, krobbins@cs.utsa.edu
+% Copyright (C) 2012  Kay Robbins, UTSA, krobbins@cs.utsa.edu
 %
 % This program is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by

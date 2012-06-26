@@ -41,18 +41,14 @@
 %% Example:
 % Create a histogram summary 32 exponentially distributed channels
 
-  % Create a element box plot
-  sfig = figure('Name', '32 exponentially distributed channels');
-  hp = visviews.signalHistogramPlot(sfig, [], []);
-
   % Generate some data to plot
   data = random('exp', 1, [32, 1000, 20]);
   testVD = viscore.blockedData(data, 'Exponenitally distributed');
    
-  % Plot the signal histogram
+  % Plot the signal histogram, adjusting the margins
+  sfig = figure('Name', '32 exponentially distributed channels');
+  hp = visviews.signalHistogramPlot(sfig, [], []);
   hp.plot(testVD, [], []);
-  
-  % Adjust the margins
   gaps = hp.getGaps();
   hp.reposition(gaps);
 

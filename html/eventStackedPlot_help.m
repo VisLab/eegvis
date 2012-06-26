@@ -103,15 +103,13 @@
     thisSlice = viscore.dataSlice('Slices', {':', ':', '1'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
  
-    % Create the figure and plot the data
+    % Create the figure and plot the data, adjusting the margins
     sfig = figure('Name', 'Plot with smoothed signals');
     sp = visviews.signalShadowPlot(sfig, [], []);
     sp.CutoffScore = 2.0;
     sp.plot(testVD, thisFunc, thisSlice);
-   
-   % Adjust the margins
-   gaps = sp.getGaps();
-   sp.reposition(gaps);
+    gaps = sp.getGaps();
+    sp.reposition(gaps);
 
 %% Notes
 %
@@ -131,6 +129,7 @@
 % <clickable_help.html |visviews.clickable|>, 
 % <configurable_help.html |visprops.configurable|>,
 % <cursorExplorable_help.html |visviews.cursorExplorable|>, 
+% <eventImagePlot_help.html |visviews.eventImagePlot|>,
 % <resizable_help.html |visviews.resizable|>, and
 % <stackedSignalPlot_help.html |visviews.stackedSignalPlot|>
 %

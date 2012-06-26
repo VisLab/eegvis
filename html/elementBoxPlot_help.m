@@ -65,11 +65,7 @@
 
 
 %% Example 1
-% Create a boxplot of kurtosis for EEG data
-
-    % Create a block box plot
-    sfig = figure('Name', 'Kurtosis for EEG data');
-    bp = visviews.elementBoxPlot(sfig, [], []);
+% Create an element boxplot of kurtosis for EEG data
 
     % Read some eeg data to display
     load('EEG.mat');  % Saved EEGLAB EEG data
@@ -81,18 +77,15 @@
                visfuncs.functionObj.getDefaultFunctions());
     
     % Plot the block function, adjusting margins for display
+    sfig = figure('Name', 'Kurtosis for EEG data');
+    bp = visviews.elementBoxPlot(sfig, [], []);
     bp.plot(testVD, funs{1}, []);
     gaps = bp.getGaps();
     bp.reposition(gaps);
 
     
 %% Example 2
-% Create a boxplot of kurtosis of clumps of 3 windows 
-
-    % Create a block box plot
-    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-    bp = visviews.elementBoxPlot(sfig, [], []);
-    bp.ClumpSize = 3;
+% Create an element boxplot of kurtosis of clumps of 3 windows 
 
     % Generate some data to plot
     data = random('exp', 1, [32, 1000, 20]);
@@ -103,6 +96,9 @@
                visfuncs.functionObj.getDefaultFunctions());
     
     % Plot the block function, adjusting margins for display
+    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
+    bp = visviews.elementBoxPlot(sfig, [], []);
+    bp.ClumpSize = 3;
     bp.plot(testVD, funs{1}, []);
     gaps = bp.getGaps();
     bp.reposition(gaps);

@@ -92,28 +92,21 @@
 %     associated with the point among name, number and no display.
 %     
 % Example:
-% % Create a scalp map of kurtosis of 32 exponentially distributed channels
+% % Create a scalp map of kurtosis for EEG data
 %
-%    % Create a block box plot
-%    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-%    bp = visviews.blockScalpPlot(sfig, [], []);
-%
-%    % Generate some data to plot
-%    data = random('exp', 1, [32, 1000, 20]);
-%    load chanlocs.mat;
-%    testVD = viscore.blockedData(data, 'Exponenitally distributed', ...
-%             'ElementLocations', chanlocs);
+%    % Read in some data to plot
+%    load('EEG.mat');
+%    testVD = viscore.blockedData(EEG.data, 'EEG sample', ...
+%            'ElementLocations', EEG.chanlocs, 'SampleRate', EEG.srate);
 %
 %    % Create a kurtosis block function object
-%    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
 %               visfuncs.functionObj.getDefaultFunctions());
-%    thisFunc = defaults{1};
-%    thisFunc.setData(testVD);
 %
-%    % Plot the block function
-%    bp.plot(testVD, thisFunc, []);
-%
-%    % Adjust the margins
+%    % Plot the block function, adjusting the margins
+%    sfig = figure('Name', 'Kurtosis for EEG data');
+%    bp = visviews.blockScalpPlot(sfig, [], []);
+%    bp.plot(testVD, funs{1}, []);
 %    gaps = bp.getGaps();
 %    bp.reposition(gaps);
 %

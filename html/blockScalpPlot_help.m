@@ -93,53 +93,40 @@
 % clicks on the electrode point, blockScalpMap toggles a label
 % associated with the point among name, number and no display.
 %     
-%% Example 1: Create a kurtosis scalp map for 32 exponentially distributed channels
+%% Example 1: Create a scalp map of kurtosis for EEG data
 
-   % Create a block box plot
-   sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-   bp = visviews.blockScalpPlot(sfig, [], []);
-
-   % Generate some data to plot
-   data = random('exp', 1, [32, 1000, 20]);
-   load chanlocs.mat;
-   testVD = viscore.blockedData(data, 'Exponenitally distributed', ...
-            'ElementLocations', chanlocs);
+   % Read in some data to plot
+   load('EEG.mat');
+   testVD = viscore.blockedData(EEG.data, 'EEG sample', ...
+            'ElementLocations', EEG.chanlocs, 'SampleRate', EEG.srate);
 
    % Create a kurtosis block function object
-   defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+   funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
               visfuncs.functionObj.getDefaultFunctions());
-   thisFunc = defaults{1};
-   thisFunc.setData(testVD);
 
    % Plot the block function
-   bp.plot(testVD, thisFunc, []);
-
-   % Adjust the margins
+   sfig = figure('Name', 'Kurtosis for EEG data');
+   bp = visviews.blockScalpPlot(sfig, [], []);
+   bp.plot(testVD, funs{1}, []);
    gaps = bp.getGaps();
    bp.reposition(gaps);
 
 %% Example 2: Compare scalp map interpolation methods
 
-   % Create a block box plot
-   
-   
    % Generate some data to plot
-   data = random('exp', 1, [32, 1000, 20]);
-   load chanlocs.mat;
-   testVD = viscore.blockedData(data, 'Exponenitally distributed', ...
-            'ElementLocations', chanlocs);
+   load('EEG.mat');
+   testVD = viscore.blockedData(EEG.data, 'EEG sample', ...
+            'ElementLocations', EEG.chanlocs, 'SampleRate', EEG.srate);
 
    % Create a kurtosis block function object
-   defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+   funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
               visfuncs.functionObj.getDefaultFunctions());
-   thisFunc = defaults{1};
-   thisFunc.setData(testVD);
    
    sfig1 = figure('Name', 'Default interpolation (v4)');
    bp1 = visviews.blockScalpPlot(sfig1, [], []);
    bp1.InterpolationMethod = 'v4';
    bp1.Title = 'v4 (default)';
-   bp1.plot(testVD, thisFunc, []);
+   bp1.plot(testVD, funs{1}, []);
    gaps = bp1.getGaps();
    bp1.reposition(gaps);
 
@@ -147,7 +134,7 @@
    bp2 = visviews.blockScalpPlot(sfig2, [], []);
    bp2.InterpolationMethod = 'linear';
    bp2.Title = 'linear';
-   bp2.plot(testVD, thisFunc, []);
+   bp2.plot(testVD, funs{1}, []);
    gaps = bp2.getGaps();
    bp2.reposition(gaps);
    
@@ -155,7 +142,7 @@
    bp3 = visviews.blockScalpPlot(sfig3, [], []);
    bp3.InterpolationMethod = 'cubic';
    bp3.Title = 'cubic';
-   bp3.plot(testVD, thisFunc, []);
+   bp3.plot(testVD, funs{1}, []);
    gaps = bp3.getGaps();
    bp3.reposition(gaps);
    
@@ -163,7 +150,7 @@
    bp4 = visviews.blockScalpPlot(sfig4, [], []);
    bp4.InterpolationMethod = 'nearest';
    bp4.Title = 'nearest';
-   bp4.plot(testVD, thisFunc, []);
+   bp4.plot(testVD, funs{1}, []);
    gaps = bp4.getGaps();
    bp4.reposition(gaps);
 

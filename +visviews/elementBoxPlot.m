@@ -62,11 +62,7 @@
 %    slice. The default value is true.
 %
 % Example: 
-% Create a boxplot of kurtosis for EEG data
-%
-%    % Create a block box plot
-%    sfig = figure('Name', 'Kurtosis for EEG data');
-%    bp = visviews.elementBoxPlot(sfig, [], []);
+% Create an element boxplot of kurtosis for EEG data
 %
 %    % Read some eeg data to display
 %    load('EEG.mat');  % Saved EEGLAB EEG data
@@ -78,6 +74,8 @@
 %               visfuncs.functionObj.getDefaultFunctions());
 %
 %    % Plot the block function, adjusting margins for display
+%    sfig = figure('Name', 'Kurtosis for EEG data');
+%    bp = visviews.elementBoxPlot(sfig, [], []);
 %    bp.plot(testVD, funs{1}, []);
 %    gaps = bp.getGaps();
 %    bp.reposition(gaps);

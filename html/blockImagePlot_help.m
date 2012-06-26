@@ -64,22 +64,19 @@
 %% Example 1
 % Create a block image plot of kurtosis of 32 exponentially distributed channels
 
-    % Create a block box plot
-    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-    bp = visviews.blockImagePlot(sfig, [], []);
-
-    % Generate some data to plot
-    data = random('exp', 1, [32, 1000, 20]);
-    testVD = viscore.blockedData(data, 'Exponenitally distributed');
+    % Read some eeg data to display
+    load('EEG.mat');  % Saved EEGLAB EEG data
+    testVD = viscore.blockedData(EEG.data, 'Sample EEG data', ...
+         'SampleRate', EEG.srate);
     
     % Create a kurtosis block function object
     funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
                visfuncs.functionObj.getDefaultFunctions());
     
-    % Plot the block function
+    % Plot the block function, adjusting the margins
+    sfig = figure('Name', 'Kurtosis for EEG data');
+    bp = visviews.blockImagePlot(sfig, [], []);
     bp.plot(testVD, funs{1}, []);
-   
-    % Adjust the margins
     gaps = bp.getGaps();
     bp.reposition(gaps);
 
@@ -87,11 +84,6 @@
 %% Example 2
 % Create a block image plot of kurtosis of clumps of 3 windows 
 
-    % Create a block box plot
-    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
-    bp = visviews.blockImagePlot(sfig, [], []);
-    bp.ClumpSize = 3;
-
     % Generate some data to plot
     data = random('exp', 1, [32, 1000, 20]);
     testVD = viscore.blockedData(data, 'Exponenitally distributed');
@@ -100,10 +92,11 @@
     funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
                visfuncs.functionObj.getDefaultFunctions());
     
-    % Plot the block function
+    % Plot the block function, adjusting the margins
+    sfig = figure('Name', 'Kurtosis for 32 exponentially distributed channels');
+    bp = visviews.blockImagePlot(sfig, [], []);
+    bp.ClumpSize = 3;
     bp.plot(testVD, funs{1}, []);
-   
-    % Adjust the margins
     gaps = bp.getGaps();
     bp.reposition(gaps);
     

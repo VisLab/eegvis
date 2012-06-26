@@ -68,10 +68,6 @@
 % Example: 
 % % Create a boxplot of kurtosis for EEG data
 %
-%    % Create a block box plot
-%    sfig = figure('Name', 'Kurtosis for EEG data');
-%    bp = visviews.blockBoxPlot(sfig, [], []);
-%
 %    % Read some eeg data to display
 %    load('EEG.mat');  % Saved EEGLAB EEG data
 %    testVD = viscore.blockedData(EEG.data, 'Sample EEG data', ...
@@ -82,6 +78,8 @@
 %               visfuncs.functionObj.getDefaultFunctions());
 %    
 %    % Plot the block function, adjusting margins for display
+%    sfig = figure('Name', 'Kurtosis for EEG data');
+%    bp = visviews.blockBoxPlot(sfig, [], []);
 %    bp.plot(testVD, funs{1}, []);
 %    gaps = bp.getGaps();
 %    bp.reposition(gaps);
