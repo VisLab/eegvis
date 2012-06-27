@@ -120,6 +120,17 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
         PropSelect;               % selector managing property configuration
     end % private properties
     
+    properties(Constant = true)
+        menuList = {'figMenuTools', 'figMenuInsert', 'figMenuView',  ...
+            'figMenuEdit', 'figMenuFile'};
+        toolbarList = {'Plottools.PlottoolsOn', 'Plottools.PlottoolsOff', ...
+            'Annotation.InsertLegend', 'Annotation.InsertColorbar', ... 
+            'Exploration.Brushing',  'Exploration.DataCursor', ...
+            'Standard.EditPlot', 'Standard.PrintFigure', ...
+            'Standard.SaveFigure', 'Standard.FileOpen', ...
+            'Standard.NewFigure', 'DataManager.Linking'};
+    end % Constant properties
+    
     methods
         
         function obj = dualView(varargin)
@@ -139,6 +150,7 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
                 'Visible', 'on', 'Tag', 'VisFig', ...
                 'DeleteFcn', {@obj.closeRequestCallback});
             obj.createLayout();
+            obj.disableMenuItems();
             obj.reset(true, true, true);
         end % dualView constructor
         
@@ -373,6 +385,18 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
                 end
             end
         end % deleteDependentViews
+        
+        function disableMenuItems(obj)
+            % Disable nonfunctional menu and toolbar items on MATLAB figure window
+            for k = 1:length(obj.menuList)
+                item = findall(obj.VisFig, 'Tag', obj.menuList{k});
+                set(item, 'Enable', 'off');
+            end
+            for k = 1:length(obj.toolbarList)
+                item = findall(obj.VisFig, 'Tag', obj.toolbarList{k});
+                set(item, 'Enable', 'off');
+            end
+        end  % disableMenuItems  
         
         function initializePlots(obj)
             % Replot each of the panels - plot window 1 in the details

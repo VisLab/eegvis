@@ -1,25 +1,32 @@
 load('EEGArtifact.mat');
-values.EEGArtifact = EEGArtifact;
 load('ArtifactLabels.mat');
-values.artifactEvents = artifactEvents;
 %%
-pS = viewTestClass.getDefaultPlotsWithEvents();
-assertEqual(length(pS), 10);
-testVD3 = viscore.blockedData(values.EEGArtifact.data, ...
-    'Artifact (Artifact events)', 'Events', values.artifactEvents, ...
-    'BlockSize', 1000, 'SampleRate', values.EEGArtifact.srate);
-bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
-assertTrue(isvalid(bv3));
+testData = viscore.blockedData(EEGArtifact.data, ...
+    'Artifact (Artifact events)', 'Events', artifactEvents, ...
+    'BlockSize', 1000, 'SampleRate', EEGArtifact.srate);
+visviews.dualView('VisData', testData);
 
 
 %%
-x = figure
+x = figure;
 y = findall(x);
  for k = 1:length(y)
      p = get(y(k), 'Type');
-    fprintf('%d: %s ', k, get(y(k), 'Tag'));
+     myTag = get(y(k), 'Tag');
+    fprintf('%d: %s ', k, myTag);
     if strcmp(p, 'uimenu')
         fprintf('%s', get(y(k), 'Label'));
     end
+    if strcmpi(myTag, 'FigureToolBar')
+        w = y(k);
+    end
     fprintf('\n');
-end
+ end
+
+ %%
+ z = findall(w);
+ for k = 1:length(z)
+     myTag = get(z(k), 'Tag');
+    fprintf('%d: %s ', k, myTag);
+    fprintf('\n');
+ end
