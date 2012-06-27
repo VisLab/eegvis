@@ -234,7 +234,8 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             if obj.PlotWindow && ~obj.VisData.isEpoched()
                 cDims = [];
             end
-            [obj.Signals, sStart] = viscore.dataSlice.getDataSlice(visData.getData(), ...
+            [obj.Signals, sStart, sSizes] = ...
+                viscore.dataSlice.getDataSlice(visData.getData(), ...
                 slices, cDims, obj.CombineMethod);
             if isempty(obj.Signals)
                 warning('signalStackedPlot:plotSlice', ...
@@ -243,15 +244,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             end
             
             obj.StartElement = sStart(1);
-            obj.StartBlock = sStart(3);
-            
-            % Adjust signals to account for blocking
-            if combDim > 0   % Adjust the label if necessary
-                combineString = [obj.CombineMethod ' '];
-            else
-                combineString = '';
-            end
-            
+            obj.StartBlock = sStart(3); 
             [nElements, nSamples, nBlocks] = size(obj.Signals);
             obj.Colors = bFunction.getBlockColors(bValues);
             if obj.PlotWindow  % Plot all elements for a window
@@ -260,9 +253,6 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                     obj.Signals = permute(obj.Signals, [2, 3, 1]);
                     obj.Signals = reshape(obj.Signals, [nSamples*nBlocks, nElements]);
                     obj.Signals = squeeze(obj.Signals');
-                    combineString = '';  % blocks contiguous so don't combine
-                elseif obj.TotalBlocks == 1
-                    combineString = ''; % only one block so don't combine
                 end
                 obj.XLimOffset = (sStart(3) - 1)*nSamples/visData.getSampleRate();
                 obj.YStringBase = names{1};
@@ -273,9 +263,18 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 obj.YStringBase = names{3};
                 obj.Colors = reshape(obj.Colors, size(bValues, 2), 3);
             end
-            obj.XStringBase  = [names{3} ' ' ...
-                viscore.dataSlice.rangeString(obj.StartBlock, nBlocks) ...
-                ' (' combineString names{1} ' ' ...
+            
+            % Fix up the base string for the x axis to reflect the range
+            combBlockString = '';
+            combElementString = '';
+            if combDim > 0 && obj.PlotWindow  % Adjust the label if necessary
+                combBlockString = [obj.CombineMethod ' '];
+            elseif combDim > 0
+                combElementString = [obj.CombineMethod ' '];
+            end     
+            obj.XStringBase  = [combBlockString names{3} ' ' ...
+                viscore.dataSlice.rangeString(obj.StartBlock, sSizes(3)) ...
+                ' ('  combElementString names{1} ' ' ...
                 viscore.dataSlice.rangeString(obj.StartElement, obj.TotalElements) ')'];
             
             if obj.VisData.isEpoched() % add time scale to x label
