@@ -274,9 +274,9 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             obj.YString = obj.YStringBase;
             
             if ~isempty(names{3})
-                wString = names{3}(1);
+                wString = names{3};
             else
-                wString = 'w';
+                wString = 'Window';
             end
 
             yTickLabels = cellstr(get(obj.MainAxes, 'YTickLabel'));

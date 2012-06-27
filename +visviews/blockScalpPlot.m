@@ -289,7 +289,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 ' (' combineString names{3} ' ' num2str(obj.StartBlock) ':' ...
                 num2str(obj.StartBlock + obj.NumberBlocks - 1) ')'];
             obj.XString = obj.XStringBase;
-            obj.CursorString = {'y:'; 'x:'};
+            obj.CursorString = {'Y:'; 'X:'};
             
             % Set the properties of the main axes
             bColor = obj.getBackgroundColor();

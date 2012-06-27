@@ -249,14 +249,14 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             
             % Fix the cursor string template
             if ~isempty(names{3})
-                wString = names{3}(1);
+                wString = names{3};
             else
-                wString = 'w';
+                wString = 'Window';
             end
             if ~isempty(names{1})
-                eString = names{1}(1);
+                eString = names{1};
             else
-                eString = 'e';
+                eString = 'Element';
             end
             obj.CursorString = {[wString ': ']; ...
                 [eString ': ']; ...

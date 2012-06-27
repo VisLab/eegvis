@@ -139,14 +139,22 @@ classdef blockedData < hgsetget
             blockSize = obj.BlockSize;
         end % getBlockSize
         
-        function bStarts = getBlockStartTimes(obj)
-            % Return the block start times in seconds
-            bStarts = obj.BlockStartTimes;
-        end % getBlockStartTimes
+        function bStarts = getBlockStartTimes(obj, varargin)
+            % Return a vector of the block or epoch start times
+            if nargin == 1
+                bStarts = obj.BlockStartTimes;
+            else
+                bStarts = obj.BlockStartTimes(varargin{1});
+            end
+        end % getBlockStartTimes       
         
-        function bTimes = getBlockTimeScale(obj)
+        function bTimes = getBlockTimeScale(obj, varargin)
             % Return the relative times of individual samples in one block
-            bTimes = obj.BlockTimeScale;
+            if nargin == 1
+                bTimes = obj.BlockTimeScale;
+            else
+                bTimes = obj.BlockTimeScale(varargin{1});
+            end
         end % getBlockTimeScale
            
         function data = getData(obj)

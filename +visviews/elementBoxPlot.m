@@ -231,6 +231,8 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             elseif length(data) == 1 || limits(1) == limits(2) %constant
                 limits = [limits(1)*0.9, limits(1)*1.1];
             end
+            
+
             try % boxplot fails if it doesn't have enough room
                 obj.Boxplot = boxplot(obj.MainAxes, ...
                     data(dRange),  num2cell(groups(dRange)), ...
@@ -262,9 +264,9 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             obj.XString = obj.XStringBase;
             
             if ~isempty(names{1})
-                eString = names{1}(1);
+                eString = names{1};
             else
-                eString = 'e';
+                eString = 'Element';
             end
  
             xTickLabels = cellstr(get(obj.MainAxes, 'XTickLabel'));

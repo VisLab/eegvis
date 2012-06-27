@@ -193,9 +193,6 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
             hold(obj.MainAxes, 'off');
             obj.YString =  '';
             obj.YStringBase = obj.YString;
-            if ~isempty(names{1})
-                obj.CursorString{2} = [names{1}(1) ': '];
-            end
             obj.redraw();
         end % plot
         

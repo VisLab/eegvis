@@ -261,12 +261,12 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             
             % Fix the cursor string template
             if ~isempty(names{3})
-                wString = names{3}(1);
+                wString = names{3};
             else
-                wString = 'w';
+                wString = 'Window';
             end
      
-            obj.CursorString = {'Type: '; [wString ': '];  ...
+            obj.CursorString = {[wString ': ']; 'Ev-type: ';  ...
                 'Count: ';};
             set(obj.MainAxes, ...
                 'XLimMode', 'manual', 'XLim', xLimits, ...
@@ -294,8 +294,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                   + obj.StartBlock - 1; 
             y = ceil(y - 0.5);
             
-            s = {[obj.CursorString{2} num2str(y)]; ...
-                 [obj.CursorString{1} num2str(w)]; ...
+            s = {[obj.CursorString{1} num2str(w)]; ...
+                 [obj.CursorString{2} num2str(y)]; ...
                  [obj.CursorString{3} num2str(obj.Events.getEventCount(y, w))]};
         end % updateString
         

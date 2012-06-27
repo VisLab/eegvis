@@ -311,20 +311,20 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             if ~obj.VisData.isEpoched()
                 t = x + obj.SelectedBlockOffset;
                 sample = floor(obj.VisData.getSampleRate()*(t)) + 1;
-                s = {['t: ' num2str(t) ' ' obj.TimeUnits]; ...
-                    ['s: ' num2str(sample)]};
+                s = {['Time: ' num2str(t) ' ' obj.TimeUnits]; ...
+                    ['Sample: ' num2str(sample)]};
                 if ~isempty(obj.SelectedHandle)
                     rs = floor(obj.VisData.getSampleRate()*(x - obj.XLimOffset)) + 1;
-                    s{3} = ['raw: '  num2str(obj.SelectedSignal(rs)) ...
+                    s{3} = ['Raw: '  num2str(obj.SelectedSignal(rs)) ...
                         ' ' obj.SignalLabel];
                 end
             else
                 a = (x - obj.VisData.getBlockTimeScale(1))./1000;
                 a = floor(obj.VisData.getSampleRate()*a) + 1;
-                s = {['et: ' num2str(x) ' ' obj.TimeUnits]; ...
-                    ['es: ' num2str(a)]};
+                s = {['Ep-time: ' num2str(x) ' ' obj.TimeUnits]; ...
+                    ['Ep-sample: ' num2str(a)]};
                 if ~isempty(obj.SelectedHandle)
-                    z = {['v: '  num2str(obj.SelectedSignal(a)) ...
+                    z = {['Value: '  num2str(obj.SelectedSignal(a)) ...
                         ' ' obj.SignalLabel]};
                     s = [s; z];
                 end;

@@ -313,13 +313,13 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
                 
                 if ~obj.VisData.isEpoched()
                     sample = floor(obj.VisData.getSampleRate()*(x)) + 1;
-                    s = {['t: ' num2str(x) ' ' obj.TimeUnits]; ...
-                         ['s: ' num2str(sample)]};
+                    s = {['Time: ' num2str(x) ' ' obj.TimeUnits]; ...
+                         ['Sample: ' num2str(sample)]};
                 else
-                    a = (x - obj.VisData.getBlockTimes(1))./1000;
+                    a = (x - obj.VisData.getBlockTimeScale(1))./1000;
                     a = floor(obj.VisData.getSampleRate()*a) + 1;
-                    s = {['et: ' num2str(x) ' ' obj.TimeUnits]; ...
-                         ['es: ' num2str(a)]};
+                    s = {['Ep-Time: ' num2str(x) ' ' obj.TimeUnits]; ...
+                         ['Ep-Sample: ' num2str(a)]};
                 end
             %catch  ME  %#ok<NASGU>   ignore errors on cursor sweep
             %end

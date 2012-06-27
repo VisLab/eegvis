@@ -12,6 +12,8 @@ startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
 values.event = struct('type', types, 'startTime', num2cell(startTimes), ...
     'certainty', ones(length(startTimes), 1));
 values.random = random('normal', 0, 1, [32, 1000, 20]);
+load('EEGEpoch.mat')
+values.EEGEpoch = EEGEpoch;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
@@ -295,16 +297,25 @@ assertEqual(size(counts, 1), length(ed1.getUniqueTypes()));
 assertEqual(size(counts, 2), numBlocks);
 assertEqual(sum(counts(:)), length(values.event));
 
-function testGetEpochTimes(values) %#ok<INUSD,DEFNU>
-% Unit test for viscore.blockedData with getEpochTimes
+function testGetMethods(values) %#ok<DEFNU>
+% Unit test for viscore.blockedData with get methods
 fprintf('\nUnit tests for viscore.blockedData with getEpochTimes\n');
-load('EEGEpoch.mat')
 fprintf('It should have the correct number of start times\n');
-[events, startTimes, timeScale] = viscore.blockedEvents.getEEGTimes(EEGEpoch); %#ok<ASGLU>
-assertEqual(length(startTimes), length(EEGEpoch.epoch));
+[events, startTimes, timeScale] = ...
+    viscore.blockedEvents.getEEGTimes(values.EEGEpoch); %#ok<ASGLU>
+assertEqual(length(startTimes), length(values.EEGEpoch.epoch));
 fprintf('It should have the correct number of time scale values\n');
-assertEqual(length(timeScale), length(EEGEpoch.times));
-fprintf('It should have the correct epoch start times (to within a sample)\n');
+assertEqual(length(timeScale), length(values.EEGEpoch.times));
+fprintf('It should have the correct block start times (to within a sample)\n');
 assertElementsAlmostEqual(startTimes(1), 0.0);
 assertTrue( abs(startTimes(2)- 0.6953) < 10-05);
 assertTrue( abs(startTimes(3)- 3.7081) < 10-05);
+bData = viscore.blockedData(values.EEGEpoch.data, 'bData', 'SampleRate', ...
+    values.EEGEpoch.srate, 'BlockStartTimes', startTimes, ...
+    'BlockTimeScale', timeScale, 'Epoched', true);
+fprintf('It should correctly get a subset of block start times when data is epoched\n');
+bTimes = bData.getBlockStartTimes(1:5);
+assertVectorsAlmostEqual(startTimes(1:5), bTimes);
+fprintf('It should correctly get a subset of block time scales when data is epoched\n');
+bScale = bData.getBlockTimeScale(3:10);
+assertVectorsAlmostEqual(timeScale(3:10), bScale);
