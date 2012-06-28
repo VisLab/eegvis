@@ -143,6 +143,7 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
     end % public properties
     
     properties (Access = private)
+        CurrentCounts = [];      % a events x clumps array of current counts
         CurrentFunction = [];    % block function that is currently displayed
         CurrentSlice = [];       % current slice
         Events = [];             % events object with events 
@@ -222,6 +223,7 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             if isempty(obj.Events);
                 return;
             end
+            obj.UniqueTypes = obj.Events.getUniqueTypes();
 
              % Calculate sizes and number of clumps, adjust for uneven clumps
             [e, s, b] = visData.getDataSize();
@@ -290,13 +292,16 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             if cNum < 1 || cNum > obj.NumberClumps
                 return;
             end
-            w = min(ceil((x - 0.5)*double(obj.ClumpSize)), obj.NumberBlocks) ...
-                  + obj.StartBlock - 1; 
+            
+            
+            w = min(ceil((x - 0.5)*double(obj.ClumpSize)), obj.NumberBlocks) + obj.StartBlock - 1; 
             y = ceil(y - 0.5);
+            x = ceil(x - 0.5);
+            fprintf('%d %d\n', x, y);
             
             s = {[obj.CursorString{1} num2str(w)]; ...
-                 [obj.CursorString{2} num2str(y)]; ...
-                 [obj.CursorString{3} num2str(obj.Events.getEventCount(y, w))]};
+                 [obj.CursorString{2} obj.UniqueTypes{y} '(' num2str(y) ')']; ...
+                 [obj.CursorString{3} num2str(obj.CurrentCounts(y, x))]};
         end % updateString
         
     end % public methods
@@ -304,7 +309,7 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
     methods (Access = 'private')
         
         function colors = createColors(obj)
-            % Return the range of block numbers occupied by event k
+            % Return the the colors for the current clumps
             counts = obj.Events.getEventCounts(obj.StartBlock, ...
                 obj.StartBlock + obj.NumberBlocks - 1);
             
@@ -319,6 +324,7 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 counts = viscore.dataSlice.combineDims(counts, 1, obj.CombineMethod);
                 counts = reshape(counts, obj.NumberClumps, obj.NumberEvents)';
             end
+            obj.CurrentCounts = counts;
             mask = zeros(1, obj.NumberEvents*obj.NumberClumps);
             for k = 2:length(obj.ColorLevels)
                 mask(counts >= obj.ColorLevels(k - 1) & ...

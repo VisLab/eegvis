@@ -240,9 +240,13 @@ classdef blockedEvents < hgsetget
             end
         end % getTypeNumbers
         
-        function uniqueTypes = getUniqueTypes(obj)
+        function uniqueTypes = getUniqueTypes(obj, varargin)
             % Return the unique event types
-            uniqueTypes = obj.EventUniqueTypes;
+            if nargin == 1
+                 uniqueTypes = obj.EventUniqueTypes;
+            else
+                uniqueTypes = obj.EventUniqueTypes(varargin{1});
+            end
         end % getUniqueTypes
         
         function version = getVersionID(obj)

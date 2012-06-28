@@ -110,6 +110,11 @@ function testGetMethods(values) %#ok<DEFNU>
   counts = ed1.getEventCounts(1, numBlocks);
   assertEqual(size(counts, 1), length(ed1.getUniqueTypes()));
   assertEqual(size(counts, 2), numBlocks);
+  
+  fprintf('It should return a cell array when called with one index\n');
+  types = ed1.getUniqueTypes(2);
+  assertTrue(iscell(types));
+  assertEqual(length(types), 1);
 
   function testGetEventStructure(values) %#ok<DEFNU>
   % Unit test for viscore.blockedEvents getEventStructure
