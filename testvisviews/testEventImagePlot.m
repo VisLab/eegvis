@@ -18,7 +18,7 @@ values.EEGEpoch = EEGEpoch;
 
 load('EEGArtifact.mat'); 
 values.EEGArtifact = EEGArtifact;
-load('ArtifactLabels.mat');
+load('ArtifactEvents.mat');
 values.artifactEvents = artifactEvents;
 values.deleteFigures = false;
 
@@ -81,9 +81,9 @@ assertTrue(isvalid(ep1));
 
 numBlocks = ceil(size(values.EEG.data, 2)/1000);
 ev = testVD.getEvents();
-counts = ev.getEventCounts(1, numBlocks);
+counts = ev.getEventCounts(1, numBlocks, 0);
 assertVectorsAlmostEqual(size(counts), ...
-    [length(ev.getUniqueTypes()), numBlocks]);
+    [length(ev.getUniqueTypes()) + 1, numBlocks]);
 
 slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
@@ -209,9 +209,9 @@ testVD12 = viscore.blockedData(values.EEGArtifact.data, 'Artifact', ...
     'SampleRate', values.EEGArtifact.srate, 'BlockSize', 1000);
 numBlocks = ceil(size(values.EEGArtifact.data, 2)/1000);
 ev12 = testVD12.getEvents();
-counts = ev12.getEventCounts(1, numBlocks);
+counts = ev12.getEventCounts(1, numBlocks, 0);
 assertVectorsAlmostEqual(size(counts), ...
-    [length(ev12.getUniqueTypes()), numBlocks]);
+    [length(ev12.getUniqueTypes()) + 1, numBlocks]);
 ep12.plot(testVD12, thisFunc, slice1);
 gaps = ep12.getGaps();
 ep12.reposition(gaps);

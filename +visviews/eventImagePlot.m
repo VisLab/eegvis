@@ -224,7 +224,7 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 return;
             end
             obj.UniqueTypes = obj.Events.getUniqueTypes();
-
+            obj.UniqueTypes{end + 1} = 'Uncertain';
              % Calculate sizes and number of clumps, adjust for uneven clumps
             [e, s, b] = visData.getDataSize();
             [slices, names] = obj.CurrentSlice.getParameters(3);  
@@ -243,7 +243,7 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 return;
             end
             obj.UniqueTypes = obj.Events.getUniqueTypes();
-            obj.NumberEvents = size(obj.UniqueTypes, 1);
+            obj.NumberEvents = size(obj.UniqueTypes, 1) + 1;
             colors = obj.createColors();
             iMap = image(colors, 'Parent', obj.MainAxes, 'Tag', 'ImageMap');
             set(iMap, 'HitTest', 'off') %Get position from axes not image
@@ -254,7 +254,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             yLimits = [0.5, double(obj.NumberEvents) + 0.5];
             yTickLabels = cell(1, obj.NumberEvents);
             yTickLabels{1} = '1';
-            yTickLabels{obj.NumberEvents} = num2str(obj.NumberEvents);
+            yTickLabels{obj.NumberEvents} = 'U';
+            yTickLabels{obj.NumberEvents - 1} = num2str(obj.NumberEvents - 1);
             
             xLimits = [0.5, double(obj.NumberClumps) + 0.5];
             [xTickMarks, xTickLabels, obj.XStringBase] = ...
@@ -311,7 +312,7 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
         function colors = createColors(obj)
             % Return the the colors for the current clumps
             counts = obj.Events.getEventCounts(obj.StartBlock, ...
-                obj.StartBlock + obj.NumberBlocks - 1);
+                obj.StartBlock + obj.NumberBlocks - 1, 0);
             
             % Calculate the number of clumps and adjust for uneven clumps
             obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));

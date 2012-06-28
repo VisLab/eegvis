@@ -18,7 +18,7 @@ values.EEGEpoch = EEGEpoch;
 
 load('EEGArtifact.mat');
 values.EEGArtifact = EEGArtifact;
-load('ArtifactLabels.mat');
+load('ArtifactEvents.mat');
 values.artifactEvents = artifactEvents;
 values.deleteFigures = true;
 

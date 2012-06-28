@@ -190,15 +190,25 @@ classdef blockedEvents < hgsetget
             end
         end % getStartTimes
         
-       function count = getEventCount(obj, eventType, block) 
-            % Return types x blocks array of counts
-            count = obj.EventCounts(eventType, block);
-        end % getEventCounts
+%        function count = getEventCount(obj, eventType, block) 
+%             % Return types x blocks array of counts
+%             count = obj.EventCounts(eventType, block);
+%         end % getEventCounts
         
-        function counts = getEventCounts(obj, startBlock, endBlock) %#ok<MANU>
-            % Return types x blocks array of counts
-            counts = eval(['obj.EventCounts(:, ' ...
-                num2str(startBlock) ':' num2str(endBlock) ')']);
+        function counts = getEventCounts(obj, startBlock, endBlock, threshold) 
+            % Return (types+1) x blocks array of counts of events meeting certainty threshold
+            counts = zeros(length(obj.EventUniqueTypes) + 1, endBlock - startBlock + 1);
+            blocks = startBlock:endBlock;
+            for k = 1:length(blocks)
+                events = obj.BlockList{blocks(k)};
+                certainty = obj.Certainty(events) >= threshold;
+                events = events(certainty);
+                types = obj.EventTypeNumbers(events);
+                for j = 1:length(types)
+                   counts(types(j), k) = counts(types(j), k) + 1;
+                end
+                counts(end, k) = sum(~certainty);
+            end
         end % getEventCounts
         
         function numBlocks = getNumberBlocks(obj)
@@ -221,7 +231,7 @@ classdef blockedEvents < hgsetget
         end % getStartTimes
         
         function types = getTypes(obj, varargin)
-            % Return a cell array of event types in event order
+            % Return a cell array of event type names in event order
             if nargin == 1
                 types = obj.EventTypeNumbers;
             else
