@@ -48,16 +48,16 @@ function testNormalConstructor(values) %#ok<DEFNU>
 fprintf('\nUnit tests for visviews.signalHistogramPlot valid constructor\n');
 
 fprintf('It should construct a valid shadow signal plot when only parent passed\n')
-sfig = figure('Name', 'Creates plot panel when only parent is passed');
-sp = visviews.signalHistogramPlot(sfig, [], []);
-assertTrue(isvalid(sp));
+fig1 = figure('Name', 'Creates plot panel when only parent is passed');
+sh1 = visviews.signalHistogramPlot(fig1, [], []);
+assertTrue(isvalid(sh1));
 
 fprintf('It should allow callbacks to be registered\n')
-sp.registerCallbacks([]);
+sh1.registerCallbacks([]);
 
 drawnow
 if values.deleteFigures
-  delete(sfig);
+  delete(fig1);
 end
 
 function testBadConstructor(values) %#ok<DEFNU>
@@ -69,20 +69,20 @@ f = @() visviews.signalHistogramPlot();
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when only one parameter is passed\n');
-sfig = figure('Name', 'Invalid constructor');
-f = @() visviews.signalHistogramPlot(sfig);
+fig1 = figure('Name', 'Signal histogram invalid constructor');
+f = @() visviews.signalHistogramPlot(fig1);
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when only two parameters are passed\n');
-f = @() visviews.signalHistogramPlot(sfig, []);
+f = @() visviews.signalHistogramPlot(fig1, []);
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when more than three parameters are passed\n');
-f = @() visviews.signalHistogramPlot(sfig, [], [], []);
+f = @() visviews.signalHistogramPlot(fig1, [], [], []);
 assertExceptionThrown(f, 'MATLAB:maxrhs');
 
 if values.deleteFigures
-  delete(sfig);
+  delete(fig1);
 end
 
 function testPlot(values) %#ok<DEFNU>
@@ -90,125 +90,125 @@ function testPlot(values) %#ok<DEFNU>
 fprintf('\nUnit tests for visviews.signalHistogramPlot plot method\n')
 
 fprintf('It should produce a plot for a normal slice along dim 3\n');
-sfig1 = figure('Name', 'Normal plot slice along dimension 3');
-sp1 = visviews.signalHistogramPlot(sfig1, [], []);
-assertTrue(isvalid(sp1));
-sp1.plot(values.bData, values.fun, values.slice);
-gaps = sp1.getGaps();
-sp1.reposition(gaps);
+fig1 = figure('Name', 'Normal plot slice along dimension 3');
+sh1 = visviews.signalHistogramPlot(fig1, [], []);
+assertTrue(isvalid(sh1));
+sh1.plot(values.bData, values.fun, values.slice);
+gaps = sh1.getGaps();
+sh1.reposition(gaps);
 
 fprintf('It should produce a plot multiple window slice along dimension 3\n');
-sfig2 = figure('Name', 'Multiple windows - combine dim 3');
-sp2 = visviews.signalHistogramPlot(sfig2, [], []);
-assertTrue(isvalid(sp2));
+fig2 = figure('Name', 'Multiple windows - combine dim 3');
+sh2 = visviews.signalHistogramPlot(fig2, [], []);
+assertTrue(isvalid(sh2));
 slice2 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sp2.plot(values.bData, values.fun, slice2);
-gaps = sp2.getGaps();
-sp2.reposition(gaps);
+sh2.plot(values.bData, values.fun, slice2);
+gaps = sh2.getGaps();
+sh2.reposition(gaps);
 
 fprintf('It should produce a plot for EEG with combineDim 1\n');
-sfig3 = figure('Name', 'Single element - combine dim 1');
-sp3 = visviews.signalHistogramPlot(sfig3, [], []);
-assertTrue(isvalid(sp3));
+fig3 = figure('Name', 'Single element - combine dim 1');
+sh3 = visviews.signalHistogramPlot(fig3, [], []);
+assertTrue(isvalid(sh3));
 slice3 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp3.plot(values.bData, values.fun, slice3);
-gaps = sp3.getGaps();
-sp3.reposition(gaps);
+sh3.plot(values.bData, values.fun, slice3);
+gaps = sh3.getGaps();
+sh3.reposition(gaps);
 
 fprintf('It should produce a plot for EEG with multiple elements combineDim 1\n');
-sfig4 = figure('Name', 'Multiple elements - combine dim 1');
-sp4 = visviews.signalHistogramPlot(sfig4, [], []);
-assertTrue(isvalid(sp4));
+fig4 = figure('Name', 'Multiple elements - combine dim 1');
+sh4 = visviews.signalHistogramPlot(fig4, [], []);
+assertTrue(isvalid(sh4));
 slice4 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp4.plot(values.bData, values.fun, slice4);
-gaps = sp4.getGaps();
-sp4.reposition(gaps);
+sh4.plot(values.bData, values.fun, slice4);
+gaps = sh4.getGaps();
+sh4.reposition(gaps);
 
 fprintf('It should produce a plot of epoched data for a normal slice along dim 3\n');
 assertTrue(values.bDataEpoched.isEpoched())
-sfig5 = figure('Name', 'Plot when EEG data is epoched along dim 3');
-sp5 = visviews.signalHistogramPlot(sfig5, [], []);
-sp5.plot(values.bDataEpoched, values.fun, values.slice);
-gaps = sp5.getGaps();
-sp5.reposition(gaps);
+fig5 = figure('Name', 'Plot when EEG data is epoched along dim 3');
+sh5 = visviews.signalHistogramPlot(fig5, [], []);
+sh5.plot(values.bDataEpoched, values.fun, values.slice);
+gaps = sh5.getGaps();
+sh5.reposition(gaps);
 
 fprintf('It should produce a plot multiple window slice along dimension 3\n');
-sfig6 = figure('Name', 'Epoched data, multiple windows - combine dim 3');
-sp6 = visviews.signalHistogramPlot(sfig6, [], []);
-assertTrue(isvalid(sp6));
+fig6 = figure('Name', 'Epoched data, multiple windows - combine dim 3');
+sh6 = visviews.signalHistogramPlot(fig6, [], []);
+assertTrue(isvalid(sh6));
 slice6 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sp6.plot(values.bDataEpoched, values.fun, slice6);
-gaps = sp6.getGaps();
-sp6.reposition(gaps);
+sh6.plot(values.bDataEpoched, values.fun, slice6);
+gaps = sh6.getGaps();
+sh6.reposition(gaps);
 
 fprintf('It should produce a plot for EEG epoched data with combineDim 1\n');
-sfig7 = figure('Name', 'Single element epoched - combine dim 1');
-sp7 = visviews.signalHistogramPlot(sfig7, [], []);
-assertTrue(isvalid(sp7));
+fig7 = figure('Name', 'Single element epoched - combine dim 1');
+sh7 = visviews.signalHistogramPlot(fig7, [], []);
+assertTrue(isvalid(sh7));
 slice7 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp7.plot(values.bDataEpoched, values.fun, slice7);
-gaps = sp7.getGaps();
-sp7.reposition(gaps);
+sh7.plot(values.bDataEpoched, values.fun, slice7);
+gaps = sh7.getGaps();
+sh7.reposition(gaps);
 
 fprintf('It should produce a plot for EEG epoched data with multiple elements combineDim 1\n');
-sfig8 = figure('Name', 'Multiple elements epoched - combine dim 1');
-sp8 = visviews.signalHistogramPlot(sfig8, [], []);
-assertTrue(isvalid(sp8));
+fig8 = figure('Name', 'Multiple elements epoched - combine dim 1');
+sh8 = visviews.signalHistogramPlot(fig8, [], []);
+assertTrue(isvalid(sh8));
 slice8 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp8.plot(values.bDataEpoched, values.fun, slice8);
-gaps = sp8.getGaps();
-sp8.reposition(gaps);
+sh8.plot(values.bDataEpoched, values.fun, slice8);
+gaps = sh8.getGaps();
+sh8.reposition(gaps);
 
 fprintf('It should plot smooth signals with red bars\n');
-sfig9 = figure('Name', 'Plot with smoothed signals');
-sp9 = visviews.signalHistogramPlot(sfig9, [], []);
-assertTrue(isvalid(sp9));
-sp9.HistogramColor = [1, 0, 0];
-sp9.plot(values.bDataSmooth, values.fun, values.slice);
-gaps = sp9.getGaps();
-sp9.reposition(gaps);
+fig9 = figure('Name', 'Plot with smoothed signals');
+sh9 = visviews.signalHistogramPlot(fig9, [], []);
+assertTrue(isvalid(sh9));
+sh9.HistogramColor = [1, 0, 0];
+sh9.plot(values.bDataSmooth, values.fun, values.slice);
+gaps = sh9.getGaps();
+sh9.reposition(gaps);
 
 fprintf('It should plot smooth signals with large deviation\n');
-sfig10 = figure('Name', 'Plot with smoothed signals with out of range signal');
-sp10 = visviews.signalHistogramPlot(sfig10, [], []);
-assertTrue(isvalid(sp6));
+fig10 = figure('Name', 'Plot with smoothed signals with out of range signal');
+sh10 = visviews.signalHistogramPlot(fig10, [], []);
+assertTrue(isvalid(sh10));
 data10 = values.bDataSmooth.getData();
 data10(2,:) = 100*data10(6, :);
 testVD10 = viscore.blockedData(data10, 'Large Cosine');
-sp10.plot(testVD10, values.fun, values.slice);
-gaps = sp10.getGaps();
-sp10.reposition(gaps);
+sh10.plot(testVD10, values.fun, values.slice);
+gaps = sh10.getGaps();
+sh10.reposition(gaps);
 
 fprintf('It should produce a plot for a clump of nonepoched windows sliced along dim 3 \n');
-sfig11 = figure('Name', 'Plot clump for slice along dimension 3, not epoched');
-sp11 = visviews.signalHistogramPlot(sfig11, [], []);
-assertTrue(isvalid(sp11));
+fig11 = figure('Name', 'Plot clump for slice along dimension 3, not epoched');
+sh11 = visviews.signalHistogramPlot(fig11, [], []);
+assertTrue(isvalid(sh11));
 slice11 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
-sp11.plot(values.bDataSmooth, values.fun, slice11);
-gaps = sp11.getGaps();
-sp11.reposition(gaps);
+sh11.plot(values.bDataSmooth, values.fun, slice11);
+gaps = sh11.getGaps();
+sh11.reposition(gaps);
 
 fprintf('It should produce a plot for a clump of nonepoched windows sliced along dim 3 \n');
-sfig12 = figure('Name', 'Plot clump for slice along dimension 3, epoched');
-sp12 = visviews.signalHistogramPlot(sfig12, [], []);
-assertTrue(isvalid(sp12));
+fig12 = figure('Name', 'Plot clump for slice along dimension 3, epoched');
+sh12 = visviews.signalHistogramPlot(fig12, [], []);
+assertTrue(isvalid(sh12));
 slice12 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
-sp12.plot(values.bDataEpoched, values.fun, slice12);
-gaps = sp12.getGaps();
-sp12.reposition(gaps);
+sh12.plot(values.bDataEpoched, values.fun, slice12);
+gaps = sh12.getGaps();
+sh12.reposition(gaps);
 
 fprintf('It should produce a single window plot for a clump of epoched windows sliced along dim 3 \n');
-sfig13 = figure('Name', 'Plot clump for slice along dimension 3, epoched (epoch 5 and 7 are big)');
-sp13 = visviews.signalHistogramPlot(sfig13, [], []);
-assertTrue(isvalid(sp13));
+fig13 = figure('Name', 'Plot clump for slice along dimension 3, epoched (epoch 5 and 7 are big)');
+sh13 = visviews.signalHistogramPlot(fig13, [], []);
+assertTrue(isvalid(sh13));
 bigData = values.bDataSmooth.getData;
 bigData(:, :, 5) = 3*bigData(:, :, 5);
 bigData(:, :, 7) = 3.5*bigData(:, :, 7);
@@ -216,36 +216,36 @@ testVD13 = viscore.blockedData(bigData, 'Sinusoidal', ...
     'Epoched', true, 'SampleRate', 256);
 slice13 = viscore.dataSlice('Slices', {':', ':', '4:8'}, ...
     'DimNames', {'Channel', 'Sample', 'Epoch'}, 'CombineDim', 3);
-sp13.plot(testVD13, values.fun, slice13);
-gaps = sp13.getGaps();
-sp13.reposition(gaps);
+sh13.plot(testVD13, values.fun, slice13);
+gaps = sh13.getGaps();
+sh13.reposition(gaps);
 
 fprintf('It should produce a plot for a clump of nonepoched windows\n');
-sfig14 = figure('Name', 'Plot clump for channels 2:4 sliced dimension 1, big windows [5, 7], not epoched');
-sp14 = visviews.signalHistogramPlot(sfig14, [], []);
-assertTrue(isvalid(sp4));
+fig14 = figure('Name', 'Plot clump for channels 2:4 sliced dimension 1, big windows [5, 7], not epoched');
+sh14 = visviews.signalHistogramPlot(fig14, [], []);
+assertTrue(isvalid(sh14));
 slice14 = viscore.dataSlice('Slices', {'30:32', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 1);
-sp14.plot(testVD13, values.fun, slice14);
-gaps = sp14.getGaps();
-sp14.reposition(gaps);
+sh14.plot(testVD13, values.fun, slice14);
+gaps = sh14.getGaps();
+sh14.reposition(gaps);
 drawnow
 
 if values.deleteFigures
-    delete(sfig1);
-    delete(sfig2);
-    delete(sfig3);
-    delete(sfig4);
-    delete(sfig5);
-    delete(sfig6);
-    delete(sfig7);
-    delete(sfig8);
-    delete(sfig9);
-    delete(sfig10);
-    delete(sfig11);
-    delete(sfig12);
-    delete(sfig13);
-    delete(sfig14);
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+    delete(fig5);
+    delete(fig6);
+    delete(fig7);
+    delete(fig8);
+    delete(fig9);
+    delete(fig10);
+    delete(fig11);
+    delete(fig12);
+    delete(fig13);
+    delete(fig14);
 end
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>
@@ -256,32 +256,32 @@ fprintf('\nUnit tests for visviews.signalHistogramPlot plot method with constant
 fprintf('It should produce a plot for when all of the values are 0\n');
 data = zeros([32, 1000, 20]);
 testVD1 = viscore.blockedData(data, 'All zeros');
-sfig1 = figure('Name', 'All zero values');
-bp1 = visviews.signalHistogramPlot(sfig1, [], []);
-assertTrue(isvalid(bp1));
-bp1.plot(testVD1, values.fun, values.slice);
-gaps = bp1.getGaps();
-bp1.reposition(gaps);
+fig1 = figure('Name', 'All zero values');
+sh1 = visviews.signalHistogramPlot(fig1, [], []);
+assertTrue(isvalid(sh1));
+sh1.plot(testVD1, values.fun, values.slice);
+gaps = sh1.getGaps();
+sh1.reposition(gaps);
 
 % Data zeros, function NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
-sfig2 = figure('Name', 'Data zero, func NaN');
-bp2 = visviews.signalHistogramPlot(sfig2, [], []);
-assertTrue(isvalid(bp2));
-bp2.plot(testVD1, [], values.slice);
-gaps = bp2.getGaps();
-bp2.reposition(gaps);
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+fig2 = figure('Name', 'Data zero, func NaN');
+sh2 = visviews.signalHistogramPlot(fig2, [], []);
+assertTrue(isvalid(sh2));
+sh2.plot(testVD1, [], values.slice);
+gaps = sh2.getGaps();
+sh2.reposition(gaps);
 
 % Data NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
 data = NaN([32, 1000, 20]);
 testVD3 = viscore.blockedData(data, 'Data NaN');
-sfig3 = figure('Name', 'Data NaNs');
-bp3 = visviews.signalHistogramPlot(sfig3, [], []);
-assertTrue(isvalid(bp3));
-bp3.plot(testVD3, values.fun, values.slice);
-gaps = bp3.getGaps();
-bp3.reposition(gaps);
+fig3 = figure('Name', 'Data NaNs');
+sh3 = visviews.signalHistogramPlot(fig3, [], []);
+assertTrue(isvalid(sh3));
+sh3.plot(testVD3, values.fun, values.slice);
+gaps = sh3.getGaps();
+sh3.reposition(gaps);
 
 % Data slice empty
 fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
@@ -289,18 +289,18 @@ data = zeros(5, 1);
 testVD4 = viscore.blockedData(data, 'Data empty');
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sfig4 = figure('Name', 'Data slice is empty');
-bp4 = visviews.signalHistogramPlot(sfig4, [], []);
-assertTrue(isvalid(bp4));
-bp4.plot(testVD4, values.fun, slice4);
-gaps = bp4.getGaps();
-bp4.reposition(gaps);
+fig4 = figure('Name', 'Data slice is empty');
+sh4 = visviews.signalHistogramPlot(fig4, [], []);
+assertTrue(isvalid(sh4));
+sh4.plot(testVD4, values.fun, slice4);
+gaps = sh4.getGaps();
+sh4.reposition(gaps);
 drawnow
 if values.deleteFigures
-    delete(sfig1);
-    delete(sfig2);
-    delete(sfig3);
-    delete(sfig4);
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
 end
 
 function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>

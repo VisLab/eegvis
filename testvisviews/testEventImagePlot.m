@@ -9,7 +9,7 @@ tEvents = EEG.event;
 types = {tEvents.type}';
                                       % Convert to seconds since beginning
 startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
-values.event = struct('type', types, 'startTime', num2cell(startTimes), ...
+values.event = struct('type', types, 'time', num2cell(startTimes), ...
     'certainty', ones(length(startTimes), 1));
 values.random = random('exp', 2, [32, 1000, 20]);
 
@@ -30,12 +30,12 @@ function testNormalConstructor(values) %#ok<DEFNU>
 fprintf('\nUnit tests for visviews.eventImagePlot valid constructor\n');
 
 fprintf('It should construct a valid event image plot when only parent passed\n')
-sfig = figure('Name', 'Empty plot');
-ip = visviews.eventImagePlot(sfig, [], []);
+fig = figure('Name', 'Empty plot');
+ip = visviews.eventImagePlot(fig, [], []);
 assertTrue(isvalid(ip));
 drawnow
 if values.deleteFigures
-  delete(sfig);
+  delete(fig);
 end
 
 function testBadConstructor(values) %#ok<DEFNU>
@@ -47,19 +47,19 @@ f = @() visviews.eventImagePlot();
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when only one parameter is passed\n');
-sfig = figure;
-f = @() visviews.eventImagePlot(sfig);
+fig = figure;
+f = @() visviews.eventImagePlot(fig);
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when only two parameters are passed\n');
-f = @() visviews.eventImagePlot(sfig, []);
+f = @() visviews.eventImagePlot(fig, []);
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when more than three parameters are passed\n');
-f = @() visviews.eventImagePlot(sfig, [], [], []);
+f = @() visviews.eventImagePlot(fig, [], [], []);
 assertExceptionThrown(f, 'MATLAB:maxrhs');
 if values.deleteFigures
-  delete(sfig);
+  delete(fig);
 end
 
 function testPlot(values) %#ok<DEFNU>
@@ -74,8 +74,8 @@ fMan.putObjects(defaults);
 func = fMan.getEnabledObjects('block');
 thisFunc = func{1};
 fprintf('It should it should produce a plot with events\n');
-sfig1 = figure('Name', 'Basic event plot');
-ep1 = visviews.eventImagePlot(sfig1, [], []);
+fig1 = figure('Name', 'Basic event plot');
+ep1 = visviews.eventImagePlot(fig1, [], []);
 assertTrue(isvalid(ep1));
 
 
@@ -93,8 +93,8 @@ gaps = ep1.getGaps();
 ep1.reposition(gaps);
 
 fprintf('It should produce a plot for empty slice\n');
-sfig2 = figure('Name', 'Empty slice');
-ep2 = visviews.eventImagePlot(sfig2, [], []);
+fig2 = figure('Name', 'Empty slice');
+ep2 = visviews.eventImagePlot(fig2, [], []);
 assertTrue(isvalid(ep2));
 
 ep2.plot(testVD, thisFunc, []);
@@ -106,16 +106,16 @@ fprintf('It should produce a plot for identity slice with groupings of 2\n');
 % Generate some data to plot with and without grouping
 slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sfig3 = figure('Name', 'Ungrouped data to compare with grouping of 2');
-ep3 = visviews.eventImagePlot(sfig3, [], []);
+fig3 = figure('Name', 'Ungrouped data to compare with grouping of 2');
+ep3 = visviews.eventImagePlot(fig3, [], []);
 assertTrue(isvalid(ep3));
 ep3.plot(testVD, thisFunc, slice3);
 drawnow
 gaps = ep3.getGaps();
 ep3.reposition(gaps);
 
-sfig4 = figure('Name', 'Grouping of 2');
-ep4 = visviews.eventImagePlot(sfig4, [], []);
+fig4 = figure('Name', 'Grouping of 2');
+ep4 = visviews.eventImagePlot(fig4, [], []);
 assertTrue(isvalid(ep4));
 ep4.ClumpSize = 2;
 ep4.plot(testVD, thisFunc, slice1);
@@ -124,8 +124,8 @@ gaps = ep4.getGaps();
 ep4.reposition(gaps);
 
 fprintf('It should produce a plot for identity slice with 1 group\n');
-sfig5 = figure('Name', 'Group of one');
-ep5 = visviews.eventImagePlot(sfig5, [], []);
+fig5 = figure('Name', 'Group of one');
+ep5 = visviews.eventImagePlot(fig5, [], []);
 assertTrue(isvalid(ep5));
 ep5.ClumpSize = 20;
 ep5.plot(testVD, thisFunc, slice1);
@@ -135,8 +135,8 @@ ep5.reposition(gaps);
 
 fprintf('It should produce a plot for identity slice with uneven grouping\n');
 % Generate some data to plot
-sfig6 = figure('Name', 'Ungrouped group to compare with uneven grouping');
-ep6 = visviews.eventImagePlot(sfig6, [], []);
+fig6 = figure('Name', 'Ungrouped group to compare with uneven grouping');
+ep6 = visviews.eventImagePlot(fig6, [], []);
 assertTrue(isvalid(ep6));
 ep6.ClumpSize = 3;
 ep6.plot(testVD, thisFunc, slice1);
@@ -146,8 +146,8 @@ ep6.reposition(gaps);
 fprintf('It should produce a plot for identity slice for small grouping with uneven grouping\n');
 slice7 = viscore.dataSlice('Slices', {':', ':', '5:9'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sfig7 = figure('Name', 'Ungrouped comparison for uneven  small group');
-ep7 = visviews.eventImagePlot(sfig7, [], []);
+fig7 = figure('Name', 'Ungrouped comparison for uneven  small group');
+ep7 = visviews.eventImagePlot(fig7, [], []);
 assertTrue(isvalid(ep7));
 ep7.ClumpSize = 4;
 ep7.plot(testVD, thisFunc, slice7);
@@ -159,8 +159,8 @@ fprintf('It should produce a plot for slice with 1 element and 1 block\n');
 slice8 = viscore.dataSlice('Slices', {'32', ':', '5'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 % test blockBoxPlot plot
-sfig8 = figure('Name', 'One element grouped by 3');
-ep8 = visviews.eventImagePlot(sfig8, [], []);
+fig8 = figure('Name', 'One element grouped by 3');
+ep8 = visviews.eventImagePlot(fig8, [], []);
 assertTrue(isvalid(ep8));
 ep8.ClumpSize = 3;
 ep8.plot(testVD, thisFunc, slice8);
@@ -169,8 +169,8 @@ gaps = ep8.getGaps();
 ep8.reposition(gaps);
 
 fprintf('It should produce a plot for a slice of windows at beginning\n');
-sfig9 = figure('Name', 'Slice of windows at beginning');
-ep9 = visviews.eventImagePlot(sfig9, [], []);
+fig9 = figure('Name', 'Slice of windows at beginning');
+ep9 = visviews.eventImagePlot(fig9, [], []);
 assertTrue(isvalid(ep9));
 slice9 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
@@ -179,8 +179,8 @@ gaps = ep9.getGaps();
 ep9.reposition(gaps);
 
 fprintf('It should produce a plot for a slice of windows that falls off the end\n');
-sfig10 = figure('Name', 'Slice of windows off the end');
-ep10 = visviews.eventImagePlot(sfig10, [], []);
+fig10 = figure('Name', 'Slice of windows off the end');
+ep10 = visviews.eventImagePlot(fig10, [], []);
 assertTrue(isvalid(ep10));
 slice10 = viscore.dataSlice('Slices', {':', ':', '25:34'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
@@ -189,8 +189,8 @@ gaps = ep10.getGaps();
 ep10.reposition(gaps);
 
 fprintf('It should produce a plot for a slice of windows in one clump\n');
-sfig11 = figure('Name', 'Slice of 2 windows with clump factor 3');
-ep11 = visviews.eventImagePlot(sfig11, [], []);
+fig11 = figure('Name', 'Slice of 2 windows with clump factor 3');
+ep11 = visviews.eventImagePlot(fig11, [], []);
 assertTrue(isvalid(ep11));
 slice11 = viscore.dataSlice('Slices', {':', ':', '14:15'}, ...
          'DimNames', {'Channel', 'Sample', 'Window'});
@@ -200,8 +200,8 @@ gaps = ep11.getGaps();
 ep11.reposition(gaps);
 
 fprintf('It should plot the artifact data with labeled data\n');
-sfig12 = figure('Name', 'Artifact plot');
-ep12 = visviews.eventImagePlot(sfig12, [], []);
+fig12 = figure('Name', 'Artifact plot');
+ep12 = visviews.eventImagePlot(fig12, [], []);
 assertTrue(isvalid(ep12));
 
 testVD12 = viscore.blockedData(values.EEGArtifact.data, 'Artifact', ...
@@ -217,18 +217,18 @@ gaps = ep12.getGaps();
 ep12.reposition(gaps);
 drawnow
 if values.deleteFigures
-    delete(sfig1);
-    delete(sfig2);
-    delete(sfig3);
-    delete(sfig4);
-    delete(sfig5);
-    delete(sfig6);
-    delete(sfig7);
-    delete(sfig8);
-    delete(sfig9);
-    delete(sfig10);
-    delete(sfig11);
-    delete(sfig12);
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+    delete(fig5);
+    delete(fig6);
+    delete(fig7);
+    delete(fig8);
+    delete(fig9);
+    delete(fig10);
+    delete(fig11);
+    delete(fig12);
 end
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>
@@ -250,8 +250,8 @@ testVD1 = viscore.blockedData(values.EEG.data, 'Rand1', ...
     'SampleRate', values.EEG.srate, 'BlockSize', 1000);
 slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sfig1 = figure('Name', 'All zero values');
-ep1 = visviews.eventImagePlot(sfig1, [], []);
+fig1 = figure('Name', 'All zero values');
+ep1 = visviews.eventImagePlot(fig1, [], []);
 assertTrue(isvalid(ep1));
 ep1.plot(testVD1, thisFuncS, slice1);
 gaps = ep1.getGaps();
@@ -264,8 +264,8 @@ data = zeros([32, 1000, 20]);
 testVD = viscore.blockedData(data, 'Data zeros, func NaN');
 slice2 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sfig2 = figure('Name', 'Data zero, func NaN');
-bp2 = visviews.eventImagePlot(sfig2, [], []);
+fig2 = figure('Name', 'Data zero, func NaN');
+bp2 = visviews.eventImagePlot(fig2, [], []);
 assertTrue(isvalid(bp2));
 bp2.plot(testVD, thisFuncK, slice2);
 gaps = bp2.getGaps();
@@ -278,8 +278,8 @@ data = NaN([32, 1000, 20]);
 testVD = viscore.blockedData(data, 'Data NaN');
 slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sfig3 = figure('Name', 'Data NaNs');
-bp3 = visviews.eventImagePlot(sfig3, [], []);
+fig3 = figure('Name', 'Data NaNs');
+bp3 = visviews.eventImagePlot(fig3, [], []);
 assertTrue(isvalid(bp3));
 bp3.plot(testVD, thisFuncS, slice3);
 gaps = bp3.getGaps();
@@ -292,18 +292,18 @@ data = zeros(5, 1);
 testVD = viscore.blockedData(data, 'Data empty');
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sfig4 = figure('Name', 'Data slice is empty');
-bp4 = visviews.eventImagePlot(sfig4, [], []);
+fig4 = figure('Name', 'Data slice is empty');
+bp4 = visviews.eventImagePlot(fig4, [], []);
 assertTrue(isvalid(bp4));
 bp4.plot(testVD, thisFuncS, slice4);
 gaps = bp4.getGaps();
 bp4.reposition(gaps);
 drawnow
 if values.deleteFigures
-    delete(sfig1);
-    delete(sfig2);
-    delete(sfig3);
-    delete(sfig4);
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
 end
 
 
@@ -316,9 +316,9 @@ s = visviews.eventImagePlot.getDefaultProperties();
 assertTrue(isa(s, 'struct'));
 
 fprintf('It should allow a key in the structure\n');
-sfig1 = figure('Name', 'Test of the settings structure');
+fig1 = figure('Name', 'Test of the settings structure');
 ipKey = 'Event image';
-ep1 = visviews.eventImagePlot(sfig1, [], ipKey);
+ep1 = visviews.eventImagePlot(fig1, [], ipKey);
 assertTrue(isvalid(ep1));
 pConf = ep1.getConfigObj();
 assertTrue(isa(pConf, 'visprops.configurableObj'));
@@ -354,6 +354,6 @@ gaps = ep1.getGaps();
 ep1.reposition(gaps);
 drawnow
 if values.deleteFigures
-   delete(sfig1);
+   delete(fig1);
 end
 

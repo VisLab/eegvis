@@ -2,7 +2,13 @@ function test_suite = testConfigurableObj %#ok<STOUT>
 % Unit tests for configurableObj
 initTestSuite;
 
-function testConstructor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+   values = [];
+   
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testConstructor(values) %#ok<INUSD,DEFNU>
 % Unit test for visprops.configurableObj normal constructor
 fprintf('\nUnit tests for visprops.configurableObj valid constructor\n');
 
@@ -16,7 +22,7 @@ assertTrue(~isempty(ms));
 s = ms.getStructure();
 assertEqual(length(s), 11);
 
-function testGetDefaultFields %#ok<DEFNU>
+function testGetDefaultFields(values) %#ok<INUSD,DEFNU>
 % Unit test for visprops.configurableObj getDefaultFields static method
 fprintf('\nUnit tests for visprops.configurableObj getDefaultFields static method\n');
 
@@ -27,7 +33,7 @@ s = viscore.managedObj.createEmptyStruct([], dFields);
 fieldNames = fields(s);
 assertEqual(length(fieldNames), 11);
 
-function testUpdateManager %#ok<DEFNU>
+function testUpdateManager(values) %#ok<INUSD,DEFNU>
 % Unit test for visprops.configurableObj updateManager method
 fprintf('\nUnit tests for visprops.configurableObj updateManager static method\n');
 

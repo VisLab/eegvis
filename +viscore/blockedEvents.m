@@ -52,8 +52,7 @@
 %
 % The event structure array should contain the following fields fields:
 %    type        a string identifying the type of event
-%    startTime   double time in seconds of the start of the event from the
-%                beginning
+%    time        double time in seconds of the event  
 %    certainty  (optional) measure between 0 and 1 indicating how
 %                certain this event is (for computed events).  If omitted, 
 %                the certainty is 1
@@ -105,9 +104,8 @@ classdef blockedEvents < hgsetget
         BlockStartTimes;     % start time of each block in seconds
         BlockTime;           % time in seconds for one block
         Certainty;           % values between 0 and 1 indicating certainty
-        EventBlocks;         % cell array of starting blocks by event
-        EventCounts;         % type x blocks array with event counts
-        EventStartTimes;     % double array of event start times
+        EventBlocks;         % cell array by event of blocks
+        EventTimes;          % double array of event times
         EventTypeNumbers;    % cell array of event type numbers
         EventUniqueTypes;    % cell array of unique in desired order
         MaxTime;             % maximum time in seconds for events
@@ -115,6 +113,9 @@ classdef blockedEvents < hgsetget
         VersionID            % version ID of this event set
     end % private properties
     
+    properties (Constant = true)
+        Eps = 0.1            % amount of fraction of BlockTime above last event
+    end % 
     methods
         
         function obj = blockedEvents(event, varargin)
@@ -177,7 +178,7 @@ classdef blockedEvents < hgsetget
                 return;
             end
             event.type = obj.EventTypes{k};
-            event.startTime = obj.EventStartTimes(k);
+            event.time = obj.EventTimes(k);
             event.blocks = obj.EventBlocks{k};
         end % getEvent
         
@@ -189,11 +190,6 @@ classdef blockedEvents < hgsetget
                 eBlocks = obj.EventBlocks(varargin{1});
             end
         end % getStartTimes
-        
-%        function count = getEventCount(obj, eventType, block) 
-%             % Return types x blocks array of counts
-%             count = obj.EventCounts(eventType, block);
-%         end % getEventCounts
         
         function counts = getEventCounts(obj, startBlock, endBlock, threshold) 
             % Return (types+1) x blocks array of counts of events meeting certainty threshold
@@ -211,6 +207,20 @@ classdef blockedEvents < hgsetget
             end
         end % getEventCounts
         
+        function eventTimes = getEventTimes(obj, varargin)
+            % Return event times - all or those specified by varargin
+            if nargin == 1
+                eventTimes = obj.EventTimes;
+            else
+                eventTimes = obj.EventTimes(varargin{1});
+            end
+        end % getEventTimes
+        
+        function maxTime = getMaxTime(obj)
+            % Return the maximum time for this event object
+            maxTime = obj.MaxTime;
+        end % getMaxTime
+        
         function numBlocks = getNumberBlocks(obj)
             % Return the number of blocks
             numBlocks = length(obj.BlockList);
@@ -218,18 +228,9 @@ classdef blockedEvents < hgsetget
         
         function numEvents = getNumberEvents(obj)
             % Return the number of events
-            numEvents = length(obj.EventStartTimes);
+            numEvents = length(obj.EventTimes);
         end % getNumberEvents
               
-        function startTimes = getStartTimes(obj, varargin)
-            % Return event start times - all or those specified by varargin
-            if nargin == 1
-                startTimes = obj.EventStartTimes;
-            else
-                startTimes = obj.EventStartTimes(varargin{1});
-            end
-        end % getStartTimes
-        
         function types = getTypes(obj, varargin)
             % Return a cell array of event type names in event order
             if nargin == 1
@@ -239,7 +240,6 @@ classdef blockedEvents < hgsetget
             end
             types = obj.EventUniqueTypes(types);  % not correct
         end % getUniqueTypes
-        
         
         function typeNumbers = getTypeNumbers(obj, varargin)
             % Return event type numbers - all or those specified by varargin
@@ -268,17 +268,24 @@ classdef blockedEvents < hgsetget
             % Reblock the event list to a new blocksize
             %
             % Inputs:
-            %    blockSize    size to make the windows
+            %    blockTime    time in seconds to make the windows
             %    maxTime      optional time in seconds of end range
             %
             % Notes:
-            %  - no action is taken if data is epoched or blockSize <= 0
+            %  - no action is taken if data is preblocked or blockSize <= 0
             %
             if isempty(blockTime) || blockTime <= 0
                 return;
-            elseif nargin > 2 && ~isempty(maxTime)
+            elseif nargin > 2 
                 obj.MaxTime = maxTime;
             end
+            
+            % Reset the maximum time if necessary
+            if isempty(obj.MaxTime) && obj.Preblocked
+                    obj.MaxTime = max(obj.BlockStartTimes) + obj.BlockTime;
+            elseif isempty(obj.MaxTime)
+                    obj.MaxTime = max(obj.EventTimes) + obj.Eps*obj.BlockTime;
+            end           
             if ~obj.Preblocked
                 obj.BlockStartTimes = ...
                     (0:(ceil(obj.MaxTime/blockTime)-1)).*obj.BlockTime;
@@ -291,29 +298,22 @@ classdef blockedEvents < hgsetget
             
             % Calculate the event counts in each block
             numBlocks = length(obj.BlockStartTimes);
-            obj.EventCounts = zeros(length(obj.EventUniqueTypes), numBlocks);
-            obj.BlockList = cell(numBlocks, 1);
-            for k = 1:length(obj.BlockList)
-                obj.BlockList{k} = {};
-            end;
-            if ~obj.Preblocked
-                obj.EventBlocks = ...
-                    num2cell(floor(obj.EventStartTimes/obj.BlockTime) + 1);
+            eventMask = false(length(obj.EventTimes), numBlocks);
+            for k = 1:numBlocks  % Mark the blocks containing the events
+                eventMask(:, k) = obj.BlockStartTimes(k) <=  obj.EventTimes ...
+                     & obj.EventTimes < obj.BlockStartTimes(k) + obj.BlockTime;
             end
-            for k = 1:length(obj.EventStartTimes)
-                myBlocks = obj.EventBlocks{k};
-                for j = 1:length(myBlocks);
-                    s = myBlocks(j);
-                    obj.BlockList{s}{length(obj.BlockList{s}) + 1} = k;
-                    obj.EventCounts(obj.EventTypeNumbers(k), s) = ...
-                        obj.EventCounts(obj.EventTypeNumbers(k), s) + 1;
+            if isempty(obj.EventBlocks) || ~obj.Preblocked
+                obj.EventBlocks = cell(length(obj.EventTimes), 1);
+                for k = 1:length(obj.EventTimes)
+                        obj.EventBlocks{k} = find(eventMask(k, :));
                 end
             end
             
-            % Now fix BlockList elements to be arrays
+            obj.BlockList = cell(numBlocks, 1);
             for k = 1:length(obj.BlockList)
-                obj.BlockList{k} = cell2mat(obj.BlockList{k});
-            end
+                obj.BlockList{k} = find(eventMask(:, k))';
+            end;
         end % reblock
         
     end % public methods
@@ -328,10 +328,10 @@ classdef blockedEvents < hgsetget
             
             % Set the events
             types = cellfun(@num2str, {p.event.type}', 'UniformOutput', false);
-            obj.EventStartTimes = cell2mat({p.event.startTime})';
-            if sum(isnan(obj.EventStartTimes)) > 0 || ...
-                    sum(obj.EventStartTimes) < 0 > 0 || ...
-                    sum(isnan(obj.EventStartTimes)) > 0
+            obj.EventTimes = cell2mat({p.event.time})';
+            if sum(isnan(obj.EventTimes)) > 0 || ...
+                    sum(obj.EventTimes) < 0 > 0 || ...
+                    sum(isnan(obj.EventTimes)) > 0
                 error('blockedEvents:NonNegativeStart', ...
                     'Event start times must be non negative\n')
             end
@@ -342,7 +342,7 @@ classdef blockedEvents < hgsetget
                        'Event certainties must be between 0 and 1 inclusive');
                end
             else
-               obj.Certainty = ones(length(obj.EventStartTimes), 1);
+               obj.Certainty = ones(length(obj.EventTimes), 1);
             end
             
             % Process the event types
@@ -353,35 +353,19 @@ classdef blockedEvents < hgsetget
                     'Event types must be non empty\n');
             end
             
-            % Figure out the maximum time
+            % Process the other parameters
             obj.MaxTime = p.MaxTime;
             obj.BlockTime = p.BlockTime;
             if ~isempty(p.BlockStartTimes)
                 obj.Preblocked = true;
                 obj.BlockStartTimes = ...
                     reshape(p.BlockStartTimes, length(p.BlockStartTimes), 1);
-                if isempty(obj.MaxTime)
-                    obj.MaxTime = max(obj.BlockStartTimes) + obj.BlockTime;
-                end
                 if isfield(p.event, 'block')
                     obj.EventBlocks = {p.event.block}';
-                else
-                    obj.EventBlocks = cell(length(obj.EventStartTimes), 1);
-                    for k = 1:length(obj.EventStartTimes)
-                        obj.EventBlocks{k} = find( ...
-                            obj.BlockStartTimes <= obj.EventStartTimes(k) && ...
-                            obj.EventStartTimes(k) < ...
-                            obj.BlockStartTimes + obj.BlockTime);
-                    end
                 end
             else
                 obj.Preblocked = false;
-                if isempty(obj.MaxTime)
-                    obj.MaxTime = max(obj.EventStartTimes);
-                end
-                
-            end
-            
+            end  
             obj.reblock(obj.BlockTime, obj.MaxTime);
         end % parseParameters
         
@@ -406,17 +390,17 @@ classdef blockedEvents < hgsetget
                 uEvents = cell2mat({EEG.event.urevent}');
             end
             eLatencies = double(cell2mat({EEG.urevent(uEvents).latency}'));
-            startTimes = (round(eLatencies) - 1)./EEG.srate;
+            eventTimes = (round(eLatencies) - 1)./EEG.srate;
            
             % Now look at the epochs
             if ~isfield(EEG,'epoch') ||  isempty(EEG.epoch) % not epoched
-                event = struct('type', types, 'startTime', num2cell(startTimes), ...
-                    'certainty', ones(length(startTimes), 1));
+                event = struct('type', types, 'time', num2cell(eventTimes), ...
+                    'certainty', ones(length(eventTimes), 1));
                 return;
             end
             epochList = {EEG.event.epoch}';
-            event = struct('type', types, 'startTime', num2cell(startTimes), ...
-                 'certainty', ones(length(startTimes), 1), 'block', epochList);
+            event = struct('type', types, 'time', num2cell(eventTimes), ...
+                 'certainty', ones(length(eventTimes), 1), 'block', epochList);
             if ~isstruct(EEG) ||~isfield(EEG, 'times')
                 epochScale = (0:(length(EEG.epoch) - 1))'/EEG.srate;
             else
@@ -440,7 +424,7 @@ classdef blockedEvents < hgsetget
             parser.StructExpand = true;
             parser.addRequired('event', ...
                 @(x) (~isempty(x) && isstruct(x)) && ...
-                sum(isfield(x, {'type', 'startTime', 'certainty'})) == 3);
+                sum(isfield(x, {'type', 'time', 'certainty'})) == 3);
             parser.addParamValue('BlockStartTimes', [], ...
                 @(x)(isempty(x) || isnumeric(x)));
             parser.addParamValue('BlockTime', 1, ...

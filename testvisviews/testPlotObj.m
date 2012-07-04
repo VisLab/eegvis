@@ -2,18 +2,22 @@ function test_suite = testPlotObj %#ok<STOUT>
 % Unit tests for plotObj
 initTestSuite;
 
-function testConstuctor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values = [];
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testConstuctor(values) %#ok<DEFNU>
 % Unit test for visviews.plotObject normal constructor
 fprintf('\nUnit tests for visviews.plotObject valid constructor\n');
 
-fprintf('It should construct a valid plotObj when two empty arguments are passed\n');
-         
+fprintf('It should construct a valid plotObj when two empty arguments are passed\n');       
 bf = visviews.plotObj([], []);
 assertTrue(isvalid(bf));
 bf.printObject();
 
-
-function testGetDefaultFields %#ok<DEFNU>
+function testGetDefaultFields(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.plotObj getDefaultFields
 fprintf('\nUnit tests for visviews.plotObj getDefaultFields\n');
 
@@ -21,7 +25,7 @@ fprintf('It should have a getDefaultProperties method that returns a list of def
 dFields = visviews.plotObj.getDefaultFields();
 assertEqual(length(dFields), 7);
 
-function testGetDefinition %#ok<DEFNU>
+function testGetDefinition(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.plotObj getDefinition
 fprintf('\nUnit tests for visviews.plotObj getDefinition\n');
 
@@ -31,7 +35,7 @@ bf = visviews.plotObj([], pls(1));
 def = bf.getDefinition();
 assertTrue(strcmp(def, 'visviews.blockImagePlot'));
 
-function testClone %#ok<DEFNU>
+function testClone(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.plotObj clone
 fprintf('\nUnit tests for visviews.plotObj clone\n');
 
@@ -55,7 +59,7 @@ nBf.printObject();
 nValue = nBf.getValue(1, 'DisplayName');
 assertEqual(strcmpi(nValue, 'Blech'), true);
 
-function testCreateObjects %#ok<DEFNU>
+function testCreateObjects(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.plotObj static createObjects method
 fprintf('\nUnit tests for visviews.plotObj static createObjects method\n');
 
@@ -68,7 +72,7 @@ bfs1 = visviews.plotObj.createObjects('visviews.plotObj',  pls1);
 assertTrue(isa(bfs1, 'cell'))
 assertEqual(length(bfs1), length(pls1));
 
-function testCreateConfigurableObj %#ok<DEFNU>
+function testCreateConfigurableObj(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.plotObj static createConfigurableObj method
 fprintf('\nUnit tests for visviews.plotObj static createConfigurableObj method\n');
 
@@ -93,7 +97,7 @@ assertEqual(length(pConf), numPlots);
 key1 = pConf{1}.getObjectID();
 assertTrue(strcmp(key1, 'Block box'));
 
-function testGetSources %#ok<DEFNU>
+function testGetSources(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.plotObj getSources method
 fprintf('\nUnit tests for visviews.plotObj getSources method\n');
 

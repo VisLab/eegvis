@@ -48,8 +48,8 @@ function testNormalConstructor(values) %#ok<DEFNU>
 fprintf('\nUnit tests for visviews.signalStackedPlot valid constructor\n');
 
 fprintf('It should construct a valid shadow signal plot when only parent passed\n')
-sfig = figure('Name', 'Creates plot panel when only parent is passed');
-sp = visviews.signalStackedPlot(sfig, [], []);
+fig = figure('Name', 'Creates plot panel when only parent is passed');
+sp = visviews.signalStackedPlot(fig, [], []);
 assertTrue(isvalid(sp));
 
 fprintf('It should allow callbacks to be registered\n')
@@ -57,7 +57,7 @@ sp.registerCallbacks([]);
 
 drawnow
 if values.deleteFigures
-  delete(sfig);
+  delete(fig);
 end
 
 function testBadConstructor(values) %#ok<DEFNU>
@@ -69,20 +69,20 @@ f = @() visviews.signalStackedPlot();
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when only one parameter is passed\n');
-sfig = figure('Name', 'Invalid constructor');
-f = @() visviews.signalStackedPlot(sfig);
+fig = figure('Name', 'Invalid constructor');
+f = @() visviews.signalStackedPlot(fig);
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when only two parameters are passed\n');
-f = @() visviews.signalStackedPlot(sfig, []);
+f = @() visviews.signalStackedPlot(fig, []);
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when more than three parameters are passed\n');
-f = @() visviews.signalStackedPlot(sfig, [], [], []);
+f = @() visviews.signalStackedPlot(fig, [], [], []);
 assertExceptionThrown(f, 'MATLAB:maxrhs');
 
 if values.deleteFigures
-  delete(sfig);
+  delete(fig);
 end
 
 function testPlot(values) %#ok<DEFNU>
@@ -90,16 +90,16 @@ function testPlot(values) %#ok<DEFNU>
 fprintf('\nUnit tests for visviews.signalStackedPlot plot method\n')
 
 fprintf('It should produce a plot for a normal slice along dim 3\n');
-sfig1 = figure('Name', 'Normal plot slice along dimension 3');
-sp1 = visviews.signalStackedPlot(sfig1, [], []);
+fig1 = figure('Name', 'Normal plot slice along dimension 3');
+sp1 = visviews.signalStackedPlot(fig1, [], []);
 assertTrue(isvalid(sp1));
 sp1.plot(values.bData, values.fun, values.slice);
 gaps = sp1.getGaps();
 sp1.reposition(gaps);
 
 fprintf('It should produce a plot multiple window slice along dimension 3\n');
-sfig2 = figure('Name', 'Multiple windows - combine dim 3');
-sp2 = visviews.signalStackedPlot(sfig2, [], []);
+fig2 = figure('Name', 'Multiple windows - combine dim 3');
+sp2 = visviews.signalStackedPlot(fig2, [], []);
 assertTrue(isvalid(sp2));
 slice2 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
@@ -108,8 +108,8 @@ gaps = sp2.getGaps();
 sp2.reposition(gaps);
 
 fprintf('It should produce a plot for EEG with combineDim 1\n');
-sfig3 = figure('Name', 'Single element - combine dim 1');
-sp3 = visviews.signalStackedPlot(sfig3, [], []);
+fig3 = figure('Name', 'Single element - combine dim 1');
+sp3 = visviews.signalStackedPlot(fig3, [], []);
 assertTrue(isvalid(sp3));
 slice3 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
@@ -118,8 +118,8 @@ gaps = sp3.getGaps();
 sp3.reposition(gaps);
 
 fprintf('It should produce a plot for EEG with multiple elements combineDim 1\n');
-sfig4 = figure('Name', 'Multiple elements - combine dim 1');
-sp4 = visviews.signalStackedPlot(sfig4, [], []);
+fig4 = figure('Name', 'Multiple elements - combine dim 1');
+sp4 = visviews.signalStackedPlot(fig4, [], []);
 assertTrue(isvalid(sp4));
 slice4 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
@@ -129,15 +129,15 @@ sp4.reposition(gaps);
 
 fprintf('It should produce a plot of epoched data for a normal slice along dim 3\n');
 assertTrue(values.bDataEpoched.isEpoched())
-sfig5 = figure('Name', 'Plot when EEG data is epoched along dim 3');
-sp5 = visviews.signalStackedPlot(sfig5, [], []);
+fig5 = figure('Name', 'Plot when EEG data is epoched along dim 3');
+sp5 = visviews.signalStackedPlot(fig5, [], []);
 sp5.plot(values.bDataEpoched, values.fun, values.slice);
 gaps = sp5.getGaps();
 sp5.reposition(gaps);
 
 fprintf('It should produce a plot multiple window slice along dimension 3\n');
-sfig6 = figure('Name', 'Epoched data, multiple windows - combine dim 3');
-sp6 = visviews.signalStackedPlot(sfig6, [], []);
+fig6 = figure('Name', 'Epoched data, multiple windows - combine dim 3');
+sp6 = visviews.signalStackedPlot(fig6, [], []);
 assertTrue(isvalid(sp6));
 slice6 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
@@ -146,8 +146,8 @@ gaps = sp6.getGaps();
 sp6.reposition(gaps);
 
 fprintf('It should produce a plot for EEG epoched data with combineDim 1\n');
-sfig7 = figure('Name', 'Single element epoched - combine dim 1');
-sp7 = visviews.signalStackedPlot(sfig7, [], []);
+fig7 = figure('Name', 'Single element epoched - combine dim 1');
+sp7 = visviews.signalStackedPlot(fig7, [], []);
 assertTrue(isvalid(sp7));
 slice7 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
@@ -156,8 +156,8 @@ gaps = sp7.getGaps();
 sp7.reposition(gaps);
 
 fprintf('It should produce a plot for EEG epoched data with multiple elements combineDim 1\n');
-sfig8 = figure('Name', 'Multiple elements epoched - combine dim 1');
-sp8 = visviews.signalStackedPlot(sfig8, [], []);
+fig8 = figure('Name', 'Multiple elements epoched - combine dim 1');
+sp8 = visviews.signalStackedPlot(fig8, [], []);
 assertTrue(isvalid(sp8));
 slice8 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
@@ -166,8 +166,8 @@ gaps = sp8.getGaps();
 sp8.reposition(gaps);
 
 fprintf('It should plot smooth signals\n');
-sfig9 = figure('Name', 'Plot with smoothed signals');
-sp9 = visviews.signalStackedPlot(sfig9, [], []);
+fig9 = figure('Name', 'Plot with smoothed signals');
+sp9 = visviews.signalStackedPlot(fig9, [], []);
 assertTrue(isvalid(sp9));
 sp9.SignalScale = 3.0;
 sp9.plot(values.bDataSmooth, values.fun, values.slice);
@@ -175,8 +175,8 @@ gaps = sp9.getGaps();
 sp9.reposition(gaps);
 
 fprintf('It should plot smooth signals with a trim percent\n');
-sfig10 = figure('Name', 'Plot with smoothed signals with out of range signal');
-sp10 = visviews.signalStackedPlot(sfig10, [], []);
+fig10 = figure('Name', 'Plot with smoothed signals with out of range signal');
+sp10 = visviews.signalStackedPlot(fig10, [], []);
 assertTrue(isvalid(sp6));
 data10 = values.bDataSmooth.getData();
 data10(2,:) = 100*data10(6, :);
@@ -188,8 +188,8 @@ gaps = sp10.getGaps();
 sp10.reposition(gaps);
 
 fprintf('It should produce a plot for a clump of nonepoched windows sliced along dim 3 \n');
-sfig11 = figure('Name', 'Plot clump for slice along dimension 3, not epoched');
-sp11 = visviews.signalStackedPlot(sfig11, [], []);
+fig11 = figure('Name', 'Plot clump for slice along dimension 3, not epoched');
+sp11 = visviews.signalStackedPlot(fig11, [], []);
 assertTrue(isvalid(sp11));
 slice11 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
@@ -198,8 +198,8 @@ gaps = sp11.getGaps();
 sp11.reposition(gaps);
 
 fprintf('It should produce a plot for a clump of nonepoched windows sliced along dim 3 \n');
-sfig12 = figure('Name', 'Plot clump for slice along dimension 3, epoched');
-sp12 = visviews.signalStackedPlot(sfig12, [], []);
+fig12 = figure('Name', 'Plot clump for slice along dimension 3, epoched');
+sp12 = visviews.signalStackedPlot(fig12, [], []);
 assertTrue(isvalid(sp12));
 slice12 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
@@ -208,8 +208,8 @@ gaps = sp12.getGaps();
 sp12.reposition(gaps);
 
 fprintf('It should produce a single window plot for a clump of epoched windows sliced along dim 3 \n');
-sfig13 = figure('Name', 'Plot clump for slice along dimension 3, epoched (epoch 5 and 7 are big)');
-sp13 = visviews.signalStackedPlot(sfig13, [], []);
+fig13 = figure('Name', 'Plot clump for slice along dimension 3, epoched (epoch 5 and 7 are big)');
+sp13 = visviews.signalStackedPlot(fig13, [], []);
 assertTrue(isvalid(sp13));
 bigData = values.bDataSmooth.getData;
 bigData(:, :, 5) = 3*bigData(:, :, 5);
@@ -223,8 +223,8 @@ gaps = sp13.getGaps();
 sp13.reposition(gaps);
 
 fprintf('It should produce a plot for a clump of nonepoched windows\n');
-sfig14 = figure('Name', 'Plot clump for channels 2:4 sliced dimension 1, big windows [5, 7], not epoched');
-sp14 = visviews.signalStackedPlot(sfig14, [], []);
+fig14 = figure('Name', 'Plot clump for channels 2:4 sliced dimension 1, big windows [5, 7], not epoched');
+sp14 = visviews.signalStackedPlot(fig14, [], []);
 assertTrue(isvalid(sp4));
 slice14 = viscore.dataSlice('Slices', {'30:32', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 1);
@@ -234,20 +234,20 @@ sp14.reposition(gaps);
 drawnow
 
 if values.deleteFigures
-    delete(sfig1);
-    delete(sfig2);
-    delete(sfig3);
-    delete(sfig4);
-    delete(sfig5);
-    delete(sfig6);
-    delete(sfig7);
-    delete(sfig8);
-    delete(sfig9);
-    delete(sfig10);
-    delete(sfig11);
-    delete(sfig12);
-    delete(sfig13);
-    delete(sfig14);
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+    delete(fig5);
+    delete(fig6);
+    delete(fig7);
+    delete(fig8);
+    delete(fig9);
+    delete(fig10);
+    delete(fig11);
+    delete(fig12);
+    delete(fig13);
+    delete(fig14);
 end
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>
@@ -258,17 +258,17 @@ fprintf('\nUnit tests for visviews.signalStackedPlot plot method with constant a
 fprintf('It should produce a plot for when all of the values are 0\n');
 data = zeros([32, 1000, 20]);
 testVD1 = viscore.blockedData(data, 'All zeros');
-sfig1 = figure('Name', 'All zero values');
-bp1 = visviews.signalStackedPlot(sfig1, [], []);
+fig1 = figure('Name', 'All zero values');
+bp1 = visviews.signalStackedPlot(fig1, [], []);
 assertTrue(isvalid(bp1));
 bp1.plot(testVD1, values.fun, values.slice);
 gaps = bp1.getGaps();
 bp1.reposition(gaps);
 
 % Data zeros, function NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
-sfig2 = figure('Name', 'Data zero, func NaN');
-bp2 = visviews.signalStackedPlot(sfig2, [], []);
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+fig2 = figure('Name', 'Data zero, func NaN');
+bp2 = visviews.signalStackedPlot(fig2, [], []);
 assertTrue(isvalid(bp2));
 bp2.plot(testVD1, [], values.slice);
 gaps = bp2.getGaps();
@@ -278,8 +278,8 @@ bp2.reposition(gaps);
 fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
 data = NaN([32, 1000, 20]);
 testVD3 = viscore.blockedData(data, 'Data NaN');
-sfig3 = figure('Name', 'Data NaNs');
-bp3 = visviews.signalStackedPlot(sfig3, [], []);
+fig3 = figure('Name', 'Data NaNs');
+bp3 = visviews.signalStackedPlot(fig3, [], []);
 assertTrue(isvalid(bp3));
 bp3.plot(testVD3, values.fun, values.slice);
 gaps = bp3.getGaps();
@@ -291,18 +291,18 @@ data = zeros(5, 1);
 testVD4 = viscore.blockedData(data, 'Data empty');
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sfig4 = figure('Name', 'Data slice is empty');
-bp4 = visviews.signalStackedPlot(sfig4, [], []);
+fig4 = figure('Name', 'Data slice is empty');
+bp4 = visviews.signalStackedPlot(fig4, [], []);
 assertTrue(isvalid(bp4));
 bp4.plot(testVD4, values.fun, slice4);
 gaps = bp4.getGaps();
 bp4.reposition(gaps);
 drawnow
 if values.deleteFigures
-    delete(sfig1);
-    delete(sfig2);
-    delete(sfig3);
-    delete(sfig4);
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
 end
 
 function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>

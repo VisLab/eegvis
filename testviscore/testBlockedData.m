@@ -9,7 +9,7 @@ tEvents = EEG.event;
 types = {tEvents.type}';
                                       % Convert to seconds since beginning
 startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
-values.event = struct('type', types, 'startTime', num2cell(startTimes), ...
+values.event = struct('type', types, 'time', num2cell(startTimes), ...
     'certainty', ones(length(startTimes), 1));
 values.random = random('normal', 0, 1, [32, 1000, 20]);
 load('EEGEpoch.mat')
@@ -290,10 +290,10 @@ ed1 = vd2.getEvents();
 assertTrue(isvalid(ed1));
 assertTrue(isa(ed1, 'viscore.blockedEvents'));
 fprintf('It should have the right event counts\n');
-startTimes = ed1.getStartTimes();
+startTimes = ed1.getEventTimes();
 numBlocks = ceil(max(startTimes)/ed1.getBlockTime());
-counts = ed1.getEventCounts(1, numBlocks);
-assertEqual(size(counts, 1), length(ed1.getUniqueTypes()));
+counts = ed1.getEventCounts(1, numBlocks, 1);
+assertEqual(size(counts, 1), length(ed1.getUniqueTypes()) + 1);
 assertEqual(size(counts, 2), numBlocks);
 assertEqual(sum(counts(:)), length(values.event));
 

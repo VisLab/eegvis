@@ -224,7 +224,7 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             dRange = 1:(obj.NumberElements *obj.NumberBlocks);
             limits = [max(limits(1), min(data(:))), min(limits(2), max(data(:)))];
             if sum(isnan(limits)) > 0  
-                warning('blockBoxPlot:NaNValues', 'Values were entirely NaN\n');
+                warning('elementBoxPlot:NaNValues', 'Block values were entirely NaN\n');
                 limits = [-0.1, 0.1];
             elseif sum(abs(limits)) <= 10e-8 % limits were both zero 
                 limits = [-0.1, 0.1];

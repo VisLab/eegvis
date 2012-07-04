@@ -356,7 +356,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
     methods (Access = private)
 
         function [xTimes, yTimes] = getPlotPositions(obj)
-            xTimes = obj.Events.getStartTimes(obj.CurrentEvents);
+            xTimes = obj.Events.getEventTimes(obj.CurrentEvents);
             yTimes = obj.Events.getTypeNumbers(obj.CurrentEvents);
             if (obj.BlockStart == obj.BlockEnd) && obj.VisData.isEpoched()
                 xTimes = obj.XValues(1) + 1000.*(xTimes - ...

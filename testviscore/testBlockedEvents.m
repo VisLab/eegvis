@@ -8,11 +8,20 @@ values.EEG = EEG;
 tEvents = EEG.event;
 types = {tEvents.type}';
 % Convert to seconds since beginning
-startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
-values.event = struct('type', types, 'startTime', num2cell(startTimes), ...
-'certainty', ones(length(startTimes), 1));
+eventTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
+values.event = struct('type', types, 'time', num2cell(eventTimes), ...
+'certainty', ones(length(eventTimes), 1));
 load('EEGEpoch.mat');
+values.EEGEpochBlockTime = size(EEGEpoch.data, 2)/EEGEpoch.srate;
 values.EEGEpoch = EEGEpoch;
+tEvents = EEGEpoch.event;
+types = {tEvents.type}';
+% Convert to seconds since beginning
+eventTimes = (round(double(cell2mat({EEGEpoch.event.latency}))') - 1)./EEG.srate;
+values.eventEpoch = struct('type', types, 'time', num2cell(eventTimes), ...
+'certainty', ones(length(eventTimes), 1));
+[values.eventEpoch1, values.epochStarts, values.epochScale] = ...
+    viscore.blockedEvents.getEEGTimes(EEGEpoch);
 load('ArtifactEvents.mat');
 values.artifactEvents = artifactEvents;
 
@@ -26,42 +35,117 @@ fprintf('\nUnit tests for viscore.blockedEvents valid constructor\n');
 fprintf('It should construct a valid event set from set of types and start times\n');
 ed1 = viscore.blockedEvents(values.event);
 assertTrue(isvalid(ed1));
-fprintf('The start times be greater than or equal to 0\n');
-assertTrue(sum(ed1.getStartTimes() < 0) == 0);
-fprintf('The default block time should be correct\n');
+fprintf('---The event times be greater than or equal to 0\n');
+assertTrue(sum(ed1.getEventTimes() < 0) == 0);
+fprintf('---The default block time should be correct\n');
 assertEqual(ed1.getBlockTime, 1);
-fprintf('It should return the correct unique event types:\n');
+fprintf('---It should return the correct unique event types:\n');
 uTypes = ed1.getUniqueTypes();
 originalUnique = unique({values.event.type});
 assertEqual(length(uTypes), length(originalUnique));
 for k = 1:length(uTypes)
-fprintf('---It should have event type: ''%s''\n', uTypes{k});
-assertEqual(sum(strcmpi(uTypes{k}, originalUnique)), 1);
+   fprintf('+---It should have event type: ''%s''\n', uTypes{k});
+    assertEqual(sum(strcmpi(uTypes{k}, originalUnique)), 1);
 end
+fprintf('---It should have a maxTime equal to the maximum event time\n');
+maxTime = max(cell2mat(({values.event.time}'))) + ed1.Eps*ed1.getBlockTime();
+assertElementsAlmostEqual(maxTime, ed1.getMaxTime());
+fprintf('---It should have the right number of blocks\n');
+assertElementsAlmostEqual(ed1.getNumberBlocks(), ceil(maxTime));
+fprintf('---It should have the right block start times\n');
+assertVectorsAlmostEqual((0:ed1.getNumberBlocks() - 1), ed1.getBlockStartTimes());
 
 fprintf('It should work when the block time that is not the default:\n');
 blockTime = 1000/128;
 ed2 = viscore.blockedEvents(values.event, 'BlockTime', blockTime);
 assertTrue(isvalid(ed2));
-sTimes = ed2.getStartTimes();
-fprintf('It should have the right number of blocks\n');
+eTimes = ed2.getEventTimes();
+fprintf('---It should have the right number of blocks\n');
 assertEqual(ed2.getNumberBlocks(), 31);
 bList = ed2.getBlockList();
 assertEqual(length(bList), ed2.getNumberBlocks());
-bTimes = (0:(ed1.getNumberBlocks() - 1)) * blockTime;
+bTimes = (0:(ed2.getNumberBlocks() - 1)) * blockTime;
 for k = 1:length(bList)
-indices = find(bTimes(k) <= sTimes & sTimes < bTimes(k) + blockTime)';
-fprintf('---Block %g should have %g events\n', k, length(indices));
+indices = find(bTimes(k) <= eTimes & eTimes < bTimes(k) + blockTime)';
+fprintf('+---Block %g should have %g events\n', k, length(indices));
 assertEqual(length(indices), length(bList{k}));
 assertVectorsAlmostEqual(indices, bList{k});
 end
+fprintf('---It should have the right maximum time\n');
+assertElementsAlmostEqual(ed2.getMaxTime(),  ...
+    max(cell2mat(({values.event.time}'))) + ed2.Eps*ed2.getBlockTime());
 
-fprintf('It should have the right indices associated with each block\n');
+fprintf('---It should have the right indices associated with each block\n');
 for k = 1:length(bList)
-indices = find(bTimes(k) <= sTimes & sTimes < bTimes(k) + blockTime);
-fprintf('---Block %g should have %g events\n', k, length(indices));
+indices = find(bTimes(k) <= eTimes & eTimes < bTimes(k) + blockTime);
+fprintf('+---Block %g should have %g events\n', k, length(indices));
 assertVectorsAlmostEqual(indices, ed2.getBlocks(k, k));
 end
+
+fprintf('It should work when the maxTime is greater than expected\n');
+ed3 = viscore.blockedEvents(values.event, 'MaxTime', 500);
+assertTrue(isvalid(ed3));
+fprintf('---It should have the right number of blocks\n');
+assertElementsAlmostEqual(500, ed3.getNumberBlocks());
+fprintf('---The ending blocks should have no events\n');
+e = ed3.getBlocks(450, 500);
+assertTrue(isempty(e));
+fprintf('It should work with the maxTime is less than expected\n');
+ed4 = viscore.blockedEvents(values.event, 'MaxTime', 10);
+assertTrue(isvalid(ed4));
+fprintf('---It should have the right number of blocks\n');
+assertElementsAlmostEqual(10, ed4.getNumberBlocks());
+fprintf('---The object has all of the events\n');
+assertEqual(ed4.getNumberEvents(), length(values.event));
+fprintf('---The blocks do contain all of the events\n');
+e = ed4.getBlocks(1, 10);
+assertTrue(~isempty(e));
+assertTrue(ed4.getNumberEvents() > length(e));
+
+fprintf('It should construct a valid event set for epoched data\n');
+ed5 = viscore.blockedEvents(values.eventEpoch1, ...
+    'BlockStartTimes', values.epochStarts, 'BlockTime', ...
+     values.EEGEpochBlockTime);
+assertTrue(isvalid(ed1));
+fprintf('---The event times be greater than or equal to 0\n');
+assertTrue(sum(ed5.getEventTimes() < 0) == 0);
+fprintf('---The default block time should be correct\n');
+assertEqual(ed5.getBlockTime, values.EEGEpochBlockTime);
+fprintf('---It should return the correct unique event types:\n');
+uTypes = ed5.getUniqueTypes();
+originalUnique = unique({values.eventEpoch.type});
+assertEqual(length(uTypes), length(originalUnique));
+for k = 1:length(uTypes)
+   fprintf('+---It should have event type: ''%s''\n', uTypes{k});
+    assertEqual(sum(strcmpi(uTypes{k}, originalUnique)), 1);
+end
+fprintf('---It should have a maxTime equal to end of last epoch\n');
+bTimes = ed5.getBlockStartTimes();
+assertElementsAlmostEqual(bTimes(end) + ed5.getBlockTime(), ...
+            ed5.getMaxTime());
+fprintf('---It should have the right number of blocks\n');
+assertElementsAlmostEqual(ed5.getNumberBlocks(), length(values.epochStarts));
+fprintf('---It should have the right block start times\n');
+assertVectorsAlmostEqual(values.epochStarts, ed5.getBlockStartTimes());
+
+fprintf('It should work when the maxTime is greater than expected\n');
+ed6 = viscore.blockedEvents(values.eventEpoch1, ...
+    'BlockStartTimes', values.epochStarts, 'BlockTime', ...
+     values.EEGEpochBlockTime, 'MaxTime', 600);
+assertTrue(isvalid(ed6));
+fprintf('---It should have the right number of blocks\n');
+assertElementsAlmostEqual(length(values.epochStarts), ed6.getNumberBlocks());
+fprintf('It should work with the maxTime is less than expected\n');
+ed7 = viscore.blockedEvents(values.event, 'MaxTime', 10);
+assertTrue(isvalid(ed7));
+fprintf('---It should have the right number of blocks\n');
+assertElementsAlmostEqual(10, ed7.getNumberBlocks());
+fprintf('---The object has all of the events\n');
+assertEqual(ed7.getNumberEvents(), length(values.event));
+fprintf('---The blocks do contain all of the events\n');
+e = ed7.getBlocks(1, 10);
+assertTrue(~isempty(e));
+assertTrue(ed7.getNumberEvents() > length(e));
 
 function testBadConstructor(values) %#ok<INUSD,DEFNU>
 % Unit test for viscore.blockedEvents bad constructor
@@ -90,13 +174,10 @@ blockList = ev.getBlockList();
 fprintf('It should have the correct block list for point events\n');
 assertEqual(length(startTimes), length(blockList));
 epochs = values.EEGEpoch.epoch;
-for k = 1:length(startTimes)
-fprintf('---Epoch %g should have %g events\n', k, length(epochs(k).event));
-assertTrue(isequal(blockList{k}, epochs(k).event));
-end
+
 fprintf('The event start times should place them in right epochs\n');
 epTimes = ev.getBlockStartTimes();
-evTimes = ev.getStartTimes();
+evTimes = ev.getEventTimes();
 bTime = ev.getBlockTime();
 for k = 1:length(epTimes)
 nEvents = length(epochs(k).event);
@@ -124,11 +205,11 @@ function testGetMethods(values) %#ok<DEFNU>
 fprintf('\nUnit tests for viscore.blockedEvents getStartTimes\n');
 ed1 = viscore.blockedEvents(values.event);
 fprintf('It should return all start times when called with 1 argument\n');
-sTimes = ed1.getStartTimes();
-assertTrue(length(sTimes) == length(values.event));
+eTimes = ed1.getEventTimes();
+assertTrue(length(eTimes) == length(values.event));
 fprintf('It should return the right number of start times when called with 2 arguments\n');
-sTimes = ed1.getStartTimes(1:6);
-assertTrue(length(sTimes) == 6);
+eTimes = ed1.getEventTimes(1:6);
+assertTrue(length(eTimes) == 6);
 
 fprintf('It should return all type numbers when called with 1 argument\n');
 tNums = ed1.getTypeNumbers();
@@ -154,8 +235,8 @@ assertTrue(iscell(types));
 assertEqual(length(types), 1);
 
 fprintf('It should return an event count array of the correct size\n');
-startTimes = ed1.getStartTimes();
-numBlocks = ceil(max(startTimes)/ed1.getBlockTime());
+eventTimes = ed1.getEventTimes();
+numBlocks = ceil(max(eventTimes)/ed1.getBlockTime());
 
 counts = ed1.getEventCounts(1, numBlocks, 0);
 assertEqual(size(counts, 1), length(ed1.getUniqueTypes()) + 1);
@@ -191,8 +272,8 @@ assertTrue(sum(counts(end, :)) == ed1.getNumberEvents());
 fprintf('It should work with artifact events with uncertainty\n');
 ed2 = viscore.blockedEvents(values.artifactEvents);
 fprintf('It should return an artifact event count array of correct size for artifact events\n');
-startTimes = ed2.getStartTimes();
-numBlocks = ceil(max(startTimes)/ed2.getBlockTime());
+eventTimes = ed2.getEventTimes();
+numBlocks = ceil(max(eventTimes)/ed2.getBlockTime());
 
 counts = ed2.getEventCounts(1, numBlocks, 0);
 assertEqual(size(counts, 1), length(ed2.getUniqueTypes()) + 1);

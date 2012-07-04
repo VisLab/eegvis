@@ -9,7 +9,7 @@ tEvents = EEG.event;
 types = {tEvents.type}';
 % Convert to seconds since beginning
 startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
-values.event = struct('type', types, 'startTime', num2cell(startTimes), ...
+values.event = struct('type', types, 'time', num2cell(startTimes), ...
     'certainty', ones(length(startTimes), 1));
 values.random = random('exp', 2, [32, 1000, 20]);
 

@@ -378,7 +378,8 @@ classdef blockedData < hgsetget
                 maxTime = [];
             else
                 bStarts = [];
-                maxTime = obj.BlockSize*size(obj.Data, obj.BlockDim);
+                maxTime = obj.BlockSize*size(obj.Data, obj.BlockDim + 1)./ ...
+                    obj.SampleRate;
             end
             
             obj.Events = viscore.blockedEvents(pdata.Events, ...
@@ -419,7 +420,7 @@ classdef blockedData < hgsetget
                 @(x) validateattributes(x, {'logical'}, {}));
             parser.addParamValue('Events', [], ...
                  @(x) (isempty(x) || (isstruct(x)) && ...
-                sum(isfield(x, {'type', 'startTime'})) == 2));
+                sum(isfield(x, {'type', 'time'})) == 2));
             parser.addParamValue('PadValue', 0, ...
                 @(x) validateattributes(x, {'numeric'}, {'scalar'}));
         end % getParser

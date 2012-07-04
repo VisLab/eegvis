@@ -241,7 +241,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             
             % Get needed information from the data and function objects
             if isempty(visData) || isempty(bFunction)
-                warning('blockScalpePlot:emptyFunctionOrData', ...
+                warning('blockScalpPlot:emptyFunctionOrData', ...
                     'Missing summary function or block data for this plot');
                 return;
             end

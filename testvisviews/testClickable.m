@@ -2,7 +2,13 @@ function test_suite = testClickable %#ok<STOUT>
 % Unit tests for visviews.clickable
 initTestSuite;
 
-function testConstuctor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values = [];
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testConstuctor(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.clickable normal constructor
 fprintf('\nUnit tests for visviews.clickable normal constructor\n');
 
@@ -22,7 +28,7 @@ assertTrue(isempty(keys));
 keys = cl.getUnmappedKeys();
 assertTrue(isempty(keys));
 
-function testInvalidConstructor %#ok<DEFNU>
+function testInvalidConstructor(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.clickable invalid constructor
 fprintf('\nUnit tests for visviews.clickable invalid constructor parameters\n');
 
@@ -30,8 +36,7 @@ fprintf('It should throw an exception when an empty array passed to constructor\
 f = @() visviews.clickable([]);
 assertExceptionThrown(f, 'MATLAB:maxrhs');
 
-
-function testClear %#ok<DEFNU>
+function testClear(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.clickable invalid constructor
 fprintf('\nUnit tests for visviews.clickable clear method\n');
 
@@ -41,7 +46,7 @@ obj.clearClickable();
 keys = obj.getSourceMapKeys();
 assertTrue(isempty(keys));
 
-function testPutUnmapped %#ok<DEFNU>
+function testPutUnmapped(values) %#ok<INUSD,DEFNU>
 fprintf('\nUnit tests for visviews.clickable putUnmapped\n');
 
 fprintf('It should allow clickable objects to be unmapped\n');
@@ -63,4 +68,3 @@ assertTrue(~isempty(m1));
 assertTrue(isa(m1, 'cell'));
 assertEqual(length(m1), 1);
 assertEqual(m1{1}, x2);
-

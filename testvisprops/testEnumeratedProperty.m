@@ -2,18 +2,24 @@ function test_suite = testEnumeratedProperty %#ok<STOUT>
 % Unit tests for enumeratedProperty
 initTestSuite;
 
-function testConstuctor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values.setStruct = propertyTestClass.getDefaultProperties();
+values.myNumber = 3;
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testConstuctor(values) %#ok<DEFNU>
 % Unit test for visprops.enumeratedProperty normal constructor
 fprintf('\nUnit tests for visprops.enumeratedProperty valid constructor\n');
 
 fprintf('It should construct a valid property from a valid property structure\n');
-setStruct = propertyTestClass.getDefaultProperties();
-settings = setStruct(3);
+settings = values.setStruct(values.myNumber);
 assertTrue(strcmp('WindowType', settings.FieldName));
 bm = visprops.enumeratedProperty([], settings);
 assertTrue(isvalid(bm));
 
-function testEnumeratedPropertyBadConstuctor %#ok<DEFNU>
+function testEnumeratedPropertyBadConstuctor(values) %#ok<DEFNU>
 % Unit test for visprops.enumeratedProperty invalid constructor
 fprintf('\nUnit tests for visprops.enumeratedProperty invalid constructor\n');
 
@@ -22,33 +28,30 @@ f1 = @()visprops.enumeratedProperty();
 assertAltExceptionThrown(f1, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when the setting structure parameter has an invalid value\n');
-setStruct = propertyTestClass.getDefaultProperties();
-settings = setStruct(3);
+settings = values.setStruct(values.myNumber);
 assertTrue(strcmp('WindowType', settings.FieldName));
 settings.Value = 'None';
 f = @()visprops.enumeratedProperty([], settings);
 assertExceptionThrown(f, 'enumeratedProperty:property');
 
-function testGetJIDEProperty %#ok<DEFNU>
+function testGetJIDEProperty(values) %#ok<DEFNU>
 % Unit test for visprops.enumeratedProperty getJIDEProperty method
 fprintf('\nUnit tests for visprops.enumeratedProperty getJIDEProperty method\n');
 
 fprintf('It should return a valid property corresponding to settings value\n');
-setStruct = propertyTestClass.getDefaultProperties();
-settings = setStruct(3);
+settings = values.setStruct(values.myNumber);
 assertTrue(strcmp(settings.Value, 'Blocked'));
 bm = visprops.enumeratedProperty([], settings);
 jProp = bm.getJIDEProperty();
 assertTrue(~isempty(jProp));
 assertTrue(strcmp(settings.Value, jProp.getValue()));
 
-function testGetPropertyStructure %#ok<DEFNU>
+function testGetPropertyStructure(values) %#ok<DEFNU>
 % Unit test for visprops.enumeratedProperty getPropertyStructure method
 fprintf('\nUnit tests for visprops.enumeratedProperty getPropertyStructure method\n');
 
 fprintf('It should return a property structure with the right values\n');
-setStruct = propertyTestClass.getDefaultProperties();
-s = setStruct(3);
+s = values.setStruct(values.myNumber);
 dm = visprops.enumeratedProperty([], s);
 assertTrue(isvalid(dm));
 sNew = dm.getPropertyStructure();

@@ -9,7 +9,6 @@ values.myNumber = 11;
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
 
-
 function testConstuctor(values) %#ok<DEFNU>
 % Unit test for visprops.vectorProperty valid constructor
 fprintf('\nUnit tests for visprops.vectorProperty invalid constructor\n');

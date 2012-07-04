@@ -2,19 +2,24 @@ function test_suite = testColorProperty %#ok<STOUT>
 % Unit tests for colorProperty
 initTestSuite;
 
-function testConstuctor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values.setStruct = propertyTestClass.getDefaultProperties();
+values.myNumber = 6;
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testConstuctor(values) %#ok<DEFNU>
 % Unit test for visprops.colorProperty normal constructor
 fprintf('\nUnit tests for visprops.colorProperty valid constructor\n');
 
 fprintf('It should construct a valid property from a property structure with 1 color\n');
-setStruct = propertyTestClass.getDefaultProperties();
-setting = setStruct(6);
-assertTrue(strcmp('Background', setting.FieldName));
-cp = visprops.colorProperty([], setting);
+settings = values.setStruct(values.myNumber);
+assertTrue(strcmp('Background', settings.FieldName));
+cp = visprops.colorProperty([], settings);
 assertTrue(isvalid(cp));
 
-
-function testConstuctorInvalid %#ok<DEFNU>
+function testConstuctorInvalid(values) %#ok<DEFNU>
 % Unit test for visprops.colorProperty invalid constructor
 fprintf('\nUnit tests for visprops.colorProperty invalid constructor\n');
 
@@ -24,27 +29,30 @@ setting = setStruct(1);
 f = @()visprops.colorProperty([], setting);
 assertExceptionThrown(f, 'colorProperty:property');
 
-function testGetFullNames %#ok<DEFNU>
+fprintf('It should throw an exception if constructor is called with a settings structure with a non color value\n');
+settings = values.setStruct(values.myNumber);
+settings.Value = 'abcd';
+f = @()visprops.colorProperty([], settings);
+assertExceptionThrown(f, 'colorProperty:property');
+
+function testGetFullNames(values) %#ok<DEFNU>
 % Unit test for visprops.colorProperty getFullNames method
 fprintf('\nUnit tests for visprops.colorProperty getFullNames method\n');
 
 fprintf('It should return a cell array containing one full name\n');
-setStruct = propertyTestClass.getDefaultProperties();
-setting = setStruct(6);
-bm = visprops.colorProperty([], setting);
+settings = values.setStruct(values.myNumber);
+bm = visprops.colorProperty([], settings);
 names = bm.getFullNames();
 assertEqual(length(names), 1);
 assertTrue(isa(names, 'cell'));
 
-
-function testValidateAndSetJIDE %#ok<DEFNU>
+function testValidateAndSetJIDE(values) %#ok<DEFNU>
 % Unit test for visprops.colorProperty validateAndSetFromJIDE method
 fprintf('\nUnit tests for visprops.colorProperty validateAndSetFromJIDE method\n');
 
 fprintf('It should correctly set a color value from a valid JIDE representation\n');
-settings =  propertyTestClass.getDefaultProperties();
-assertEqual(length(settings), 11);
-x = visprops.colorProperty('temp', settings(6));
+settings = values.setStruct(values.myNumber);
+x = visprops.colorProperty('temp', settings);
 [oldColor, valid, msg] = x.convertValueToJIDE([0.7, 0.7, 0.7]);  %#ok<ASGLU>
 assertTrue(valid);
 assertTrue(isempty(msg));
@@ -53,13 +61,12 @@ assertTrue(valid);
 assertTrue(isempty(msg));
 x.validateAndSetFromJIDE('Name', newColor);
 
-function testGetPropertyStructure %#ok<DEFNU>
+function testGetPropertyStructure(values) %#ok<DEFNU>
 % Unit test for visprops.colorProperty getPropertyStructure method
 fprintf('\nUnit tests for visprops.colorProperty getPropertyStructure method\n');
 
 fprintf('It should correctly get the property structure\n');
-setStruct = propertyTestClass.getDefaultProperties();
-s = setStruct(6);
+s= values.setStruct(values.myNumber);
 assertTrue(strcmp('Background', s.FieldName));
 cm = visprops.colorProperty([], s);
 assertTrue(isvalid(cm));
