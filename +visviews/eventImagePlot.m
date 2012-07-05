@@ -312,7 +312,7 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
         function colors = createColors(obj)
             % Return the the colors for the current clumps
             counts = obj.Events.getEventCounts(obj.StartBlock, ...
-                obj.StartBlock + obj.NumberBlocks - 1, 0);
+                obj.StartBlock + obj.NumberBlocks - 1, obj.CertaintyThreshold);
             
             % Calculate the number of clumps and adjust for uneven clumps
             obj.NumberClumps = ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
