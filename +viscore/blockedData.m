@@ -113,7 +113,8 @@ classdef blockedData < hgsetget
         ElementLocations = [];% element locations structure with ElementFields
         Epoched;              % true if the data is epoched
         Events;               % blockedEvent object if this object has events
-        OriginalMean          % overall mean of data set (before padding)
+        OriginalMean;         % overall mean of data set (before padding)
+        OriginalPrctile;      % original percentiles
         OriginalStd           % overall std of data set (before padding)
         PadValue = 0;         % use to pad data if not divisible by BlockSize
         SampleRate = 1;       % sampling rate in Hz of data

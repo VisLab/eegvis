@@ -347,7 +347,7 @@ classdef eventStackedPlot < visviews.axesPanel  & visprops.configurable
             type = obj.Events.getTypes(obj.SelectedEvent); 
             obj.XString = [obj.XStringBase ' Event('  event '): ' ...
                   type{1} ' ' ...
-                  num2str(obj.Events.getStartTimes(obj.SelectedEvent)) ' s'];
+                  num2str(obj.Events.getEventTimes(obj.SelectedEvent)) ' s'];
             obj.redraw();
         end % buttonDownPreCallback
         
