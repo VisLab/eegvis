@@ -132,12 +132,15 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
         SignalLabel = '{\mu}V';      % label indicating units of the signal
         SignalScale = 1;             % scale factor to calculate plot spacing
         TrimPercent = 0;             % percentage of extreme points to trim
+        TrimScope = 'global';        % apply 
     end % public properties
     
     properties (Access = private)
         ClippingTolerance = 0.05;    % clipped this much inside axes
         Colors = [];                 % needed for clickable
         CurrentSlice = [];           % current data slice
+        CurrentTrimPercent = 0;      % current trim percent
+        CurrentTrimValues = [];      % current lower and upper values
         HitList = {};                % list of hithandles
         LineWidthSelected = 2.0;     % width of selected signal line
         LineWidthUnselected = 0.5;   % width of unselected signal line
@@ -434,31 +437,93 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
             % Structure specifying how to set configurable public properties
             cName = 'visviews.signalStackedPlot';
             settings = struct( ...
-                'Enabled',       {true,           true,               true,            true,            true,        true}, ...
-                'Category',      {cName,          cName,              cName,           cName,           cName,       cName}, ...
-                'DisplayName',   {'Clipping on',  'Combine method',   'Remove mean',  'Signal label',  'Signal scale', 'Trim percent'}, ...
-                'FieldName',     {'ClippingOn',   'CombineMethod',    'RemoveMean',   'SignalLabel',    'SignalScale',  'TrimPercent'}, ...
-                'Value',         {true,           'mean',             true,          '{\mu}V',        3.0,           0 }, ...
-                'Type',          { ...
-                'visprops.logicalProperty', ...
-                'visprops.enumeratedProperty', ...
-                'visprops.logicalProperty', ...
-                'visprops.stringProperty', ...
-                'visprops.doubleProperty', ...
-                'visprops.doubleProperty'}, ...
-                'Editable',      {true,              true,            true,           true,            true,         true}, ...
-                'Options',       {'',         {'mean', 'median', 'max', 'min'},'',              '',              [0, inf],     [0, inf]}, ...
-                'Description',   { ...
+                'Enabled',       { ... % display in property manager?...
+                true,             ... %1 clip signal plots       
+                true,             ... %2 method for combining clumps    
+                true,             ... %3 remove mean before plotting
+                true,             ... %4 label designating signal units
+                true,             ... %5 spacing between stacked lines
+                true,             ... %6 trim percentage for scale
+                true              ... %7 trim scope (global or local)
+                }, ...
+                'Category',      {  ... % category for property
+                cName,              ... %1 clip signal plots
+                cName,              ... %2 method for combining clumps  
+                cName,              ... %3 remove mean before plotting
+                cName,              ... %4 label designating signal units
+                cName,              ... %5 spacing between stacked lines
+                cName,              ... %6 trim percentage for scale
+                cName               ... %7 trim scope (global or local)
+                }, ...
+                'DisplayName',   { ... % display name in property manager
+                'Clipping on',     ... %1 clip signal plots
+                'Combine method',  ... %2 method for combining clumps  
+                'Remove mean',     ... %3 remove mean before plotting
+                'Signal label',    ... %4 label designating signal units
+                'Signal scale',    ... %5 spacing between stacked lines
+                'Trim percent',    ... %6 trim percentage for scale
+                'Trim scope'       ... %7 trim scope (global or local)
+                }, ...
+                'FieldName',     { ... % name of public property
+                'ClippingOn',      ... %1 clip signal plots 
+                'CombineMethod',   ... %2 method for combining clumps  
+                'RemoveMean',     ... %3 remove mean before plotting
+                'SignalLabel',     ... %4 label designating signal units
+                'SignalScale'      ... %5 spacing between stacked lines
+                'TrimPercent',     ... %6 trim percentage for scale
+                'TrimScope'        ... %7 trim scope (global or local)
+                }, ... 
+                'Value',         { ... % default or initial value
+                true,              ... %1 clip signal plots
+                'mean',            ... %2 method for combining clumps   
+                true,              ... %3 remove mean before plotting
+                '{\mu}V',          ... %4 label designating signal units
+                3.0,               ... %5 spacing between stacked lines
+                0,                 ... %6 trim percentage for scale
+                'global'           ... %7 trim scope (global or local)
+                }, ...
+                'Type',          { ... % type of property for validation
+                'visprops.logicalProperty', ... %1 clip signal plots
+                'visprops.enumeratedProperty', ... %2 method for combining clumps  
+                'visprops.logicalProperty', ... %3 remove mean before plotting
+                'visprops.stringProperty',  ... %4 label designating signal units
+                'visprops.doubleProperty',  ... %5 spacing between stacked lines
+                'visprops.doubleProperty', ... %6 trim percentage for scale
+                'visprops.enumeratedProperty' ... %7 trim scope (global or local)
+                }, ...
+                'Editable',      { ... % grayed out if false
+                true,             ... %1 clip signal plots 
+                true,             ... %2 method for combining clumps    
+                true,             ... %3 remove mean before plotting
+                true,             ... %4 label designating signal units
+                true,             ... %5 spacing between stacked lines
+                true,             ... %6 trim percentage for scale
+                true              ... %7 trim scope (global or local)
+                }, ...
+                'Options',       { ... % restrictions on input values
+                '',                ... %1 clip signal plots
+                {'mean', 'median', 'max', 'min'}, ... %2 method for combining clumps  
+                '',                ... %3 remove mean before plotting
+                '',                ... %4 label designating signal units
+                [0, inf],          ... %5 spacing between stacked lines
+                [0, 100]           ... %6 trim percentage for scale
+                {'global', 'local'}, ... %7 trim scope (global or local)
+                }, ...
+                'Description',   {  ... % description for property manager
                 ['If true, individual signals are clipped ' ...
-                'to fall within the plot window'], ...
+                'to fall within the plot window'], ... %1
                 ['Specifies how to combine multiple windows ' ...
-                'into a single window for plotting'], ...
-                'If true, remove mean before plotting', ...
-                'Label indicating signal units', ...
+                'into a single window for plotting'], ... %2
+                'If true, remove mean before plotting', ... %3
+                'Label indicating signal units', ... %4
                 ['Scale factor for plotting individual signal plots ' ...
-                '(must be positive)'], ...
+                '(must be positive)'], ... %5
                 ['Percentage of extreme points (half on each end ' ...
-                'before calculating limits']} ...
+                'before calculating limits'], ... %6
+                ['Scope for calculating trim percentages -- ' ...
+                'global designates entire data set, ' ...
+                'local designates this block only'] ...%7
+                } ...
                 );
         end % getDefaultProperties
         

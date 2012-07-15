@@ -150,7 +150,7 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
         end % blockImagePlot constructor
         
         function [dSlice, bFunction] = getClicked(obj)
-            % Clicking on the boxplot always causes plot of group of blocks
+            % Clicking on the image always causes plot of group of blocks
             bFunction = obj.CurrentFunction;
             point = get(obj.MainAxes, 'CurrentPoint');
             dSlice = obj.getClumpSlice(point(1, 1));        

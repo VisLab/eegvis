@@ -177,7 +177,7 @@ sp9.reposition(gaps);
 fprintf('It should plot smooth signals with a trim percent\n');
 fig10 = figure('Name', 'Plot with smoothed signals with out of range signal');
 sp10 = visviews.signalStackedPlot(fig10, [], []);
-assertTrue(isvalid(sp6));
+assertTrue(isvalid(sp10));
 data10 = values.bDataSmooth.getData();
 data10(2,:) = 100*data10(6, :);
 testVD10 = viscore.blockedData(data10, 'Large Cosine');
@@ -233,6 +233,17 @@ gaps = sp14.getGaps();
 sp14.reposition(gaps);
 drawnow
 
+% Trim percentage out of range
+fprintf('It ignores invalid trim percentages\n');
+fig15 = figure('Name', 'Plot did''t change percentages');
+sp15 = visviews.signalStackedPlot(fig15, [], []);
+assertTrue(isvalid(sp15));
+sp15.TrimPercent = 200;
+sp15.plot(values.bData, values.fun, values.slice);
+gaps = sp15.getGaps();
+sp15.reposition(gaps);
+assertElementsAlmostEqual(200, sp15.TrimPercent);
+
 if values.deleteFigures
     delete(fig1);
     delete(fig2);
@@ -248,6 +259,7 @@ if values.deleteFigures
     delete(fig12);
     delete(fig13);
     delete(fig14);
+    delete(fig15);
 end
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>
@@ -298,6 +310,7 @@ bp4.plot(testVD4, values.fun, slice4);
 gaps = bp4.getGaps();
 bp4.reposition(gaps);
 drawnow
+
 if values.deleteFigures
     delete(fig1);
     delete(fig2);

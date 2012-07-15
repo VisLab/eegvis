@@ -80,7 +80,7 @@ classdef axesPanel < uiextras.Panel & visviews.resizable ...
     properties
         MainAxes;                  % handle for the main panel axes
         MinXLabelOffset = 5;       % minimum pixels from x label to axis
-        MinYLabelOffset = 5;       % minimum pixels from y label to axis        
+        MinYLabelOffset = 5;       % minimum pixels from y label to axis  
         XLabelOffset = 0;          % actual x label offset from axis
         XLimOffset = 0;            % actual offset of label to x axis scale
         XOffsetFromAxis = false;    % if true adjust x label offset on resize      

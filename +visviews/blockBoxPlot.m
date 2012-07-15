@@ -395,7 +395,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 'DisplayName',   {  ... % display name in property manager
                 'Box plot colors',    ... %1 alternating box plot colors
                 'Clump size',         ... %2 blocks/clump
-                'Combination method', ... %3 method for combining clumps
+                'Combine method',     ... %3 method for combining clumps
                 'Link to details'     ... %4 link to details on click
                 }, ...
                 'FieldName',     {  ... % name of public property
@@ -428,7 +428,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 {'max', 'min', 'mean', 'median', 'sum'}, ... %3 method for combining clumps
                 ''                  ... %4 link to details on click
                 }, ...
-                'Description',   {...
+                'Description',   {  ... % description for property manager
                 'blockBoxPlot alternating box colors (cannot be empty)', ... %1
                 'Number of blocks grouped into a clump represented by one box plot', ... %2
                 'Method for combining blocks in a clump', ... %3
