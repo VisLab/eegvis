@@ -214,8 +214,30 @@ classdef blockedData < hgsetget
             nValues = obj.TotalValues;
         end % getTotalValues
         
+        function [tMean, tStd, tLow, tHigh] = getTrimValues(obj, percent, data)
+            % Return trim mean, trim std, trim low cutoff, trim high cutoff
+            if nargin == 3
+                myData = data(:);
+            else
+                myData = obj.Data(:);
+            end
+            if percent <= 0 || percent >= 100
+                tLow = min(myData);
+                tHigh = max(myData);
+            else
+                tValues = prctile(myData, [percent/2, 100 - percent/2]);
+                tLow = tValues(1);
+                tHigh = tValues(2);
+                myData(myData < tLow | myData > tHigh) = [];
+            end
+            tMean = mean(myData);
+            tStd = std(myData, 1);
+        end % getTrimValues
+        
+        
         function value = getValue(obj, element, sample, block)
             % Return the value of element, sample, block ****needs testing
+            
             value = obj.Data(element, sample, block);
         end
         
