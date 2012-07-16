@@ -221,7 +221,7 @@ classdef blockedData < hgsetget
             else
                 myData = obj.Data(:);
             end
-            if percent <= 0 || percent >= 100
+            if isempty(percent) || percent <= 0 || percent >= 100
                 tLow = min(myData);
                 tHigh = max(myData);
             else

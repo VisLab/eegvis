@@ -25,7 +25,7 @@
 %
 
 %% Configurable properties
-% The |visviews.stackedSignalPlot| has five configurable parameters: 
+% The |visviews.stackedSignalPlot| has seven configurable parameters: 
 %
 % |ClippingOn| is a boolean, which if true causes the individual signals
 % to be truncated so that they appear inside the axes. 
@@ -50,6 +50,12 @@
 % scale is calculated relative to the trimmed signal and all of the
 % signals are clipped at the trim cutoff before plotting.
 %
+% |TrimScope| specifies the range over which trimming and removing
+% the mean takes place. A value of |'global'| specifies that the
+% the trim percentages and means are computed on the entire
+% dataset, while a value of |'local'| specifies that trimming
+% and removing the mean applies only to the block being
+% plotted.
 
 %% Example 
 % Create a stacked signal plot for random signals

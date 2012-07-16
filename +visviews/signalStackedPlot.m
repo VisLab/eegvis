@@ -24,7 +24,7 @@
 %
 %
 % Configurable properties:
-% The visviews.signalStackedPlot has five configurable parameters:
+% The visviews.signalStackedPlot has seven configurable parameters:
 %
 % ClippingOn    is a boolean, which if true causes the individual signals
 %               to be truncated so that they appear inside the axes.
@@ -53,6 +53,12 @@
 %               The signal scale is calculated relative to the trimmed
 %               signal and all of the signals are clipped at the
 %               trim cutoff before plotting.
+% TrimScope     specifies the range over which trimming and removing
+%               the mean takes place. A value of 'global' specifies that the
+%               the trim percentages and means are computed on the entire
+%               dataset, while a value of 'local' specifies that trimming
+%               and removing the mean applies only to the block being
+%               plotted.
 %
 % Example:
 % Create a stacked signal plot for random signals
@@ -371,33 +377,42 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
         function displayPlot(obj)
             % Plot the signals stacked one on top of another
             data = obj.Signals;
-            % Remove the mean if necessary
-            if obj.RemoveMean
-                m = mean(data, 2);
-                data = data - repmat(m, 1, size(data, 2));
+            numPlots = size(data, 1);
+            if numPlots == 0 
+                warning('signalStackedPlot:NaNValues', ...
+                    'No data to plot');
+                return;
             end
-            % Trim up the signals if necessary
-            if 0 < obj.TrimPercent && obj.TrimPercent < 100
-                tValues = prctile(data(:), ...
-                    [obj.TrimPercent/2, 100-obj.TrimPercent/2]);
-                data(data < tValues(1)) = tValues(1);
-                data(data > tValues(2)) = tValues(2);
+            % Take care of trimming based on scope
+            if strcmpi(obj.TrimScope, 'global')
+                [tMean, tStd, tLow, tHigh] = ...
+                    obj.VisData.getTrimValues(obj.TrimPercent);
+            else
+                      [tMean, tStd, tLow, tHigh] = ...
+                    obj.VisData.getTrimValues(obj.TrimPercent, data);
             end
             
-            dataStd = nanstd(data, 1, 2);
             scale = obj.SignalScale;
             if isempty(scale)
                 scale = 1;
             end
-            plotSpacing = double(scale)*trimmean(dataStd, 10);
-            numPlots = length(dataStd);
-            if numPlots == 0 || isnan(plotSpacing)
-                warning('signalStackedPlot:NaNValues', ...
+            plotSpacing = double(scale)*tStd;
+            if isnan(plotSpacing)
+                 warning('signalStackedPlot:NaNValues', ...
                     'No data to plot');
                 return;
-            elseif plotSpacing == 0;
-                plotSpacing = 0.1;
             end
+            if plotSpacing == 0;
+                plotSpacing = 0.1;
+            end 
+            data(data < tLow) = tLow;
+            data(data > tHigh) = tHigh;
+            
+            % Remove the mean if necessary
+            if obj.RemoveMean
+                data = data - tMean;
+            end
+
             %y-axis reversed, so must plot the negative of the signals
             eps = plotSpacing*obj.ClippingTolerance;
             obj.HitList = cell(1, numPlots + 1);
@@ -427,7 +442,7 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 'XLim', [obj.XValues(1), obj.XValues(end)], 'XLimMode', 'manual', ...
                 'XTickMode', 'auto');
             obj.redraw();
-        end % plot
+        end % displayPlot
         
     end % private methods
     
