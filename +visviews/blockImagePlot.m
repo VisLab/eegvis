@@ -125,8 +125,9 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
     end % public properties
     
     properties (Access = private)
+        BlockPtr = [];           % block number of current block
         CurrentFunction = [];    % block function that is currently displayed
-        CurrentSlice = [];       % current slice
+        CurrentSlice = [];       % current slice   
         NumberBlocks = 0;        % number of blocks
         NumberClumps = 0;        % current number of clumps (boxplots)
         NumberElements = 0;      % number of elements being plotted
@@ -149,11 +150,25 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
                 'YDir', 'reverse');
         end % blockImagePlot constructor
         
+        function drawMarker(obj, p)
+            if p < 0.5
+                return;
+            end    
+            x =  [-0.5; 0; 0.5];
+            if isempty(obj.BlockPtr)
+                obj.BlockPtr = fill(x, [-0.5; 0.5; -0.5], ...
+                    [1, 0, 0], 'Parent', obj.MainAxes);
+            else
+                set(obj.BlockPtr, 'XData', x);
+            end    
+        end % drawMarker
+        
         function [dSlice, bFunction] = getClicked(obj)
             % Clicking on the image always causes plot of group of blocks
             bFunction = obj.CurrentFunction;
             point = get(obj.MainAxes, 'CurrentPoint');
-            dSlice = obj.getClumpSlice(point(1, 1));        
+            dSlice = obj.getClumpSlice(point(1, 1));
+            obj.drawMarker(round(point(1, 1)));
         end % getClicked
         
         function dSlice = getClumpSlice(obj, clump)

@@ -324,3 +324,24 @@ drawnow
 if values.deleteFigures
     delete(fig1);
 end
+
+function testBlockPtr(values) %#ok<DEFNU>
+% Unit test for visviews.blockImagePlot position of block pointer
+fprintf('\nUnit tests for visviews.blockImagePlot positioning of block pointer\n');
+
+fprintf('It should allow callbacks to be registers\n');
+fig1 = figure('Name', 'Clumps of one window');
+ip1 = visviews.blockImagePlot(fig1, [], []);
+assertTrue(isvalid(ip1));
+ip1.plot(values.bData, values.fun, values.slice);
+gaps = ip1.getGaps();
+ip1.reposition(gaps + 10);
+ip1.registerCallbacks([]);
+
+fprintf('It should move the position marker when incremented\n');
+pause on
+for k = 1:31
+    pause(0.25);
+    ip1.drawMarker(k);
+end
+pause off
