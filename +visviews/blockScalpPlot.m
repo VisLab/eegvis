@@ -213,7 +213,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             end
         end % buttonDownPreCallback
         
-        function [dSlice, bFunction] = getClicked(obj)
+        function [dSlice, bFunction, position] = getClicked(obj, increment)
             % Clicking on the electrodes always causes plot of an element
             bFunction = obj.CurrentFunction;
             if isempty(obj.CurrentElement)
@@ -227,6 +227,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                     'CombineMethod', obj.CombineMethod, 'CombineDim', 1, ...
                     'DimNames', names);
             end
+            position = 0;
         end % getClicked
         
         function [cbHandles, hitHandles] = getHitObjects(obj)

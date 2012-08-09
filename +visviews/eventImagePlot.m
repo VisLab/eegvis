@@ -171,11 +171,12 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 'YDir', 'reverse');
         end % eventImagePlot constructor
         
-        function [dSlice, bFunction] = getClicked(obj)
+        function [dSlice, bFunction, position] = getClicked(obj, increment)
             % Clicking on the boxplot always causes plot of group of blocks
             bFunction = obj.CurrentFunction;
             point = get(obj.MainAxes, 'CurrentPoint');
-            dSlice = obj.getClumpSlice(point(1, 1));        
+            dSlice = obj.getClumpSlice(point(1, 1)); 
+            position = 0;
         end % getClicked
         
         function dSlice = getClumpSlice(obj, clump)

@@ -116,7 +116,7 @@ classdef clickable < handle
             obj.Unmapped = containers.Map('KeyType', 'char', 'ValueType', 'any');
         end % clear
         
-        function [dSlice, bFunction] = getClicked(obj) %#ok<MANU>
+        function [dSlice, bFunction, currentPosition] = getClicked(obj, increment) %#ok<MANU>
             % Return data slice at current clicked point [element, sample, block]
             %
             % Notes:
@@ -124,6 +124,7 @@ classdef clickable < handle
             %   - if one of element, sample or block is missing, use NaN
             dSlice = [];
             bFunction = [];
+            currentPosition = [];
         end % getClicked
         
         function [cbHandles, hitHandles] = getHitObjects(obj) %#ok<MANU>
@@ -253,7 +254,7 @@ classdef clickable < handle
             [cbHandles, hitHandles] = getHitObjects(obj);
             for k = 1:length(cbHandles)  % set callbacks on underlying objects
                 set(cbHandles{k}, 'ButtonDownFcn', ...
-                    {@obj.buttonDownCallback, master});
+                    {@obj.buttonDownCallback, master, 0});
             end
             for k = 1:length(hitHandles) % set HitTest on underlying targets
                 set(hitHandles{k}, 'HitTest', 'on');
@@ -384,12 +385,14 @@ classdef clickable < handle
         
         % CALLBACKS ----------------------------------------
         
-        function buttonDownCallback (obj, src, eventdata, master) %#%#ok<MSNU> ok<INUSL>
+        function buttonDownCallback (obj, src, eventdata, master, increment) %#%#ok<MSNU> ok<INUSL>
             % Callback links master component to details
             obj.buttonDownPreCallback(src, eventdata);
             id = num2str(obj.getInternalID());
             
-            [dSlice, bFunction] = obj.getClicked();
+            if isa(src, 'visviews.navigator')
+            end
+            [dSlice, bFunction, position] = obj.getClicked(increment);
             if isempty(dSlice) || isempty(bFunction)
                 return;
             end

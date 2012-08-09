@@ -144,11 +144,12 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             set(obj.MainAxes, 'YDir', 'reverse', 'Tag', 'elementBoxAxes');
         end % elementBoxPlot constructor
         
-        function [dSlice, bFunction] = getClicked(obj)
+        function [dSlice, bFunction, position] = getClicked(obj, increment)
             % Clicking on the boxplot always causes plot of an element
             point = get(obj.MainAxes, 'CurrentPoint');
             bFunction = obj.CurrentFunction;
             dSlice = obj.getClumpSlice(point(1, 2));
+            position = 0;
         end % getClicked
         
         function dSlice = getClumpSlice(obj, clump)
