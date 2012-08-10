@@ -94,10 +94,11 @@ classdef clickable < handle
     properties
         IsClickable  = true;           % if true, this is clickable
         LinkDetails = true;            % if true, link to details
+        Navigator = [];                % navigator object
     end % public properties
     
     properties (Access = private)
-        IDMap = [];           % contains (name, objIDs) for lookup
+        IDMap = [];           % contains (name, objIDs) for lookup   
         SourceMap = [];       % local copy of sources (obj, sources, targets)
         Unmapped = []         % contains (sourceName, unmappedIDs) not mapped here
     end % private properties
@@ -254,7 +255,7 @@ classdef clickable < handle
             [cbHandles, hitHandles] = getHitObjects(obj);
             for k = 1:length(cbHandles)  % set callbacks on underlying objects
                 set(cbHandles{k}, 'ButtonDownFcn', ...
-                    {@obj.buttonDownCallback, master, 0});
+                    {@obj.buttonDownCallback, master, []});
             end
             for k = 1:length(hitHandles) % set HitTest on underlying targets
                 set(hitHandles{k}, 'HitTest', 'on');
@@ -385,20 +386,21 @@ classdef clickable < handle
         
         % CALLBACKS ----------------------------------------
         
-        function buttonDownCallback (obj, src, eventdata, master, increment) %#%#ok<MSNU> ok<INUSL>
+        function buttonDownCallback (obj, src, eventdata, master, position) %#%#ok<MSNU> ok<INUSL>
             % Callback links master component to details
             obj.buttonDownPreCallback(src, eventdata);
             id = num2str(obj.getInternalID());
             
-            if isa(src, 'visviews.navigator')
-            end
-            [dSlice, bFunction, position] = obj.getClicked(increment);
+            [dSlice, bFunction, position] = obj.getClicked(position);
             if isempty(dSlice) || isempty(bFunction)
                 return;
             end
-            
+   
             % Plot slices for direct targets
             if ~isempty(master) && isa(master, 'visviews.clickable')
+                if ~isa(src, 'visviews.navigator')
+                    master.Navigator.setCurrent(obj, position);
+                end
                 plot = master.getSourceMap(id);
                 targets = plot.targets;
                 if ~isempty(targets)

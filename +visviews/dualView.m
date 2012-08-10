@@ -106,15 +106,17 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
     
     properties (Access = private)
         DetailNumber = 1;         % number of the block or element in details
-        DetailPanel = [];         % detail panel
         ElementDetails = false    % when true, plot all windows for an element
         ExploratoryCursor = [];   % cursorExplorer object
-        GUIClosing = false;       % indicates whether GUI in process of closing
-        Navigator = [];           % navigator object for stepping through summaries
-        SummaryPanel = [];        % summary tab panel        
+        GUIClosing = false;       % indicates whether GUI in process of closing   
         VisData = [];             % blockedData object containing data        
         WindowName = 'Window';    % name actually used for block dimension name
-                
+        
+        % Major layout components for visualization
+        DetailPanel = [];         % detail panel 
+        NavigatorPanel = [];      % navigator panel
+        SummaryPanel = [];        % summary tab panel   
+        
         % Selectors for managing configurable resources
         FunSelect;                % selector managing function configuration
         PlotSelect;               % selector managing plot configuration
@@ -346,12 +348,15 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
                 'Tag', 'MainVBox', ...
                 'Spacing', 5, 'Padding', 5, ...
                 'BackgroundColor', [0.92, 0.92, 0.92]);
+            obj.Navigator = visviews.navigator(mainVBox, obj);
             obj.SummaryPanel = visviews.tabPanel(mainVBox, obj.PropSelect.getManager(), []);
             obj.DetailPanel = visviews.verticalPanel(mainVBox, obj.PropSelect.getManager(), []);
+            units = get(mainVBox, 'Units');
+            set(mainVBox, 'Units', 'pixels', 'Sizes', [25, -1, -1]);
+            set(mainVBox, 'Units', units);
             obj.ExploratoryCursor = visviews.cursorExplorer(obj.VisFig);
-            obj.Navigator = visviews.navigator(obj);
             hToolbar = findall(obj.VisFig, 'Type', 'uitoolbar');
-            p = which('pop_visviews.m');
+            p = which('pop_eegvis.m');
             p = p(1:strfind(p, 'pop_visviews.m') - 1);
             fxIcon = imread([p 'icons/fx20LighterBlue.png']);
             plotsIcon = imread([p 'icons/plottoolsLighterBlue.png']);
@@ -373,24 +378,6 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
                 'Tag', 'PropertiesDualView', ...
                 'ClickedCallback', {@viscore.dataSelector.configureCallback, ...
                 obj.PropSelect, [obj.VisName ': Configure properties']});
-             uipushtool(hToolbar, 'CData', fxIcon,...
-                'Separator', 'on', 'HandleVisibility','off', 'TooltipString', ...
-                'Step back in currently selected summary', ...
-                'Tag', 'BackDualView', ...
-                'ClickedCallback', {@visviews.navigator.buttonDownCallback, ...
-                obj.Navigator, -1});
-            uipushtool(hToolbar, 'CData', fxIcon,...
-                'Separator', 'off', 'HandleVisibility','off', 'TooltipString', ...
-                'Show position in currently selected summary', ...
-                'Tag', 'CurrentPositionDualView', ...
-                'ClickedCallback', {@visviews.navigator.buttonDownCallback, ...
-                obj.Navigator, 0});
-            uipushtool(hToolbar, 'CData', fxIcon,...
-                'Separator', 'off', 'HandleVisibility','off', 'TooltipString', ...
-                'Step forward in currently selected summary', ...
-                'Tag', 'ForwardDualView', ...
-                'ClickedCallback', {@visviews.navigator.buttonDownCallback, ...
-                obj.Navigator, 1});
         end % createLayout
         
         function deleteDependentViews(obj)

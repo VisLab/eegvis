@@ -189,17 +189,25 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             end    
         end % drawMarker
         
-        function [dSlice, bFunction, position] = getClicked(obj, increment)
+        function [dSlice, bFunction, position] = getClicked(obj, cposition)
             % Clicking on the image always causes plot of group of blocks
             bFunction = obj.CurrentFunction;
-            point = get(obj.MainAxes, 'CurrentPoint');
-            dSlice = obj.calculateClumpSlice(point(1, 1) + increment);
+            if isempty(cposition)
+              point = get(obj.MainAxes, 'CurrentPoint');
+              position = point(1, 1);
+            else
+              position = cposition;
+            end
+            dSlice = obj.calculateClumpSlice(position);
             obj.drawMarker(round(obj.CurrentPosition));
             position = obj.CurrentPosition;
         end % getClicked
         
-
-        
+        function position = getCurrentPosition(obj)
+            % Return the current position
+            position = obj.CurrentPosition;
+        end % getCurrentPosition
+              
         function plot(obj, visData, bFunction, dSlice)
             % Plot the blocked data using an image
             obj.reset();

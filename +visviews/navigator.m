@@ -68,26 +68,87 @@ classdef navigator < handle
     end % public properties
     
     properties (Access = private)
-        Master = [];                  % The master that has the toolbar
+        Background = [0.90, 0.90, 0.90]; % Background color
+        CurrentClickable = [];         % set the current clickable
+        CurrentPosition = [];          % set the current position
+        Master = [];                   % master that has the panel
+        NavigatorPanel = [];           % panel that holds navigation
     end % private properties
     
     methods
         
-        function obj = navigator(master)
+        function obj = navigator(parent, master)
             % Base class for clickable objects
             obj.Master = master;
+            obj.createLayout(parent);
         end % constructor
         
-        function clearClickable(obj)
-            % Clear the maps with IDs and relationships
-
-        end % clear
+        function [current, position] = getCurrent(obj)
+            % Return the current object and position
+            current = obj.CurrentClickable;
+            position = obj.CurrentPosition;
+        end % getCurrent
+        
+        function setCurrent(obj, current, position)
+            % Set the current clickable object
+            if isa(current, 'visviews.clickable')
+                obj.CurrentClickable = current;
+                obj.CurrentPosition = position;
+            end
+        end % setCurrent
+        
+       function buttonDownCallback (obj, src, eventdata, increment)  %#ok<INUSD,INUSL>
+            % Callback links navigator to summary plots
+            fprintf('Here\n');
+            [current, position] = obj.getCurrent;
+            if isempty(current)
+                return;
+            end
+            position = position + increment;
+            
+            current.buttonDownCallback(obj, [], obj.Master, position);
+            position = current.getCurrentPosition();
+            obj.setCurrent(current, position);
+        end
+        
     end % public methods
     
+    methods (Access = private)
+         function createLayout(obj, parent)
+             obj.NavigatorPanel =  uiextras.HBox('Parent', parent, ...
+                                     'BackgroundColor', [0.8, 0.8, 0.8]);
+            p = which('pop_eegvis.m');
+            p = p(1:strfind(p, 'pop_eegvis.m') - 1);
+            back = imread([p 'icons/backward.png']);
+            fback = imread([p 'icons/fastBackward.png']);
+            fforward = imread([p 'icons/fastForward.png']);
+            forward = imread([p 'icons/forward.png']);
+            uipanel('Parent', obj.NavigatorPanel, 'BorderType', 'none');
+            uicontrol('Parent', obj.NavigatorPanel, ...
+                       'Style', 'pushbutton', 'CData', fback, ...
+                       'BackgroundColor', obj.Background, ...
+                       'ButtonDownFcn', ...
+                       {@buttonDownCallback, -2});
+            uicontrol('Parent', obj.NavigatorPanel, ...
+                       'Style', 'pushbutton', 'CData', back, ...
+                       'ButtonDownFcn', ...
+                       {@buttonDownCallback, -1});
+            uicontrol('Parent', obj.NavigatorPanel, 'Style', 'edit', ...
+                      'String', 'Unset');
+            uicontrol('Parent', obj.NavigatorPanel, ...
+                      'Style', 'pushbutton', 'CData', forward, ...
+                       'ButtonDownFcn', ...
+                       {@buttonDownCallback, 1});
+            uicontrol('Parent', obj.NavigatorPanel, ...
+                      'Style', 'pushbutton', 'CData', fforward, ...
+                       'ButtonDownFcn', ...
+                       {@buttonDownCallback, 2});
+            set(obj.NavigatorPanel, 'Sizes', [-1 30 30 60, 30, 30]);
+         end % createLayout
+    end % private methods
+    
    methods (Static = true)
-        function buttonDownCallback (src, eventdata, obj, increment) %#%#ok<MSNU> ok<INUSL>
-            % Callback links master component to details
-            fprintf('Here\n');
-        end 
+ 
+       
    end % static methods
 end % navigator
