@@ -153,7 +153,11 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
         
         function dSlice = calculateClumpSlice(obj, clump)
             dSlice = [];
-            if clump <= 0 || clump >= obj.NumberClumps + 1 || ...
+            if clump == -inf
+                clump = 1;
+            elseif clump == inf
+                clump = obj.NumberClumps;
+            elseif clump <= 0 || clump >= obj.NumberClumps + 1 || ...
                     obj.NumberClumps ~= ...      % needs to be recalculated
                     ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
                 return;
@@ -202,6 +206,14 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             obj.drawMarker(round(obj.CurrentPosition));
             position = obj.CurrentPosition;
         end % getClicked
+        
+        function name = getName(obj)
+            % Return an identifying name for this object
+            name = [num2str(obj.getObjectID()) '[' class(obj) ']'];
+            if ~isempty(obj.CurrentFunction)
+               name = [name ' ' obj.CurrentFunction.getValue(1, 'DisplayName')];
+            end
+        end % getName
         
         function position = getCurrentPosition(obj)
             % Return the current position

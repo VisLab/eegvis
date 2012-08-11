@@ -94,7 +94,7 @@ classdef clickable < handle
     properties
         IsClickable  = true;           % if true, this is clickable
         LinkDetails = true;            % if true, link to details
-        Navigator = [];                % navigator object
+        Navigator = [];                % non empty if this clickable controls navigation
     end % public properties
     
     properties (Access = private)
@@ -117,7 +117,7 @@ classdef clickable < handle
             obj.Unmapped = containers.Map('KeyType', 'char', 'ValueType', 'any');
         end % clear
         
-        function [dSlice, bFunction, currentPosition] = getClicked(obj, increment) %#ok<MANU>
+        function [dSlice, bFunction, currentPosition] = getClicked(obj, position) %#ok<INUSD,MANU>
             % Return data slice at current clicked point [element, sample, block]
             %
             % Notes:
@@ -164,6 +164,11 @@ classdef clickable < handle
                 targets = {};
             end
         end % getMasterTargets
+        
+        function name = getName(obj)
+            % Return an identifying name of this clickable object
+            name = class(obj);
+        end % getName
         
         function value = getSourceMap(obj, key)
             % Return value associated with key in SourceMap

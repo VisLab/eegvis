@@ -72,7 +72,9 @@ classdef navigator < handle
         CurrentClickable = [];         % set the current clickable
         CurrentPosition = [];          % set the current position
         Master = [];                   % master that has the panel
+        NameBox = [];                  % text box displaying name of current
         NavigatorPanel = [];           % panel that holds navigation
+        PositionBox = [];              % text box displaying current position
     end % private properties
     
     methods
@@ -94,18 +96,18 @@ classdef navigator < handle
             if isa(current, 'visviews.clickable')
                 obj.CurrentClickable = current;
                 obj.CurrentPosition = position;
+                set(obj.PositionBox, 'String', num2str(position))
+                set(obj.NameBox, 'String', [current.getName() ': ']);
             end
         end % setCurrent
         
        function buttonDownCallback (obj, src, eventdata, increment) %#ok<INUSL>
             % Callback links navigator to summary plots
-            fprintf('Here\n');
-            [current, position] = obj.getCurrent 
+            [current, position] = obj.getCurrent; 
             if isempty(current)
                 return;
-            end
-            position = position + increment;
-            
+            end           
+            position = position + increment;            
             current.buttonDownCallback(obj, [], obj.Master, position);
             position = current.getCurrentPosition();
             obj.setCurrent(current, position);
@@ -123,18 +125,20 @@ classdef navigator < handle
             fback = imread([p 'icons/fastBackward.png']);
             fforward = imread([p 'icons/fastForward.png']);
             forward = imread([p 'icons/forward.png']);
-            uipanel('Parent', obj.NavigatorPanel, 'BorderType', 'none');
+            obj.NameBox = uicontrol('Parent', obj.NavigatorPanel, ...
+                       'Style', 'text', 'BackgroundColor', obj.Background, ...
+                        'String', 'a', 'HorizontalAlignment', 'right');
             uicontrol('Parent', obj.NavigatorPanel, ...
                        'Style', 'pushbutton', 'CData', fback, ...
                        'BackgroundColor', obj.Background, ...
                        'Callback', ...
-                       {@obj.buttonDownCallback, -2});
+                       {@obj.buttonDownCallback, -inf});
             uicontrol('Parent', obj.NavigatorPanel, ...
                        'Style', 'pushbutton', 'CData', back, ...
                        'Callback', ...
                        {@obj.buttonDownCallback, -1});
-            uicontrol('Parent', obj.NavigatorPanel, 'Style', 'edit', ...
-                      'String', 'Unset');
+            obj.PositionBox = uicontrol('Parent', obj.NavigatorPanel, ...
+                       'Style', 'edit', 'String', 'Unset');
             uicontrol('Parent', obj.NavigatorPanel, ...
                       'Style', 'pushbutton', 'CData', forward, ...
                        'Callback', ...
@@ -142,7 +146,7 @@ classdef navigator < handle
             uicontrol('Parent', obj.NavigatorPanel, ...
                       'Style', 'pushbutton', 'CData', fforward, ...
                        'Callback', ...
-                       {@obj.buttonDownCallback, 2});
+                       {@obj.buttonDownCallback, inf});
             set(obj.NavigatorPanel, 'Sizes', [-1 30 30 60, 30, 30]);
          end % createLayout
     end % private methods
