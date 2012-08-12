@@ -342,6 +342,12 @@ fprintf('It should move the position marker when incremented\n');
 pause on
 for k = 1:31
     pause(0.25);
-    ip1.drawMarker(k);
+    ip1.getClicked(k);
 end
+fprintf('It should move the marker to beginning when position is -inf\n');
+pause(0.5);
+ip1.getClicked(-inf);
+fprintf('It should move the marker to end when position is inf\n');
+pause(0.5);
+ip1.getClicked(inf);
 pause off

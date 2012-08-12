@@ -205,7 +205,7 @@ classdef horizontalPanel < uiextras.Panel & visprops.configurable & ...
             s = 'empty';
             try
                 s = [pCon.getDefinition() '(parent, propMan, ''' ...
-                          pCon.getDisplayName() ''')'];
+                          pCon.getDisplayName() ''')']
                 p = eval(s);
                 if isempty(propMan)
                     return;

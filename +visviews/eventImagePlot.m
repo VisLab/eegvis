@@ -145,6 +145,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
     properties (Access = private)
         CurrentCounts = [];      % a events x clumps array of current counts
         CurrentFunction = [];    % block function that is currently displayed
+        CurrentPointer = [];     % triangle marking current position on axes
+        CurrentPosition = [];    % position of the last selected block or empty       
         CurrentSlice = [];       % current slice
         Events = [];             % events object with events 
         NumberBlocks = 0;        % number of blocks
@@ -171,38 +173,34 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 'YDir', 'reverse');
         end % eventImagePlot constructor
         
-        function [dSlice, bFunction, position] = getClicked(obj, increment)
+        function [dSlice, bFunction, position] = getClicked(obj,  cposition)
             % Clicking on the boxplot always causes plot of group of blocks
             bFunction = obj.CurrentFunction;
-            point = get(obj.MainAxes, 'CurrentPoint');
-            dSlice = obj.getClumpSlice(point(1, 1)); 
-            position = 0;
+            if isempty(cposition)
+                point = get(obj.MainAxes, 'CurrentPoint');
+                position = point(1, 1);
+            else
+                position = cposition;
+            end
+            dSlice = obj.calculateClumpSlice(position);
+            obj.drawMarker(round(obj.CurrentPosition));
+            position = obj.CurrentPosition;
         end % getClicked
         
-        function dSlice = getClumpSlice(obj, clump)
-            dSlice = [];
-            if clump <= 0 || clump >= obj.NumberClumps + 1 || ...
-                    obj.NumberClumps ~= ...      % needs to be recalculated
-                    ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
-                return;
-            end
-            clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
-            if obj.ClumpSize == 1
-                s = num2str(clump + obj.StartBlock - 1);
-            else
-                startBlock = (clump - 1)* obj.ClumpSize + obj.StartBlock; % adjust to win num
-                endBlock = min(obj.StartBlock + obj.NumberBlocks - 1, ...
-                               startBlock + obj.ClumpSize - 1);
-                s = [num2str(startBlock) ':' num2str(endBlock)];
-            end
-            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
-            elementSlice = viscore.dataSlice.rangeString( ...
-                                obj.StartElement, obj.NumberElements);
-            dSlice = viscore.dataSlice('Slices', {elementSlice, ':', s}, ...
-                'CombineMethod', obj.CombineMethod, 'CombineDim', 3, ...
-                'DimNames', names);
-        end % getClumpSlice
+        function position = getCurrentPosition(obj)
+            % Return the current position
+            position = obj.CurrentPosition;
+        end % getCurrentPosition
         
+         function name = getName(obj)
+            % Return an identifying name for this object
+            name = [num2str(obj.getObjectID()) '[' class(obj) ']'];
+            if ~isempty(obj.CurrentFunction)
+               name = [name ' ' obj.CurrentFunction.getValue(1, 'DisplayName')];
+            end
+        end % getName
+        
+
         function plot(obj, visData, bFunction, dSlice)
             % Plot the blocked data using an image
             obj.reset();
@@ -310,6 +308,36 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
     
     methods (Access = 'private')
         
+       function dSlice = calculateClumpSlice(obj, clump)
+            % Calculate slice for clump and set CurrentPosition
+            dSlice = [];
+            if clump == -inf
+                clump = 1;
+            elseif clump == inf
+                clump = obj.NumberClumps;
+            elseif clump <= 0 || clump >= obj.NumberClumps + 1 || ...
+                    obj.NumberClumps ~= ...      % needs to be recalculated
+                    ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
+                return;
+            end
+            clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
+            obj.CurrentPosition = clump;
+            if obj.ClumpSize == 1
+                s = num2str(clump + obj.StartBlock - 1);
+            else
+                startBlock = (clump - 1)* obj.ClumpSize + obj.StartBlock; % adjust to win num
+                endBlock = min(obj.StartBlock + obj.NumberBlocks - 1, ...
+                               startBlock + obj.ClumpSize - 1);
+                s = [num2str(startBlock) ':' num2str(endBlock)];
+            end
+            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
+            elementSlice = viscore.dataSlice.rangeString( ...
+                                obj.StartElement, obj.NumberElements);
+            dSlice = viscore.dataSlice('Slices', {elementSlice, ':', s}, ...
+                'CombineMethod', obj.CombineMethod, 'CombineDim', 3, ...
+                'DimNames', names);
+        end % calculateClumpSlice
+           
         function colors = createColors(obj)
             % Return the the colors for the current clumps
             counts = obj.Events.getEventCounts(obj.StartBlock, ...
@@ -337,10 +365,24 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             colors = eval([obj.Colormap '(' num2str(length(obj.ColorLevels)) ')']);
             colors = [obj.Background; colors];
             colors = colors(mask + 1, :);   
-            colors = reshape(colors, [obj.NumberEvents, obj.NumberClumps, 3]);
-            
+            colors = reshape(colors, [obj.NumberEvents, obj.NumberClumps, 3]);         
         end % createColors
         
+        function drawMarker(obj, p)
+            % Draw a triangle outside axes at position p
+            if p < 0.5
+                return;
+            end    
+            pos = getpixelposition(obj.MainAxes, false);
+            x =  p + [-0.5; 0; 0.5];
+            if isempty(obj.CurrentPointer) || ~ishandle(obj.CurrentPointer)
+                obj.CurrentPointer = fill(x, [-0.5; 0.5; -0.5], ...
+                    [1, 0, 0], 'Parent', obj.MainAxes);
+            else
+                set(obj.CurrentPointer, 'XData', x);
+            end    
+        end % drawMarker
+      
         function [xTickMarks, xTickLabels, xStringBase] = getClumpTicks(obj, clumpName)
             % Calculate the x tick marks and labels based on clumps
             if obj.NumberClumps <= 1 && obj.ClumpSize == 1

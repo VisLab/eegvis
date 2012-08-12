@@ -72,12 +72,12 @@ fprintf('It should allow callbacks to be registered for clumps of one window\n')
 bp1.registerCallbacks([]);
 
 fprintf('It should produce a correct slice for clumps of one window\n');
-dslice = bp1.getClumpSlice(1);
+dslice = bp1.getClicked(1);
 s = dslice.getParameters(3);
 assertTrue(strcmp(s{1}, '1:32'))
 assertTrue(strcmp(s{2}, ':'))
 assertTrue(strcmp(s{3}, '1'))
-dslice = bp1.getClumpSlice(31);
+dslice = bp1.getClicked(31);
 s = dslice.getParameters(3);
 assertTrue(strcmp(s{1}, '1:32'))
 assertTrue(strcmp(s{2}, ':'))
@@ -92,7 +92,7 @@ gaps = bp2.getGaps();
 bp2.reposition(gaps);
 
 fprintf('It should produce a correct slice when initial slice is empty\n');
-dslice1 = bp2.getClumpSlice(1);
+dslice1 = bp2.getClicked(1);
 s = dslice1.getParameters(3);
 assertTrue(strcmp(s{1}, '1:32'))
 assertTrue(strcmp(s{2}, ':'))
@@ -299,8 +299,8 @@ if values.deleteFigures
     delete(fig5);
 end
 
-function testGetClumpSlice(values) %#ok<DEFNU>
-%Unit test visviews.blockBoxPlot getClumpSlice
+function testGetClicked(values) %#ok<DEFNU>
+%Unit test visviews.blockBoxPlot getGetClicked
 fprintf('\nUnit tests for visviews.blockBoxPlot getClumpSlice\n')
 
 fig1 = figure('Name', 'Full range unclumped');
@@ -311,8 +311,8 @@ gaps = bp1.getGaps();
 bp1.reposition(gaps);
 
 fprintf('It should produce the correct slice when plotting full range\n');
-ds1 = bp1.getClumpSlice(1);
-ds2 = bp1.getClumpSlice(31);
+ds1 = bp1.getClicked(1);
+ds2 = bp1.getClicked(31);
 slices1 = ds1.getParameters(3);
 slices2 = ds2.getParameters(3);
 assertTrue(strcmp(slices1{1}, '1:32'));
@@ -321,14 +321,14 @@ assertTrue(strcmp(slices1{3}, '1'));
 assertTrue(strcmp(slices2{3}, '31'));
 
 fprintf('It should produce an empty slice when clump factor is out of range\n');
-ds3 = bp1.getClumpSlice(0);
+ds3 = bp1.getClicked(0);
 assertTrue(isempty(ds3));
-ds4 = bp1.getClumpSlice(32);
+ds4 = bp1.getClicked(32);
 assertTrue(isempty(ds4));
 
 fprintf('It should produce an empty slice when clump factor has changed without replotting\n');
 bp1.ClumpSize = 3;
-ds1 = bp1.getClumpSlice(1);
+ds1 = bp1.getClicked(1);
 assertTrue(isempty(ds1));
 
 
@@ -337,11 +337,11 @@ bp1.ClumpSize = 3;
 bp1.plot(values.bData, values.fun, []);
 gaps = bp1.getGaps();
 bp1.reposition(gaps);
-ds1 = bp1.getClumpSlice(1);
-ds2 = bp1.getClumpSlice(3);
-ds3 = bp1.getClumpSlice(7);
-ds4 = bp1.getClumpSlice(11);
-ds5 = bp1.getClumpSlice(12);
+ds1 = bp1.getClicked(1);
+ds2 = bp1.getClicked(3);
+ds3 = bp1.getClicked(7);
+ds4 = bp1.getClicked(11);
+ds5 = bp1.getClicked(12);
 assertTrue(isempty(ds5));
 slices1 = ds1.getParameters(3);
 slices2 = ds2.getParameters(3);
@@ -364,10 +364,10 @@ bp1.plot(values.bData, values.fun, plotSlice);
 gaps = bp1.getGaps();
 bp1.reposition(gaps);
 
-ds1 = bp1.getClumpSlice(1);
-ds2 = bp1.getClumpSlice(3);
-ds3 = bp1.getClumpSlice(4);
-ds4 = bp1.getClumpSlice(20);
+ds1 = bp1.getClicked(1);
+ds2 = bp1.getClicked(3);
+ds3 = bp1.getClicked(4);
+ds4 = bp1.getClicked(20);
 slices1 = ds1.getParameters(3);
 slices2 = ds2.getParameters(3);
 slices3 = ds3.getParameters(3);
@@ -387,10 +387,10 @@ bp1.plot(values.bData, values.fun, plotSlice);
 gaps = bp1.getGaps();
 bp1.reposition(gaps);
 
-ds1 = bp1.getClumpSlice(1);
-ds2 = bp1.getClumpSlice(3);
-ds3 = bp1.getClumpSlice(5);
-ds4 = bp1.getClumpSlice(20);
+ds1 = bp1.getClicked(1);
+ds2 = bp1.getClicked(3);
+ds3 = bp1.getClicked(5);
+ds4 = bp1.getClicked(20);
 slices1 = ds1.getParameters(3);
 slices2 = ds2.getParameters(3);
 slices3 = ds3.getParameters(3);
@@ -470,3 +470,33 @@ fprintf('It should have a getDefaultProperties method that returns a structure\n
 s = visviews.blockBoxPlot.getDefaultProperties();
 assertTrue(isa(s, 'struct'));
 
+function testBlockPtr(values) %#ok<DEFNU>
+% Unit test for visviews.blockBoxPlot position of block pointer
+fprintf('\nUnit tests for visviews.blockBoxPlot positioning of block pointer\n');
+
+fprintf('It should allow callbacks to be registers\n');
+fig1 = figure('Name', 'Clumps of one window');
+bp1 = visviews.blockBoxPlot(fig1, [], []);
+assertTrue(isvalid(bp1));
+bp1.plot(values.bData, values.fun, values.slice);
+gaps = bp1.getGaps();
+bp1.reposition(gaps + 10);
+bp1.registerCallbacks([]);
+
+fprintf('It should move the position marker when incremented\n');
+pause on
+for k = 1:31
+    pause(0.25);
+    bp1.getClicked(k);
+end
+fprintf('It should move the marker to beginning when position is -inf\n');
+pause(0.5);
+bp1.getClicked(-inf);
+fprintf('It should move the marker to end when position is inf\n');
+pause(0.5);
+bp1.getClicked(inf);
+pause off
+
+if values.deleteFigures
+    delete(fig1);
+end

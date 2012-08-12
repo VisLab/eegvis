@@ -357,3 +357,45 @@ if values.deleteFigures
    delete(fig1);
 end
 
+function testBlockPtr(values) %#ok<DEFNU>
+% Unit test for visviews.elementkBoxPlot position of block pointer
+fprintf('\nUnit tests for visviews.elementkBoxPlot positioning of block pointer\n');
+
+fprintf('It should allow callbacks to be registers\n');
+fig1 = figure('Name', 'Clumps of one window');
+ep1 = visviews.eventImagePlot(fig1, [], []);
+assertTrue(isvalid(ep1));
+testVD = viscore.blockedData(values.EEGArtifact.data, 'Artifact', ...
+    'Events', values.artifactEvents, ...
+    'SampleRate', values.EEGArtifact.srate, 'BlockSize', 1000);
+slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+    viewTestClass.getDefaultFunctionsNoSqueeze());
+fMan = viscore.dataManager();
+fMan.putObjects(defaults);
+func = fMan.getEnabledObjects('block');
+thisFunc = func{1};
+ep1.plot(testVD, thisFunc, slice1);
+gaps = ep1.getGaps();
+ep1.reposition(gaps + 10);
+ep1.registerCallbacks([]);
+
+fprintf('It should move the position marker when incremented\n');
+pause on
+for k = 1:32
+    pause(0.25);
+    ep1.getClicked(k);
+end
+fprintf('It should move the marker to beginning when position is -inf\n');
+pause(0.5);
+ep1.getClicked(-inf);
+fprintf('It should move the marker to end when position is inf\n');
+pause(0.5);
+ep1.getClicked(inf);
+pause off
+
+if values.deleteFigures
+    delete(fig1);
+end
+

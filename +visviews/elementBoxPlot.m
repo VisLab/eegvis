@@ -123,6 +123,8 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
     properties (Access = private)
         Boxplot = [];           % handle to boxplot for setting callbacks
         CurrentFunction = [];   % block function that is currently displayed
+        CurrentPointer = [];     % triangle marking current position on axes
+        CurrentPosition = [];    % position of the last selected block or empty       
         CurrentSlice = [];      % current data slice
         NumberBlocks = 1;       % number of blocks being plotted
         NumberClumps = 0;       % current number of clumps (boxplots)
@@ -144,39 +146,25 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             set(obj.MainAxes, 'YDir', 'reverse', 'Tag', 'elementBoxAxes');
         end % elementBoxPlot constructor
         
-        function [dSlice, bFunction, position] = getClicked(obj, increment)
+        function [dSlice, bFunction, position] = getClicked(obj, cposition)
             % Clicking on the boxplot always causes plot of an element
-            point = get(obj.MainAxes, 'CurrentPoint');
             bFunction = obj.CurrentFunction;
-            dSlice = obj.getClumpSlice(point(1, 2));
-            position = 0;
+            if isempty(cposition)
+                point = get(obj.MainAxes, 'CurrentPoint');
+                position = point(1, 2);
+            else
+                position = cposition;
+            end
+            dSlice = obj.calculateClumpSlice(position);
+            obj.drawMarker(round(obj.CurrentPosition));
+            position = obj.CurrentPosition;
         end % getClicked
         
-        function dSlice = getClumpSlice(obj, clump)
-            % Returns the slice corresponding to elements in clump
-            dSlice = [];
-            
-            if clump <= 0 || clump >= obj.NumberClumps + 1 || ...
-                    obj.NumberClumps ~= ...  % needs to be recalculated
-                    ceil(double(obj.NumberElements)/double(obj.ClumpSize));
-                return;
-            end
-            clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
-            if obj.ClumpSize == 1
-                s = num2str(clump + obj.StartElement - 1);
-            else
-                startElement = (clump - 1)* obj.ClumpSize + obj.StartElement; % adjust to win num
-                endElement = min(obj.StartElement + obj.NumberElements - 1, ...
-                               startElement + obj.ClumpSize - 1);
-                s = [num2str(startElement) ':' num2str(endElement)];
-            end
-            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
-            blockSlice = viscore.dataSlice.rangeString( ...
-                                         obj.StartBlock, obj.NumberBlocks);
-            dSlice = viscore.dataSlice('Slices', {s, ':', blockSlice}, ...
-                'CombineMethod', obj.CombineMethod, 'CombineDim', 1, ...
-                'DimNames', names);
-        end % getClumpSlice
+        function position = getCurrentPosition(obj)
+            % Return the current position
+            position = obj.CurrentPosition;
+        end % getCurrentPosition
+        
         
         function [cbHandles, hitHandles] = getHitObjects(obj)
             % Return handles that should register callbacks as well has hit handles
@@ -316,6 +304,51 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
     end % public methods
     
     methods (Access = private)
+        
+       function dSlice = calculateClumpSlice(obj, clump)
+            % Returns the slice corresponding to elements in clump
+            dSlice = [];
+            if clump == -inf
+                clump = 1;
+            elseif clump == inf
+                clump = obj.NumberClumps;
+            elseif clump <= 0 || clump >= obj.NumberClumps + 1 || ...
+                    obj.NumberClumps ~= ...  % needs to be recalculated
+                    ceil(double(obj.NumberElements)/double(obj.ClumpSize));
+                return;
+            end
+            clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
+            obj.CurrentPosition = clump;
+            if obj.ClumpSize == 1
+                s = num2str(clump + obj.StartElement - 1);
+            else
+                startElement = (clump - 1)* obj.ClumpSize + obj.StartElement; % adjust to win num
+                endElement = min(obj.StartElement + obj.NumberElements - 1, ...
+                               startElement + obj.ClumpSize - 1);
+                s = [num2str(startElement) ':' num2str(endElement)];
+            end
+            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
+            blockSlice = viscore.dataSlice.rangeString( ...
+                                         obj.StartBlock, obj.NumberBlocks);
+            dSlice = viscore.dataSlice('Slices', {s, ':', blockSlice}, ...
+                'CombineMethod', obj.CombineMethod, 'CombineDim', 1, ...
+                'DimNames', names);
+        end % getClumpSlice
+        
+       function drawMarker(obj, p)
+            % Draw a triangle outside axes at position p
+            if p < 0.5
+                return;
+            end
+            y =  p + [-0.5; 0; 0.5];
+            if isempty(obj.CurrentPointer) || ~ishandle(obj.CurrentPointer)
+                x = get(obj.MainAxes, 'XLim');
+                obj.CurrentPointer = fill(x(2) + [0.5, 0, 0.5], y, ...
+                    [1, 0, 0], 'Parent', obj.MainAxes);
+            else
+                set(obj.CurrentPointer, 'YData', y);
+            end
+        end % drawMarker
            
         function [yTickMarks, yTickLabels, yStringBase, xStringBase] = ...
                 getClumpTicks(obj, blockName, elementName)

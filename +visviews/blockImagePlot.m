@@ -151,75 +151,33 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
                 'YDir', 'reverse');
         end % blockImagePlot constructor
         
-        function dSlice = calculateClumpSlice(obj, clump)
-            dSlice = [];
-            if clump == -inf
-                clump = 1;
-            elseif clump == inf
-                clump = obj.NumberClumps;
-            elseif clump <= 0 || clump >= obj.NumberClumps + 1 || ...
-                    obj.NumberClumps ~= ...      % needs to be recalculated
-                    ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
-                return;
-            end
-            clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
-            obj.CurrentPosition = clump;
-            if obj.ClumpSize == 1
-                s = num2str(clump + obj.StartBlock - 1);
-            else
-                startBlock = (clump - 1)* obj.ClumpSize + obj.StartBlock; % adjust to win num
-                endBlock = min(obj.StartBlock + obj.NumberBlocks - 1, ...
-                               startBlock + obj.ClumpSize - 1);
-                s = [num2str(startBlock) ':' num2str(endBlock)];
-            end
-            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
-            elementSlice = viscore.dataSlice.rangeString( ...
-                                obj.StartElement, obj.NumberElements);
-            dSlice = viscore.dataSlice('Slices', {elementSlice, ':', s}, ...
-                'CombineMethod', obj.CombineMethod, 'CombineDim', 3, ...
-                'DimNames', names);
-        end % getClumpSlice
-        
-        function drawMarker(obj, p)
-            if p < 0.5
-                return;
-            end    
-            x =  p + [-0.5; 0; 0.5];
-            if isempty(obj.CurrentPointer)
-                obj.CurrentPointer = fill(x, [-0.5; 0.5; -0.5], ...
-                    [1, 0, 0], 'Parent', obj.MainAxes);
-            else
-                set(obj.CurrentPointer, 'XData', x);
-            end    
-        end % drawMarker
-        
         function [dSlice, bFunction, position] = getClicked(obj, cposition)
             % Clicking on the image always causes plot of group of blocks
             bFunction = obj.CurrentFunction;
             if isempty(cposition)
-              point = get(obj.MainAxes, 'CurrentPoint');
-              position = point(1, 1);
+                point = get(obj.MainAxes, 'CurrentPoint');
+                position = point(1, 1);
             else
-              position = cposition;
+                position = cposition;
             end
             dSlice = obj.calculateClumpSlice(position);
             obj.drawMarker(round(obj.CurrentPosition));
             position = obj.CurrentPosition;
         end % getClicked
+
+        function position = getCurrentPosition(obj)
+            % Return the current position
+            position = obj.CurrentPosition;
+        end % getCurrentPosition
         
-        function name = getName(obj)
+         function name = getName(obj)
             % Return an identifying name for this object
             name = [num2str(obj.getObjectID()) '[' class(obj) ']'];
             if ~isempty(obj.CurrentFunction)
                name = [name ' ' obj.CurrentFunction.getValue(1, 'DisplayName')];
             end
         end % getName
-        
-        function position = getCurrentPosition(obj)
-            % Return the current position
-            position = obj.CurrentPosition;
-        end % getCurrentPosition
-              
+           
         function plot(obj, visData, bFunction, dSlice)
             % Plot the blocked data using an image
             obj.reset();
@@ -337,7 +295,50 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
     
     methods (Access = 'private')
 
-
+        function dSlice = calculateClumpSlice(obj, clump)
+            % Calculate slice for clump and set CurrentPosition
+            dSlice = [];
+            if clump == -inf
+                clump = 1;
+            elseif clump == inf
+                clump = obj.NumberClumps;
+            elseif clump <= 0 || clump >= obj.NumberClumps + 1 || ...
+                    obj.NumberClumps ~= ...      % needs to be recalculated
+                    ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
+                return;
+            end
+            clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
+            obj.CurrentPosition = clump;
+            if obj.ClumpSize == 1
+                s = num2str(clump + obj.StartBlock - 1);
+            else
+                startBlock = (clump - 1)* obj.ClumpSize + obj.StartBlock; % adjust to win num
+                endBlock = min(obj.StartBlock + obj.NumberBlocks - 1, ...
+                               startBlock + obj.ClumpSize - 1);
+                s = [num2str(startBlock) ':' num2str(endBlock)];
+            end
+            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
+            elementSlice = viscore.dataSlice.rangeString( ...
+                                obj.StartElement, obj.NumberElements);
+            dSlice = viscore.dataSlice('Slices', {elementSlice, ':', s}, ...
+                'CombineMethod', obj.CombineMethod, 'CombineDim', 3, ...
+                'DimNames', names);
+        end % getClumpSlice
+        
+        function drawMarker(obj, p)
+            % Draw a triangle outside axes at position p
+            if p < 0.5
+                return;
+            end    
+            x =  p + [-0.5; 0; 0.5];
+            if isempty(obj.CurrentPointer) || ~ishandle(obj.CurrentPointer)
+                obj.CurrentPointer = fill(x, [-0.5; 0.5; -0.5], ...
+                    [1, 0, 0], 'Parent', obj.MainAxes);
+            else
+                set(obj.CurrentPointer, 'XData', x);
+            end    
+        end % drawMarker
+        
         function [xTickMarks, xTickLabels, xStringBase] = getClumpTicks(obj, clumpName)
             % Calculate the x tick marks and labels based on clumps
             if obj.NumberClumps <= 1 && obj.ClumpSize == 1

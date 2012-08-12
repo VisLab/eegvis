@@ -91,6 +91,7 @@ classdef tabPanel < uiextras.TabPanel & visprops.configurable & ...
 
     properties (Access = private)
         Functions = {};     % cell array of currently enabled function objects
+        Master = [];
         PlotList = {};      % list of horizontal panels (one for each tab panel)        
     end % private properties
     
@@ -184,6 +185,11 @@ classdef tabPanel < uiextras.TabPanel & visprops.configurable & ...
             obj.Functions = functions;
         end % setFunctions
         
+        function setMaster(obj, master)
+            % Set the master visualization controlling navigation
+            obj.Master = master;
+        end % setMaster
+        
         function updateProperties(obj, man)
             % Update tab panel properties as usual and store manager
             updateProperties@visprops.configurable(obj, man);
@@ -210,12 +216,10 @@ classdef tabPanel < uiextras.TabPanel & visprops.configurable & ...
     end % public methods
     
     methods(Access = private)
-        function changeTabCallback(obj, src, eventdata) %#ok<MANU,INUSD>
-%             pChild = eventdata.SelectedChild;
-%             obj.SelectedChild = pChild;
-%             %vChild = getappdata(obj.PlotList{pChild}
-%             set(obj.PlotList{pChild}, 'Units', 'normalized', 'Position', [0, 0, 1, 1]);
-%             obj.PlotList{pChild}.redraw()
+        function changeTabCallback(obj, src, eventdata)  %#ok<INUSL>
+           if eventdata.SelectedChild ~= eventdata.PreviousChild
+               obj.Master.Navigator.clear();
+           end
         end % changeRequestCallback
    end
     

@@ -350,6 +350,7 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
                 'BackgroundColor', [0.92, 0.92, 0.92]);
             obj.Navigator = visviews.navigator(mainVBox, obj);
             obj.SummaryPanel = visviews.tabPanel(mainVBox, obj.PropSelect.getManager(), []);
+            obj.SummaryPanel.setMaster(obj); % Set control for navigation
             obj.DetailPanel = visviews.verticalPanel(mainVBox, obj.PropSelect.getManager(), []);
             units = get(mainVBox, 'Units');
             set(mainVBox, 'Units', 'pixels', 'Sizes', [25, -1, -1]);

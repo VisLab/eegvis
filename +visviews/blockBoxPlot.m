@@ -5,55 +5,55 @@
 %   >>   obj = visviews.blockBoxPlot(parent, manager, key)
 %
 % Description:
-% visviews.blockBoxPlot(parent, manager, key) displays a series of 
-%    vertical box plots using a compressed style. The block box plot 
-%    displays the distribution of values of a summarizing function for 
-%    a clump of consecutive time windows or epochs for all channels. 
-%    Each window or epoch produces a single value for each element. 
-% 
+% visviews.blockBoxPlot(parent, manager, key) displays a series of
+%    vertical box plots using a compressed style. The block box plot
+%    displays the distribution of values of a summarizing function for
+%    a clump of consecutive time windows or epochs for all channels.
+%    Each window or epoch produces a single value for each element.
+%
 %    The parent is a graphics handle to the container for this plot. The
 %    manager is an viscore.dataManager object containing managed objects
 %    for the configurable properties of this object, and key is a string
 %    identifying this object in the property manager GUI.
-% 
+%
 % obj = visviews.blockBoxPlot(parent, manager, key) returns a handle to
 %    the newly created object.
 %
 % visviews.blockBoxPlot is configurable, resizable, clickable, and cursor explorable.
 %
 % Configurable properties:
-% The visviews.blockBoxPlot has five configurable properties: 
+% The visviews.blockBoxPlot has five configurable properties:
 %
-% BoxColors provides a list of colors used to alternate through in 
-%     displaying the boxes. For data with lots of clumps, the 
-%     boxes appear highly compressed due to limited viewing space and 
+% BoxColors provides a list of colors used to alternate through in
+%     displaying the boxes. For data with lots of clumps, the
+%     boxes appear highly compressed due to limited viewing space and
 %     alternating colors help users distinguish the individual boxes. The
 %     default is [0.7, 0.7, 0.7; 1, 0, 1].
 %
-% ClumpSize specifies the number of consecutive windows or epochs 
-%    represented by each box. When the |ClumpSize| is one (the default), 
-%    each box represents a single window or element. If |ClumpSize| is greater than 
-%    one, each box represents several consecutive blocks. 
-%    Users can trade-off clump size versus block size to see different 
+% ClumpSize specifies the number of consecutive windows or epochs
+%    represented by each box. When the |ClumpSize| is one (the default),
+%    each box represents a single window or element. If |ClumpSize| is greater than
+%    one, each box represents several consecutive blocks.
+%    Users can trade-off clump size versus block size to see different
 %    representations of the data.
 %
-% CombineMethod specifies how to combine multiple blocks into a 
-%    single block to determine an overall block value. The value can be 
-%   'max' (default), 'min', 'mean', 'median', or 'sum'. Detail plots use the 
-%    combined block value to determine slice colors. 
+% CombineMethod specifies how to combine multiple blocks into a
+%    single block to determine an overall block value. The value can be
+%   'max' (default), 'min', 'mean', 'median', or 'sum'. Detail plots use the
+%    combined block value to determine slice colors.
 %
-%    Suppose the plot has 128 channels, a clump size of 3, and a block size of 
-%    1000 samples, and 100 windows. A user click delivers a slice representing 
-%    3×1000 worth of data. A detail plot such as stackedSignalPlot 
-%    combines this data based on its own CombineMethod property, 
-%    say by taking the mean to plot 32×1000 data points on 32 line graphs. 
-%    However, we would like to use line colors for the signals based 
-%    on the block function values in the box plot. The detail plots use 
-%    box plot's CombineMethod to combine the blocks to get appropriate 
-%    colors for the slice. 
+%    Suppose the plot has 128 channels, a clump size of 3, and a block size of
+%    1000 samples, and 100 windows. A user click delivers a slice representing
+%    3×1000 worth of data. A detail plot such as stackedSignalPlot
+%    combines this data based on its own CombineMethod property,
+%    say by taking the mean to plot 32×1000 data points on 32 line graphs.
+%    However, we would like to use line colors for the signals based
+%    on the block function values in the box plot. The detail plots use
+%    box plot's CombineMethod to combine the blocks to get appropriate
+%    colors for the slice.
 %
-%    Usually signal plots combine signals using mean or median, while 
-%    summary plots such as blockBoxPlot use the max, although users may 
+%    Usually signal plots combine signals using mean or median, while
+%    summary plots such as blockBoxPlot use the max, although users may
 %    choose other combinations.
 %
 % IsClickable is a boolean specifying whether this plot should respond to
@@ -65,18 +65,18 @@
 %    slice. The default value is true.
 %
 %
-% Example: 
+% Example:
 % % Create a boxplot of kurtosis for EEG data
 %
 %    % Read some eeg data to display
 %    load('EEG.mat');  % Saved EEGLAB EEG data
 %    testVD = viscore.blockedData(EEG.data, 'Sample EEG data', ...
 %         'SampleRate', EEG.srate);
-%    
+%
 %    % Create a kurtosis block function object
 %    funs = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
 %               visfuncs.functionObj.getDefaultFunctions());
-%    
+%
 %    % Plot the block function, adjusting margins for display
 %    sfig = figure('Name', 'Kurtosis for EEG data');
 %    bp = visviews.blockBoxPlot(sfig, [], []);
@@ -90,7 +90,7 @@
 %   - If key is empty, the class name is used to identify in GUI configuration.
 %
 % Class documentation:
-% Execute the following in the MATLAB command window to view the class 
+% Execute the following in the MATLAB command window to view the class
 % documentation for visviews.blockBoxPlot:
 %
 %    doc visviews.blockBoxPlot
@@ -134,12 +134,14 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
     properties (Access = private)
         Boxplot = [];            % handle to boxplot for setting callbacks
         CurrentFunction = [];    % handle to block function for this
+        CurrentPointer = [];     % triangle marking current position on axes
+        CurrentPosition = [];    % position of the last selected block or empty
         CurrentSlice = [];       % current data slice
         NumberBlocks = 0;        % number of blocks being plotted
         NumberClumps = 0;        % current number of clumps (boxplots)
         NumberElements = 0;      % number of elements being plotted
         StartBlock = 1;          % starting block of currently plotted slice
-        StartElement = 1;        % starting element of currently plotted slice  
+        StartElement = 1;        % starting element of currently plotted slice
     end % private properties
     
     methods
@@ -155,39 +157,25 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             set(obj.MainAxes, 'Tag', 'blockBoxAxes');
         end % blockBoxPlot constructor
         
-        function [dSlice, bFunction, position] = getClicked(obj, increment)
+        
+        function [dSlice, bFunction, position] = getClicked(obj, cposition)
             % Clicking on the boxplot always causes plot of group of blocks
             bFunction = obj.CurrentFunction;
-            point = get(obj.MainAxes, 'CurrentPoint');
-            dSlice = obj.getClumpSlice(point(1, 1));
-            position = 0;
+            if isempty(cposition)
+                point = get(obj.MainAxes, 'CurrentPoint');
+                position = point(1, 1);
+            else
+                position = cposition;
+            end
+            dSlice = obj.calculateClumpSlice(position);
+            obj.drawMarker(round(obj.CurrentPosition));
+            position = obj.CurrentPosition;
         end % getClicked
         
-       function dSlice = getClumpSlice(obj, clump)
-            % Returns the slice corresponding to windows in clump
-            dSlice = [];
-            
-            if clump <= 0 || clump >= obj.NumberClumps + 1 || ...
-                    obj.NumberClumps ~= ...  % needs to be recalculated
-                    ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
-                return;
-            end
-            clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
-            if obj.ClumpSize == 1
-                s = num2str(clump + obj.StartBlock - 1);
-            else
-                startBlock = (clump - 1)* obj.ClumpSize + obj.StartBlock; % adjust to win num
-                endBlock = min(obj.StartBlock + obj.NumberBlocks - 1, ...
-                               startBlock + obj.ClumpSize - 1);
-                s = [num2str(startBlock) ':' num2str(endBlock)];
-            end
-            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
-            elementSlice = viscore.dataSlice.rangeString( ...
-                                obj.StartElement, obj.NumberElements);
-            dSlice = viscore.dataSlice('Slices', {elementSlice, ':', s}, ...
-                'CombineMethod', obj.CombineMethod, 'CombineDim', 3, ...
-                'DimNames', names);
-        end % getClumpSlice
+        function position = getCurrentPosition(obj)
+            % Return the current position
+            position = obj.CurrentPosition;
+        end % getCurrentPosition
         
         function [cbHandles, hitHandles] = getHitObjects(obj)
             % Return handles that should register callbacks as well has hit handles
@@ -200,6 +188,14 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             dSlice = obj.getClumpSlice(1);
         end % getInitialSourceInfo
         
+        function name = getName(obj)
+            % Return an identifying name for this object
+            name = [num2str(obj.getObjectID()) '[' class(obj) ']'];
+            if ~isempty(obj.CurrentFunction)
+               name = [name ' ' obj.CurrentFunction.getValue(1, 'DisplayName')];
+            end
+        end % getName
+        
         function plot(obj, visData, bFunction, dSlice)
             % Sets up the plot hierarchy but may not display plot
             obj.reset();
@@ -208,7 +204,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 warning('blockBoxPlot:emptyFunctionOrData', ...
                     'Missing summary function or block data for this plot');
                 return;
-            end            
+            end
             bFunction.setData(visData);
             obj.CurrentFunction = bFunction;
             if isempty(dSlice)
@@ -236,15 +232,15 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             
             % Draw the box plot
             limits = [max(limits(1), min(data(:))), min(limits(2), max(data(:)))];
-            if sum(isnan(limits)) > 0  
+            if sum(isnan(limits)) > 0
                 warning('blockBoxPlot:NaNValues', 'Block values were entirely NaN\n');
                 limits = [-0.1, 0.1];
-            elseif sum(abs(limits)) <= 10e-8 % limits were both zero 
+            elseif sum(abs(limits)) <= 10e-8 % limits were both zero
                 limits = [-0.1, 0.1];
             elseif length(data) == 1 || limits(1) == limits(2) %constant
                 limits = [limits(1)*0.9, limits(1)*1.1];
             end
-           
+            
             try  % boxplot fails if it doesn't have enough room
                 obj.Boxplot = boxplot(obj.MainAxes, ...
                     data, num2cell(groups(1:length(data))), ...
@@ -279,7 +275,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             else
                 wString = 'Window';
             end
-
+            
             yTickLabels = cellstr(get(obj.MainAxes, 'YTickLabel'));
             yTickMarks = get(obj.MainAxes, 'YTick');
             yLimits = get(obj.MainAxes, 'YLim');
@@ -296,15 +292,15 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 'YLimMode', 'manual', 'YLim', yLimits, ...
                 'YTickMode','manual', 'YTick', yTickMarks, ...
                 'YTickLabelMode', 'manual', 'YTickLabel', yTickLabels);
-         
+            
             % Set the cursor string for exploration mode
             obj.CursorString = {[wString ': ']; ...
-                [bFunction.getValue(1, 'ShortName') ': ']; };  
+                [bFunction.getValue(1, 'ShortName') ': ']; };
             obj.redraw();
         end % plot
         
         function setBackgroundColor(obj, c)
-           % Set the background color to c
+            % Set the background color to c
             obj.setBackgroundColor@visviews.axesPanel(c);
             set(obj.MainAxes, 'Color', 'none', 'Box', 'off', ...
                 'XColor', c, 'YColor', c, 'ZColor', c);
@@ -335,7 +331,52 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
     end % public methods
     
     methods (Access = 'private')
- 
+        
+        function dSlice = calculateClumpSlice(obj, clump)
+            % Calculate slice for clump and set CurrentPosition
+            dSlice = [];
+            if clump == -inf
+                clump = 1;
+            elseif clump == inf
+                clump = obj.NumberClumps;
+            elseif clump <= 0 || clump >= obj.NumberClumps + 1 || ...
+                    obj.NumberClumps ~= ...  % needs to be recalculated
+                    ceil(double(obj.NumberBlocks)/double(obj.ClumpSize));
+                return;
+            end
+            clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
+            obj.CurrentPosition = clump;
+            if obj.ClumpSize == 1
+                s = num2str(clump + obj.StartBlock - 1);
+            else
+                startBlock = (clump - 1)* obj.ClumpSize + obj.StartBlock; % adjust to win num
+                endBlock = min(obj.StartBlock + obj.NumberBlocks - 1, ...
+                    startBlock + obj.ClumpSize - 1);
+                s = [num2str(startBlock) ':' num2str(endBlock)];
+            end
+            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
+            elementSlice = viscore.dataSlice.rangeString( ...
+                obj.StartElement, obj.NumberElements);
+            dSlice = viscore.dataSlice('Slices', {elementSlice, ':', s}, ...
+                'CombineMethod', obj.CombineMethod, 'CombineDim', 3, ...
+                'DimNames', names);
+        end % calculateClumpSlice
+        
+        function drawMarker(obj, p)
+            % Draw a triangle outside axes at position p
+            if p < 0.5
+                return;
+            end
+            x =  p + [-0.5; 0; 0.5];
+            if isempty(obj.CurrentPointer) || ~ishandle(obj.CurrentPointer)
+                y = get(obj.MainAxes, 'YLim');
+                obj.CurrentPointer = fill(x, y(2) + [0.5, 0, 0.5], ...
+                    [1, 0, 0], 'Parent', obj.MainAxes);
+            else
+                set(obj.CurrentPointer, 'XData', x);
+            end
+        end % drawMarker
+        
         function [xTickMarks, xTickLabels, xStringBase] = ...
                 getClumpTicks(obj, blockName, elementName)
             % Calculate the tick marks and labels based on clumps
@@ -359,18 +400,18 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 xStringBase = [blockName 's' ...
                     num2str(obj.StartBlock) ':' ...
                     num2str(obj.StartBlock + obj.NumberBlocks -1) ...
-                    ' clumps of ' num2str(obj.ClumpSize)];                   
+                    ' clumps of ' num2str(obj.ClumpSize)];
             end
             
             % Add an indicator of which elements being plotted
             if obj.NumberElements > 1
                 xStringBase = [xStringBase ' [' elementName 's ' ...
-                num2str(obj.StartElement) ':' ...
-                num2str(obj.NumberElements + obj.StartElement - 1) ']'];
+                    num2str(obj.StartElement) ':' ...
+                    num2str(obj.NumberElements + obj.StartElement - 1) ']'];
             else
                 xStringBase = [xStringBase ' [' elementName ' ' ...
-                num2str(obj.StartElement) ']'];
-            end     
+                    num2str(obj.StartElement) ']'];
+            end
         end % getClumpTicks
         
     end % private methods
@@ -416,7 +457,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 'visprops.unsignedIntegerProperty', ... %2 blocks/clump
                 'visprops.enumeratedProperty', ... %3 method for combining clumps
                 'visprops.logicalProperty' ... %4 link to details on click
-                }, ... 
+                }, ...
                 'Editable',      {  ... % grayed out if false
                 true,               ... %1 alternating box plot colors
                 true,               ... %2 blocks/clump

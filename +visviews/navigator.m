@@ -85,6 +85,15 @@ classdef navigator < handle
             obj.createLayout(parent);
         end % constructor
         
+        
+        function clear(obj)
+            % Clear the settings of the navigator
+            obj.CurrentClickable = [];
+            obj.CurrentPosition = [];
+            set(obj.PositionBox, 'String', 'unset')
+            set(obj.NameBox, 'String', '');
+        end % clear
+        
         function [current, position] = getCurrent(obj)
             % Return the current object and position
             current = obj.CurrentClickable;
@@ -101,13 +110,13 @@ classdef navigator < handle
             end
         end % setCurrent
         
-       function buttonDownCallback (obj, src, eventdata, increment) %#ok<INUSL>
+        function buttonDownCallback (obj, src, eventdata, increment) %#ok<INUSL>
             % Callback links navigator to summary plots
-            [current, position] = obj.getCurrent; 
+            [current, position] = obj.getCurrent;
             if isempty(current)
                 return;
-            end           
-            position = position + increment;            
+            end
+            position = position + increment;
             current.buttonDownCallback(obj, [], obj.Master, position);
             position = current.getCurrentPosition();
             obj.setCurrent(current, position);
@@ -116,9 +125,9 @@ classdef navigator < handle
     end % public methods
     
     methods (Access = private)
-         function createLayout(obj, parent)
-             obj.NavigatorPanel =  uiextras.HBox('Parent', parent, ...
-                                     'BackgroundColor', [0.8, 0.8, 0.8]);
+        function createLayout(obj, parent)
+            obj.NavigatorPanel =  uiextras.HBox('Parent', parent, ...
+                'BackgroundColor', [0.8, 0.8, 0.8]);
             p = which('pop_eegvis.m');
             p = p(1:strfind(p, 'pop_eegvis.m') - 1);
             back = imread([p 'icons/backward.png']);
@@ -126,29 +135,29 @@ classdef navigator < handle
             fforward = imread([p 'icons/fastForward.png']);
             forward = imread([p 'icons/forward.png']);
             obj.NameBox = uicontrol('Parent', obj.NavigatorPanel, ...
-                       'Style', 'text', 'BackgroundColor', obj.Background, ...
-                        'String', 'a', 'HorizontalAlignment', 'right');
+                'Style', 'text', 'BackgroundColor', obj.Background, ...
+                'String', 'a', 'HorizontalAlignment', 'right');
             uicontrol('Parent', obj.NavigatorPanel, ...
-                       'Style', 'pushbutton', 'CData', fback, ...
-                       'BackgroundColor', obj.Background, ...
-                       'Callback', ...
-                       {@obj.buttonDownCallback, -inf});
+                'Style', 'pushbutton', 'CData', fback, ...
+                'BackgroundColor', obj.Background, ...
+                'Callback', ...
+                {@obj.buttonDownCallback, -inf});
             uicontrol('Parent', obj.NavigatorPanel, ...
-                       'Style', 'pushbutton', 'CData', back, ...
-                       'Callback', ...
-                       {@obj.buttonDownCallback, -1});
+                'Style', 'pushbutton', 'CData', back, ...
+                'Callback', ...
+                {@obj.buttonDownCallback, -1});
             obj.PositionBox = uicontrol('Parent', obj.NavigatorPanel, ...
-                       'Style', 'edit', 'String', 'Unset');
+                'Style', 'edit', 'String', 'Unset');
             uicontrol('Parent', obj.NavigatorPanel, ...
-                      'Style', 'pushbutton', 'CData', forward, ...
-                       'Callback', ...
-                       {@obj.buttonDownCallback,  1});
+                'Style', 'pushbutton', 'CData', forward, ...
+                'Callback', ...
+                {@obj.buttonDownCallback,  1});
             uicontrol('Parent', obj.NavigatorPanel, ...
-                      'Style', 'pushbutton', 'CData', fforward, ...
-                       'Callback', ...
-                       {@obj.buttonDownCallback, inf});
+                'Style', 'pushbutton', 'CData', fforward, ...
+                'Callback', ...
+                {@obj.buttonDownCallback, inf});
             set(obj.NavigatorPanel, 'Sizes', [-1 30 30 60, 30, 30]);
-         end % createLayout
+        end % createLayout
     end % private methods
     
 end % navigator
