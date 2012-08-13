@@ -329,13 +329,18 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
             % Draw a triangle outside axes at position p
             if p < 0.5
                 return;
-            end    
-            x =  p + [-0.5; 0; 0.5];
+            end 
+            pos = getpixelposition(obj.MainAxes, false);
+            lims = get(obj.MainAxes, {'XLim'; 'YLim'});
+            deltaX = 10*(lims{1}(2) - lims{1}(1))./pos(3);
+            deltaY = 10*(lims{2}(2) - lims{2}(1))./pos(4);
+            x = p + deltaX*[-0.5; 0; 0.5];
+            y = 0.5 + deltaY.* [-1; 0; -1];
             if isempty(obj.CurrentPointer) || ~ishandle(obj.CurrentPointer)
-                obj.CurrentPointer = fill(x, [-0.5; 0.5; -0.5], ...
+                obj.CurrentPointer = fill(x, y, ...
                     [1, 0, 0], 'Parent', obj.MainAxes);
             else
-                set(obj.CurrentPointer, 'XData', x);
+                set(obj.CurrentPointer, 'XData', x, 'YData', y);
             end    
         end % drawMarker
         

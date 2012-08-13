@@ -333,20 +333,24 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             dSlice = viscore.dataSlice('Slices', {s, ':', blockSlice}, ...
                 'CombineMethod', obj.CombineMethod, 'CombineDim', 1, ...
                 'DimNames', names);
-        end % getClumpSlice
+        end % calculateClumpSlice
         
        function drawMarker(obj, p)
             % Draw a triangle outside axes at position p
             if p < 0.5
                 return;
             end
-            y =  p + [-0.5; 0; 0.5];
+            pos = getpixelposition(obj.MainAxes, false);
+            lims = get(obj.MainAxes, {'XLim'; 'YLim'});
+            deltaX = 10*(lims{1}(2) - lims{1}(1))./pos(3);
+            deltaY = 10*(lims{2}(2) - lims{2}(1))./pos(4);
+            y = p + deltaY*[-0.5; 0; 0.5];
+            x = lims{1}(2) + deltaX.* [1; 0; 1];
             if isempty(obj.CurrentPointer) || ~ishandle(obj.CurrentPointer)
-                x = get(obj.MainAxes, 'XLim');
-                obj.CurrentPointer = fill(x(2) + [0.5, 0, 0.5], y, ...
+                obj.CurrentPointer = fill(x, y, ...
                     [1, 0, 0], 'Parent', obj.MainAxes);
             else
-                set(obj.CurrentPointer, 'YData', y);
+                set(obj.CurrentPointer, 'XData', x, 'YData', y);
             end
         end % drawMarker
            
