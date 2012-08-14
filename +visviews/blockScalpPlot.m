@@ -221,11 +221,24 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             obj.drawMarker(position);
         end % getClicked
         
+        function position = getCurrentPosition(obj)
+            % Return the current position
+            position = obj.CurrentPosition;
+        end % getCurrentPosition
+        
         function [cbHandles, hitHandles] = getHitObjects(obj)
             % Return handles that should register callbacks as well has hit handles
             cbHandles = [{obj.MainAxes, obj.HeadAxes}, obj.SliceElectrodes];
             hitHandles = [{obj.MainAxes, obj.HeadAxes}, obj.SliceElectrodes];
         end % getHitObjects
+        
+        function name = getName(obj)
+            % Return an identifying name for this object
+            name = [num2str(obj.getObjectID()) '[' class(obj) ']'];
+            if ~isempty(obj.CurrentFunction)
+               name = [name ' ' obj.CurrentFunction.getValue(1, 'DisplayName')];
+            end
+        end % getName
         
         function plot(obj, visData, bFunction, dSlice)
             % Plots the scalp map with color bar and electrodes
@@ -421,13 +434,15 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 position = 1;
             elseif cposition == inf
                 position = max(obj.ValidElements);
-            elseif isempty(cposition) && ~isempty(obj.SelectedPointer)
+            elseif isempty(cposition) && ~isempty(obj.SelectedPointer) && ...
+                ~strcmpi(class(obj.SelectedPointer), 'visviews.navigator')
                 position = str2double(get(obj.SelectedPointer, 'Tag'));
             elseif ~isempty(intersect(cposition, obj.ValidElements)) 
                 position = cposition;
             else
                 position = obj.CurrentElement;
-            end   
+            end 
+
             blockSlice = viscore.dataSlice.rangeString( ...
                       obj.StartBlock, obj.NumberBlocks);
             [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
@@ -440,13 +455,19 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
          function drawMarker(obj, p)
             % Draw a triangle outside axes at position p
             if p == obj.CurrentElement
+                obj.SelectedPointer = [];
                 return;
             end
-            if isempty(obj.SelectedPointer)
+            if isempty(obj.SelectedPointer) || ...
+               ~ishandle(obj.SelectedPointer) || ...
+               strcmpi(class(obj.SelectedPointer), 'visviews.navigator')
                 obj.SelectedPointer = findobj('Tag', num2str(p), ...
                     'Parent', obj.HeadAxes, 'Type', 'line');
             end
-            set(obj.CurrentPointer, 'Marker', '.', 'Color', obj.ElementColor);
+
+            if ~isempty(obj.CurrentPointer) && ishandle(obj.CurrentPointer)
+               set(obj.CurrentPointer, 'Marker', '.', 'Color', obj.ElementColor);
+            end
             set(obj.SelectedPointer, 'Marker', '*', 'Color', obj.SelectedColor);
             obj.CurrentPointer = obj.SelectedPointer;
             obj.SelectedPointer = [];

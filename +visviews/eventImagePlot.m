@@ -292,13 +292,10 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
             if cNum < 1 || cNum > obj.NumberClumps
                 return;
             end
-            
-            
+                 
             w = min(ceil((x - 0.5)*double(obj.ClumpSize)), obj.NumberBlocks) + obj.StartBlock - 1; 
             y = ceil(y - 0.5);
-            x = ceil(x - 0.5);
-            fprintf('%d %d\n', x, y);
-            
+            x = ceil(x - 0.5);         
             s = {[obj.CursorString{1} num2str(w)]; ...
                  [obj.CursorString{2} obj.UniqueTypes{y} '(' num2str(y) ')']; ...
                  [obj.CursorString{3} num2str(obj.CurrentCounts(y, x))]};

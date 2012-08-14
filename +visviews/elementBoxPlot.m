@@ -165,12 +165,19 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             position = obj.CurrentPosition;
         end % getCurrentPosition
         
-        
         function [cbHandles, hitHandles] = getHitObjects(obj)
             % Return handles that should register callbacks as well has hit handles
             cbHandles = {obj.MainAxes, obj.Boxplot};
             hitHandles = {obj.MainAxes, obj.Boxplot};
         end % getHitObjects
+        
+        function name = getName(obj)
+            % Return an identifying name for this object
+            name = [num2str(obj.getObjectID()) '[' class(obj) ']'];
+            if ~isempty(obj.CurrentFunction)
+               name = [name ' ' obj.CurrentFunction.getValue(1, 'DisplayName')];
+            end
+        end % getName
         
         function plot(obj, visData, bFunction, dSlice)
             % Sets up the plot hierarchy but may not display plot
@@ -337,9 +344,6 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
         
        function drawMarker(obj, p)
             % Draw a triangle outside axes at position p
-            if p < 0.5
-                return;
-            end
             pos = getpixelposition(obj.MainAxes, false);
             lims = get(obj.MainAxes, {'XLim'; 'YLim'});
             deltaX = 10*(lims{1}(2) - lims{1}(1))./pos(3);
@@ -352,7 +356,7 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             else
                 set(obj.CurrentPointer, 'XData', x, 'YData', y);
             end
-        end % drawMarker
+       end % drawMarker
            
         function [yTickMarks, yTickLabels, yStringBase, xStringBase] = ...
                 getClumpTicks(obj, blockName, elementName)

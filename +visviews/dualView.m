@@ -359,9 +359,9 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
             hToolbar = findall(obj.VisFig, 'Type', 'uitoolbar');
             p = which('pop_eegvis.m');
             p = p(1:strfind(p, 'pop_visviews.m') - 1);
-            fxIcon = imread([p 'icons/fx20LighterBlue.png']);
-            plotsIcon = imread([p 'icons/plottoolsLighterBlue.png']);
-            settingsIcon = imread([p 'icons/settingsLighterBlue.png']);
+            fxIcon = imread([p 'icons/fxConfigIcon.png']);
+            plotsIcon = imread([p 'icons/plotConfigIcon.png']);
+            settingsIcon = imread([p 'icons/settingsConfigIcon.png']);
             uipushtool(hToolbar, 'CData', fxIcon,...
                 'Separator', 'on', 'HandleVisibility','off', 'TooltipString', ...
                 'Edit functions', ...
