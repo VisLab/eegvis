@@ -161,11 +161,11 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
         function [dSlice, bFunction, position] = getClicked(obj, cposition)
             % Clicking on the boxplot always causes plot of group of blocks
             bFunction = obj.CurrentFunction;
-            if isempty(cposition)
+            if ~isempty(cposition)
+                position = cposition;
+            else
                 point = get(obj.MainAxes, 'CurrentPoint');
                 position = point(1, 1);
-            else
-                position = cposition;
             end
             dSlice = obj.calculateClumpSlice(position);
             obj.drawMarker(round(obj.CurrentPosition));

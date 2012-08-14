@@ -351,3 +351,6 @@ fprintf('It should move the marker to end when position is inf\n');
 pause(0.5);
 ip1.getClicked(inf);
 pause off
+if values.deleteFigures
+    delete(fig1);
+end

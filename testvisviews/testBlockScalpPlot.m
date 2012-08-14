@@ -22,7 +22,7 @@ function testNormalConstructor(values) %#ok<DEFNU>
 % Unit test for visviews.blockScalpPlot constructor
 fprintf('\nUnit tests for visviews.blockScalpPlot valid constructor\n');
 
-fprintf('It should construct a valid element box plot when only parent passed\n');
+fprintf('It should construct a valid scalp plot when only parent passed\n');
 fig = figure('Name', 'Empty plot');
 bp = visviews.blockScalpPlot(fig, [], []);
 assertTrue(isvalid(bp));
@@ -229,4 +229,34 @@ if values.deleteFigures
     delete(fig3);
     delete(fig4);
     delete(fig5);
+end
+
+function testBlockPtr(values) %#ok<DEFNU>
+% Unit test for visviews.blockScalpPlot position of block pointer
+fprintf('\nUnit tests for visviews.blockScalpPlot positioning of block pointer\n');
+
+fprintf('It should allow callbacks to be registers\n');
+fig1 = figure('Name', 'Clumps of one window');
+sm1 = visviews.blockScalpPlot(fig1, [], []);
+assertTrue(isvalid(sm1));
+sm1.plot(values.bData, values.fun, values.slice);
+gaps = sm1.getGaps();
+sm1.reposition(gaps);
+sm1.registerCallbacks([]);
+
+fprintf('It should move the position marker when incremented\n');
+pause on
+for k = 1:32
+    pause(0.25);
+    sm1.getClicked(k);
+end
+fprintf('It should move the marker to beginning when position is -inf\n');
+pause(0.5);
+sm1.getClicked(-inf);
+fprintf('It should move the marker to end when position is inf\n');
+pause(0.5);
+sm1.getClicked(inf);
+pause off
+if values.deleteFigures
+    delete(fig1);
 end

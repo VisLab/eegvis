@@ -74,7 +74,7 @@ classdef axesPanel < uiextras.Panel & visviews.resizable ...
  
     properties(Constant = true)
         MaximumGaps = [50, 50, 30, 30];  % largest standard borders 
-        MinimumGaps = [15, 10, 10, 15];  % smallest standard borders       
+        MinimumGaps = [15, 15, 15, 15];  % smallest standard borders       
     end % constant properties 
     
     properties

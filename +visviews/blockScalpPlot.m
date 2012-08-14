@@ -167,6 +167,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         ElementColor = [0, 0, 0];        % electrode color
         HeadColor = [0.75, 0.75, 0.75];  % color for plotting the head
         InterpolationMethod = 'v4';      % method of interpolation
+        SelectedColor = [0.75, 0.75, 0.75];
         ShowColorbar = true;             % indicates whether to show colorbar
     end % public properties
     
@@ -174,12 +175,15 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         ColorbarAxes = [];       % axis for the color bar
         CurrentElement = [];     % last valid clicked element
         CurrentFunction = [];    % handle to block function for this
+        CurrentPointer = [];     % pointer to currently selected element point
+        CurrentPosition = [];    % position of last selected element
         CurrentSlice = [];       % current data slice
         HeadAxes = []            % axis for the 
         InterpolationRadius = 0.5; % radius for extent of interpolation
         NumberBlocks = 0;        % number of blocks being plotted
         NumberElements = 0;      % number of blocks being plotted
         PlotRadius = 0.5  ;      % radius for plotting electrodes
+        SelectedPointer = [];    % temporary variable for selected element 
         SliceElectrodes = {};    % electrodes that should produce a slice
         StartBlock = 1;          % starting block of currently plotted slice
         StartElement = 1;        % starting element of currently plotted slice
@@ -207,27 +211,14 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         
         function buttonDownPreCallback (obj, src, eventdata)  %#ok<INUSD>
             % Set the current element based on the tag
-            obj.CurrentElement = str2double(get(src, 'Tag'));
-            if isempty(intersect(obj.CurrentElement, obj.ValidElements))
-                obj.CurrentElement = [];
-            end
+            obj.SelectedPointer = src; 
         end % buttonDownPreCallback
         
-        function [dSlice, bFunction, position] = getClicked(obj, increment)
+        function [dSlice, bFunction, position] = getClicked(obj, cposition)
             % Clicking on the electrodes always causes plot of an element
             bFunction = obj.CurrentFunction;
-            if isempty(obj.CurrentElement)
-                dSlice = [];
-            else
-                blockSlice = viscore.dataSlice.rangeString( ...
-                    obj.StartBlock, obj.NumberBlocks);
-                [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
-                dSlice = viscore.dataSlice('Slices', ...
-                    {num2str(obj.CurrentElement), ':', blockSlice}, ...
-                    'CombineMethod', obj.CombineMethod, 'CombineDim', 1, ...
-                    'DimNames', names);
-            end
-            position = 0;
+            [dSlice, position] = calculateSlice(obj, cposition);
+            obj.drawMarker(position);
         end % getClicked
         
         function [cbHandles, hitHandles] = getHitObjects(obj)
@@ -423,6 +414,44 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
     end % protected methods
     
     methods (Access = private)
+        
+        function  [dSlice, position] = calculateSlice(obj, cposition)
+            % Calculate the slice and position based on selection cposition
+            if cposition == -inf
+                position = 1;
+            elseif cposition == inf
+                position = max(obj.ValidElements);
+            elseif isempty(cposition) && ~isempty(obj.SelectedPointer)
+                position = str2double(get(obj.SelectedPointer, 'Tag'));
+            elseif ~isempty(intersect(cposition, obj.ValidElements)) 
+                position = cposition;
+            else
+                position = obj.CurrentElement;
+            end   
+            blockSlice = viscore.dataSlice.rangeString( ...
+                      obj.StartBlock, obj.NumberBlocks);
+            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
+            dSlice = viscore.dataSlice('Slices', ...
+                    {num2str(position), ':', blockSlice}, ...
+                    'CombineMethod', obj.CombineMethod, 'CombineDim', 1, ...
+                    'DimNames', names);
+        end % calculate the slice based on position
+        
+         function drawMarker(obj, p)
+            % Draw a triangle outside axes at position p
+            if p == obj.CurrentElement
+                return;
+            end
+            if isempty(obj.SelectedPointer)
+                obj.SelectedPointer = findobj('Tag', num2str(p), ...
+                    'Parent', obj.HeadAxes, 'Type', 'line');
+            end
+            set(obj.CurrentPointer, 'Marker', '.', 'Color', obj.ElementColor);
+            set(obj.SelectedPointer, 'Marker', '*', 'Color', obj.SelectedColor);
+            obj.CurrentPointer = obj.SelectedPointer;
+            obj.SelectedPointer = [];
+            obj.CurrentElement = p;
+        end % drawMarker
            
         function [x, y, labels, values] = ...
                 findLocations(obj, elementLocs, bValues)
