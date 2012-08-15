@@ -167,9 +167,11 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 point = get(obj.MainAxes, 'CurrentPoint');
                 position = point(1, 1);
             end
-            dSlice = obj.calculateClumpSlice(position);
-            obj.drawMarker(round(obj.CurrentPosition));
-            position = obj.CurrentPosition;
+            [dSlice, position] = obj.calculateClickedSlice(position);
+            if ~isempty(position)
+               obj.drawMarker(position);
+               obj.CurrentPosition = position;
+            end
         end % getClicked
         
         function position = getCurrentPosition(obj)
@@ -185,12 +187,12 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
         
         function [dSlice, bFunction] = getInitialSourceInfo(obj)
             bFunction = obj.CurrentFunction;
-            dSlice = obj.calculateClumpSlice(1);
+            dSlice = obj.calculateClickedSlice(1);
         end % getInitialSourceInfo
         
         function name = getName(obj)
             % Return an identifying name for this object
-            name = [num2str(obj.getObjectID()) '[' class(obj) ']'];
+            name = [num2str(obj.getObjectID()) ' [' class(obj) ']'];
             if ~isempty(obj.CurrentFunction)
                name = [name ' ' obj.CurrentFunction.getValue(1, 'DisplayName')];
             end
@@ -332,9 +334,10 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
     
     methods (Access = 'private')
         
-        function dSlice = calculateClumpSlice(obj, clump)
+        function [dSlice, position] = calculateClickedSlice(obj, clump)
             % Calculate slice for clump and set CurrentPosition
             dSlice = [];
+            position = [];
             if clump == -inf
                 clump = 1;
             elseif clump == inf
@@ -345,7 +348,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 return;
             end
             clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
-            obj.CurrentPosition = clump;
+            position = round(clump);
             if obj.ClumpSize == 1
                 s = num2str(clump + obj.StartBlock - 1);
             else
@@ -364,9 +367,6 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
         
         function drawMarker(obj, p)
             % Draw a triangle outside axes at position p
-            if p < 0.5
-                return;
-            end
             pos = getpixelposition(obj.MainAxes, false);
             lims = get(obj.MainAxes, {'XLim'; 'YLim'});
             deltaX = 10*(lims{1}(2) - lims{1}(1))./pos(3);

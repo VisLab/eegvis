@@ -266,6 +266,7 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
             obj.DetailPanel.reset(sMan, plotMan.getEnabledObjects('detail'));
             obj.mergeSource(obj.DetailPanel, false);
             obj.remapSources();
+            obj.Navigator.clear();
             
             % Plot the visualizations and adjust cursor and callbacks
             initializePlots(obj);

@@ -173,10 +173,9 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
     
     properties (Access = private)
         ColorbarAxes = [];       % axis for the color bar
-        CurrentElement = [];     % last valid clicked element
         CurrentFunction = [];    % handle to block function for this
         CurrentPointer = [];     % pointer to currently selected element point
-        CurrentPosition = [];    % position of last selected element
+        CurrentPosition = [];     % last valid clicked element
         CurrentSlice = [];       % current data slice
         HeadAxes = []            % axis for the 
         InterpolationRadius = 0.5; % radius for extent of interpolation
@@ -209,22 +208,27 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             set(obj.MainAxes, 'Tag', 'blockScalpMainAxes');
         end % blockScalpPlot constructor
         
-        function buttonDownPreCallback (obj, src, eventdata)  %#ok<INUSD>
-            % Set the current element based on the tag
-            obj.SelectedPointer = src; 
-        end % buttonDownPreCallback
+%         function buttonDownPreCallback (obj, src, eventdata)  %#ok<INUSD>
+%             % Set the current element based on the tag
+%             obj.SelectedPointer = src; 
+%         end % buttonDownPreCallback
         
-        function [dSlice, bFunction, position] = getClicked(obj, cposition)
-            % Clicking on the electrodes always causes plot of an element
-            bFunction = obj.CurrentFunction;
-            [dSlice, position] = calculateSlice(obj, cposition);
-            obj.drawMarker(position);
-        end % getClicked
+%         function [dSlice, bFunction, position] = getClicked(obj, cposition)
+%             % Clicking on the electrodes always causes plot of an element
+%             bFunction = obj.CurrentFunction;
+%             [dSlice, position] = calculateClickedSlice(obj, cposition);
+%             if ~isempty(position)
+%                obj.drawMarker(position);
+%                obj.CurrentPointer = obj.SelectedPointer;
+%                obj.SelectedPointer = [];
+%                obj.CurrentPosition = position;
+%             end
+%         end % getClicked
         
-        function position = getCurrentPosition(obj)
-            % Return the current position
-            position = obj.CurrentPosition;
-        end % getCurrentPosition
+%         function position = getCurrentPosition(obj)
+%             % Return the current position
+%             position = obj.CurrentPosition;
+%         end % getCurrentPosition
         
         function [cbHandles, hitHandles] = getHitObjects(obj)
             % Return handles that should register callbacks as well has hit handles
@@ -428,7 +432,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
     
     methods (Access = private)
         
-        function  [dSlice, position] = calculateSlice(obj, cposition)
+        function  [dSlice, position] = calculateClickedSlice(obj, cposition)
             % Calculate the slice and position based on selection cposition
             if cposition == -inf
                 position = 1;
@@ -440,7 +444,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             elseif ~isempty(intersect(cposition, obj.ValidElements)) 
                 position = cposition;
             else
-                position = obj.CurrentElement;
+                position = obj.CurrentPosition;
             end 
 
             blockSlice = viscore.dataSlice.rangeString( ...
@@ -450,28 +454,23 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                     {num2str(position), ':', blockSlice}, ...
                     'CombineMethod', obj.CombineMethod, 'CombineDim', 1, ...
                     'DimNames', names);
-        end % calculate the slice based on position
+        end % calculateClickedSlice
         
          function drawMarker(obj, p)
             % Draw a triangle outside axes at position p
-            if p == obj.CurrentElement
-                obj.SelectedPointer = [];
-                return;
-            end
             if isempty(obj.SelectedPointer) || ...
                ~ishandle(obj.SelectedPointer) || ...
                strcmpi(class(obj.SelectedPointer), 'visviews.navigator')
                 obj.SelectedPointer = findobj('Tag', num2str(p), ...
                     'Parent', obj.HeadAxes, 'Type', 'line');
             end
-
+            if isempty(obj.SelectedPointer)
+                return;
+            end
             if ~isempty(obj.CurrentPointer) && ishandle(obj.CurrentPointer)
                set(obj.CurrentPointer, 'Marker', '.', 'Color', obj.ElementColor);
             end
             set(obj.SelectedPointer, 'Marker', '*', 'Color', obj.SelectedColor);
-            obj.CurrentPointer = obj.SelectedPointer;
-            obj.SelectedPointer = [];
-            obj.CurrentElement = p;
         end % drawMarker
            
         function [x, y, labels, values] = ...

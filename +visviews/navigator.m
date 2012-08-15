@@ -102,9 +102,9 @@ classdef navigator < handle
         
         function setCurrent(obj, current, position)
             % Set the current clickable object
-            if isa(current, 'visviews.clickable')
+            if isa(current, 'visviews.clickable') && ~isempty(position)
                 obj.CurrentClickable = current;
-                obj.CurrentPosition = position;
+                obj.CurrentPosition = position;      
                 set(obj.PositionBox, 'String', num2str(position))
                 set(obj.NameBox, 'String', [current.getName() ': ']);
             end

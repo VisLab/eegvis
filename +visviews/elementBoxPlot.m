@@ -155,9 +155,11 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             else
                 position = cposition;
             end
-            dSlice = obj.calculateClumpSlice(position);
-            obj.drawMarker(round(obj.CurrentPosition));
-            position = obj.CurrentPosition;
+            [dSlice, position] = obj.calculateClickedSlice(position);
+            if ~isempty(position)
+               obj.drawMarker(position);
+               obj.CurrentPosition = position;
+            end
         end % getClicked
         
         function position = getCurrentPosition(obj)
@@ -312,9 +314,10 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
     
     methods (Access = private)
         
-       function dSlice = calculateClumpSlice(obj, clump)
+       function [dSlice, position] = calculateClickedSlice(obj, clump)
             % Returns the slice corresponding to elements in clump
             dSlice = [];
+            position = [];
             if clump == -inf
                 clump = 1;
             elseif clump == inf
@@ -325,7 +328,7 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
                 return;
             end
             clump = min(obj.NumberClumps, max(1, round(clump))); % include edges
-            obj.CurrentPosition = clump;
+            position = round(clump);
             if obj.ClumpSize == 1
                 s = num2str(clump + obj.StartElement - 1);
             else
@@ -340,7 +343,7 @@ classdef elementBoxPlot < visviews.axesPanel & visprops.configurable
             dSlice = viscore.dataSlice('Slices', {s, ':', blockSlice}, ...
                 'CombineMethod', obj.CombineMethod, 'CombineDim', 1, ...
                 'DimNames', names);
-        end % calculateClumpSlice
+        end % calculateClickedSlice
         
        function drawMarker(obj, p)
             % Draw a triangle outside axes at position p
