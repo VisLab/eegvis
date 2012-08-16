@@ -374,7 +374,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
             x = p + deltaX*[-0.5; 0; 0.5];
             y = lims{2}(2) + deltaY.* [1; 0; 1];
             if isempty(obj.CurrentPointer) || ~ishandle(obj.CurrentPointer)
-                obj.CurrentPointer = fill(x, y, ...
+                obj.CurrentPointer = fill3(x, y, [0.1; 0.1; 0.1], ...
                     [1, 0, 0], 'Parent', obj.MainAxes);
             else
                 set(obj.CurrentPointer, 'XData', x, 'YData', y);

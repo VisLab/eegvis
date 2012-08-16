@@ -208,27 +208,27 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             set(obj.MainAxes, 'Tag', 'blockScalpMainAxes');
         end % blockScalpPlot constructor
         
-%         function buttonDownPreCallback (obj, src, eventdata)  %#ok<INUSD>
-%             % Set the current element based on the tag
-%             obj.SelectedPointer = src; 
-%         end % buttonDownPreCallback
+        function buttonDownPreCallback (obj, src, eventdata)  %#ok<INUSD>
+            % Set the current element based on the tag
+            obj.SelectedPointer = src; 
+        end % buttonDownPreCallback
         
-%         function [dSlice, bFunction, position] = getClicked(obj, cposition)
-%             % Clicking on the electrodes always causes plot of an element
-%             bFunction = obj.CurrentFunction;
-%             [dSlice, position] = calculateClickedSlice(obj, cposition);
-%             if ~isempty(position)
-%                obj.drawMarker(position);
-%                obj.CurrentPointer = obj.SelectedPointer;
-%                obj.SelectedPointer = [];
-%                obj.CurrentPosition = position;
-%             end
-%         end % getClicked
+        function [dSlice, bFunction, position] = getClicked(obj, cposition)
+            % Clicking on the electrodes always causes plot of an element
+            bFunction = obj.CurrentFunction;
+            [dSlice, position] = calculateClickedSlice(obj, cposition);
+            if ~isempty(position)
+               obj.drawMarker(position);
+               obj.CurrentPointer = obj.SelectedPointer;
+               obj.SelectedPointer = [];
+               obj.CurrentPosition = position;
+            end
+        end % getClicked
         
-%         function position = getCurrentPosition(obj)
-%             % Return the current position
-%             position = obj.CurrentPosition;
-%         end % getCurrentPosition
+        function position = getCurrentPosition(obj)
+            % Return the current position
+            position = obj.CurrentPosition;
+        end % getCurrentPosition
         
         function [cbHandles, hitHandles] = getHitObjects(obj)
             % Return handles that should register callbacks as well has hit handles
@@ -238,7 +238,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         
         function name = getName(obj)
             % Return an identifying name for this object
-            name = [num2str(obj.getObjectID()) '[' class(obj) ']'];
+            name = [num2str(obj.getObjectID()) ' [' class(obj) ']'];
             if ~isempty(obj.CurrentFunction)
                name = [name ' ' obj.CurrentFunction.getValue(1, 'DisplayName')];
             end
@@ -308,15 +308,14 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             
             % Set the current axes to the head axes for plotting map
             myFigure = ancestor(obj.MainAxes, 'figure');
-            set(0, 'CurrentFigure', myFigure);    
-            set(gcf, 'CurrentAxes', obj.HeadAxes);   
-            
-            hold on
+            set(myFigure, 'CurrentAxes', obj.HeadAxes); 
+            hold (obj.HeadAxes, 'on')
             obj.plotMap(x, y, values)
             obj.plotHead();
             obj.plotElements(x, y, labels);
-            hold off
-            axis off
+            hold (obj.HeadAxes, 'off')
+            axis(obj.HeadAxes, 'off')
+            set(myFigure, 'CurrentAxes', obj.MainAxes)
             obj.redraw();
         end % plot
         
@@ -334,8 +333,8 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             end
             obj.HeadAxes = [];
      
-            myFigure = ancestor(obj.MainAxes, 'figure');
-            set(0, 'CurrentFigure', myFigure);
+            %myFigure = ancestor(obj.MainAxes, 'figure');
+            %set(0, 'CurrentFigure', myFigure);
    
            obj.HeadAxes = axes('Parent', ...
                     get(obj.MainAxes, 'Parent'), 'Tag', 'blockScalpHeadAxes', ...
@@ -588,13 +587,13 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             ringx = [[rx(:)' rx(1) ]*(rin + rwidth)  [rx(:)' rx(1)]*rin];
             ringy = [[ry(:)' ry(1) ]*(rin + rwidth)  [ry(:)' ry(1)]*rin];
             patch(ringx, ringy, 0.01*ones(size(ringx)), ...
-                obj.getBackgroundColor(), 'edgecolor', 'none'); hold on
+                obj.getBackgroundColor(), 'edgecolor', 'none'); %hold on
             
             % Plot head outline
             headx = [[rx(:)' rx(1) ]*(hin + hwidth)  [rx(:)' rx(1)]*hin];
             heady = [[ry(:)' ry(1) ]*(hin + hwidth)  [ry(:)' ry(1)]*hin];
             patch(headx, heady, ones(size(headx)), ...
-                obj.HeadColor, 'edgecolor', obj.HeadColor); hold on
+                obj.HeadColor, 'edgecolor', obj.HeadColor); %hold on
             
             % Plot ears and nose
             base  = obj.HeadRadius - 0.0046;
@@ -616,10 +615,9 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             plot3(-earX*obj.SqueezeFactor, earY*obj.SqueezeFactor,  ... % right ear
                 2*ones(size(earY)), 'Color', obj.HeadColor, 'LineWidth', 1.7)
             
-            set(gca, 'XTick', [], 'YTick', [], 'ZTick', []);
+            set(obj.HeadAxes, 'XTick', [], 'YTick', [], 'ZTick', []);
             %box on
-            set(gca, 'xlim', [-0.51 0.51]);
-            set(gca, 'ylim', [-0.51 0.51]);
+            set(obj.HeadAxes, 'xlim', [-0.51 0.51], 'ylim', [-0.51 0.51]);
         end % plotHead
         
         function plotMap(obj, x, y, values)
@@ -645,12 +643,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             
             xLin = linspace(xmin, xmax, 67);
             yLin = linspace(ymin, ymax, 67);
-            
-            % TriScatterInterp version is not implemented at this time
-%           [Xi, Yi] = meshgrid(xLin, yLin);
-%           F = TriScatteredInterp(intx', inty', intValues');
-%           Zi = F(Xi, Yi);            
-
+ 
             [Xi, Yi, Zi] = griddata(inty, intx, intValues, yLin', xLin, ...
                 obj.InterpolationMethod); %#ok<GRIDD> % interpolate
  
@@ -663,11 +656,13 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             if obj.SqueezeFactor < 0.92 && obj.PlotRadius-obj.HeadRadius > 0.05  % (size of head in axes)
                 AXHEADFAC = 1.05;     % do not leave room for external ears if head cartoon
             end
-            set(gca, ...
+            set(obj.HeadAxes, ...
                 'Xlim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC, ...
                 'Ylim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC);
-            surface(Xi' - delta/2, Yi' - delta/2, zeros(size(Zi)), ...
-                Zi', 'EdgeColor', 'none', 'FaceColor', 'flat');
+            surf(obj.HeadAxes, Xi' - delta/2, Yi' - delta/2, zeros(size(Zi)), ...
+                  Zi', 'EdgeColor', 'none', 'FaceColor', 'flat');
+%             surface(Xi' - delta/2, Yi' - delta/2, zeros(size(Zi)), ...
+%                  Zi', 'EdgeColor', 'none', 'FaceColor', 'flat');
         end % plotMap
         
     end % private methods
