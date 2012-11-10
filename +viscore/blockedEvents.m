@@ -21,10 +21,12 @@
 %
 %
 % The event order is alphabetical by default. The order is relevant for
-% the order in which events occur in the visualization. The EventOrder
-% parameter allows users to over-ride this behavior by specifying the
+% the order in which events occur in the visualization. 
+%
+% In a future implementation an EventOrder parameter will be provided
+% that allows users to over-ride this behavior by specifying the
 % types of events that should appear first (and hence are displayed more
-% prominently). Any event types not mentioned are not displayed.
+% prominently). Any event types not mentioned would not be not displayed.
 %
 % obj = viscore.blockedEvents(...) returns a handle to the newly created
 % object.
@@ -383,38 +385,45 @@ classdef blockedEvents < hgsetget
             end
             
             % Construct the events
-            types = {EEG.event.type}';
-            if ~isfield(EEG.event, 'urevent')
-                uEvents = (1:length(types))';
-            else
+            try
+                types = {EEG.event.type}';
+                % Not epoched --- just go with event latencies
+                if ~isfield(EEG, 'epoch') ||  isempty(EEG.epoch)
+                    eLatencies = double(cell2mat({EEG.event.latency}'));
+                    eventTimes = (round(eLatencies) - 1)./EEG.srate;
+                    event = struct('type', types, 'time', num2cell(eventTimes), ...
+                        'certainty', ones(length(eventTimes), 1));
+                    return;
+                end
+                
+                % Data is epoched --- assume that it has proper urevents
                 uEvents = cell2mat({EEG.event.urevent}');
-            end
-            eLatencies = double(cell2mat({EEG.urevent(uEvents).latency}'));
-            eventTimes = (round(eLatencies) - 1)./EEG.srate;
-           
-            % Now look at the epochs
-            if ~isfield(EEG,'epoch') ||  isempty(EEG.epoch) % not epoched
+                eLatencies = double(cell2mat({EEG.urevent(uEvents).latency}'));
+                eventTimes = (round(eLatencies) - 1)./EEG.srate;
+                epochList = {EEG.event.epoch}';
                 event = struct('type', types, 'time', num2cell(eventTimes), ...
-                    'certainty', ones(length(eventTimes), 1));
-                return;
-            end
-            epochList = {EEG.event.epoch}';
-            event = struct('type', types, 'time', num2cell(eventTimes), ...
-                 'certainty', ones(length(eventTimes), 1), 'block', epochList);
-            if ~isstruct(EEG) ||~isfield(EEG, 'times')
-                epochScale = (0:(length(EEG.epoch) - 1))'/EEG.srate;
-            else
-                epochScale = reshape(EEG.times, length(EEG.times), 1)./1000;
-            end
-            epochBase = epochScale(1);
-            
-            epochStarts = zeros(length(EEG.epoch), 1);
-            for k = 1:length(EEG.epoch)
-                u = EEG.event(EEG.epoch(k).event(1)).urevent;
-                epochStarts(k) = epochBase + ...
-                    (EEG.urevent(u).latency - 1)./EEG.srate - ...
-                    EEG.epoch(k).eventlatency{1}./1000;
-                epochStarts(k) = round(epochStarts(k)*EEG.srate)./EEG.srate;
+                    'certainty', ones(length(eventTimes), 1), 'block', epochList);
+                if ~isstruct(EEG) ||~isfield(EEG, 'times')
+                    epochScale = (0:(length(EEG.epoch) - 1))'/EEG.srate;
+                else
+                    epochScale = reshape(EEG.times, length(EEG.times), 1)./1000;
+                end
+                epochBase = epochScale(1);
+                
+                epochStarts = zeros(length(EEG.epoch), 1);
+                for k = 1:length(EEG.epoch)
+                    u = EEG.event(EEG.epoch(k).event(1)).urevent;
+                    epochStarts(k) = epochBase + ...
+                        (EEG.urevent(u).latency - 1)./EEG.srate - ...
+                        EEG.epoch(k).eventlatency{1}./1000;
+                    epochStarts(k) = round(epochStarts(k)*EEG.srate)./EEG.srate;
+                end
+            catch ME
+                warning('EEGVis:blockedEvents', ['[' ME.message ']' ...
+                    'Inconsistent EEG event structures --- cannot extract events']);
+                event = [];
+                epochStarts = [];
+                epochScale = [];
             end
         end  % getEpochTimes
         
