@@ -71,11 +71,19 @@ classdef configurable < hgsetget
         end % getConfigurableObjs
         
         function ID = getInternalID(obj)
-            ID = obj.ConfigObj.getInternalID();
+            if ~isempty(obj.ConfigObj) && isvalid(obj.ConfigObj)
+                ID = obj.ConfigObj.getInternalID();
+            else
+                ID = [];
+            end
         end % getInternalID
         
         function ID = getObjectID(obj)
-            ID = obj.ConfigObj.getObjectID();
+            if ~isempty(obj.ConfigObj) && isvalid(obj.ConfigObj)
+                ID = obj.ConfigObj.getObjectID();
+            else
+                ID = [];
+            end
         end % getObjectID
         
         function updateProperties(obj, man)
