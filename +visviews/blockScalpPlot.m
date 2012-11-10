@@ -333,8 +333,8 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             end
             obj.HeadAxes = [];
      
-            %myFigure = ancestor(obj.MainAxes, 'figure');
-            %set(0, 'CurrentFigure', myFigure);
+            myFigure = ancestor(obj.MainAxes, 'figure');
+            set(0, 'CurrentFigure', myFigure);
    
            obj.HeadAxes = axes('Parent', ...
                     get(obj.MainAxes, 'Parent'), 'Tag', 'blockScalpHeadAxes', ...
@@ -661,8 +661,6 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
                 'Ylim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC);
             surf(obj.HeadAxes, Xi' - delta/2, Yi' - delta/2, zeros(size(Zi)), ...
                   Zi', 'EdgeColor', 'none', 'FaceColor', 'flat');
-%             surface(Xi' - delta/2, Yi' - delta/2, zeros(size(Zi)), ...
-%                  Zi', 'EdgeColor', 'none', 'FaceColor', 'flat');
         end % plotMap
         
     end % private methods
