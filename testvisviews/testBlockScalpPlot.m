@@ -10,7 +10,8 @@ func = fMan.getEnabledObjects('block');
 values.fun = func{1};
 values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
         'DimNames', {'Channel', 'Sample', 'Window'});
-load('EEG.mat'); 
+load('EEG.mat');
+values.EEG = EEG;
 values.bData = viscore.blockedData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate, 'ElementLocations', EEG.chanlocs);    
 values.deleteFigures = false;
@@ -260,3 +261,45 @@ pause off
 if values.deleteFigures
     delete(fig1);
 end
+
+
+function testGetClicked(values) %#ok<DEFNU>
+% Unit test for visviews.blockScalpPlot getClicked
+fprintf('\nUnit tests for visviews.getClicked\n');
+
+fprintf('It should allow callbacks to be registers\n');
+fig1 = figure('Name', 'Testing click with channels');
+sm1 = visviews.blockScalpPlot(fig1, [], []);
+assertTrue(isvalid(sm1));
+sm1.plot(values.bData, values.fun, values.slice);
+gaps = sm1.getGaps();
+sm1.reposition(gaps);
+sm1.registerCallbacks([]);
+bDataNoChannels = viscore.blockedData(values.EEG.data, 'EEG', ...
+    'SampleRate', values.EEG.srate);    
+
+fig2 = figure('Name', 'Testing click with no channels channels');
+sm2 = visviews.blockScalpPlot(fig2, [], []);
+assertTrue(isvalid(sm2));
+sm2.plot(bDataNoChannels, values.fun, values.slice);
+gaps = sm2.getGaps();
+sm2.reposition(gaps);
+sm2.registerCallbacks([]);
+
+fprintf('It should produce an position and empty when clicked position is empty and channels\n');
+[s1, bf1, p1] = sm1.getClicked([]);  %#ok<ASGLU>
+assertTrue(isempty(s1));
+assertTrue(isempty(p1));
+
+fprintf('It should produce an empty slice and position when clicked position is empty and no channels\n');
+[s2, bf2, p2] = sm2.getClicked([]); %#ok<ASGLU>
+assertTrue(isempty(s2));
+assertTrue(isempty(p2));
+
+
+fprintf('It should produce an empty slice and position when clicked position is empty and no channels\n');
+[s3, bf3, p3] = sm2.getClicked(inf); %#ok<ASGLU>
+assertTrue(isempty(s3));
+assertTrue(isempty(p3));
+
+

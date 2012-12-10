@@ -175,7 +175,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         ColorbarAxes = [];       % axis for the color bar
         CurrentFunction = [];    % handle to block function for this
         CurrentPointer = [];     % pointer to currently selected element point
-        CurrentPosition = [];     % last valid clicked element
+        CurrentPosition = [];    % last valid clicked element
         CurrentSlice = [];       % current data slice
         HeadAxes = []            % axis for the 
         InterpolationRadius = 0.5; % radius for extent of interpolation
@@ -214,7 +214,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         end % buttonDownPreCallback
         
         function [dSlice, bFunction, position] = getClicked(obj, cposition)
-            % Clicking on the electrodes always causes plot of an element
+            % Clicking on the electrodes causes plot of an element
             bFunction = obj.CurrentFunction;
             [dSlice, position] = calculateClickedSlice(obj, cposition);
             if ~isempty(position)
@@ -433,7 +433,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         
         function  [dSlice, position] = calculateClickedSlice(obj, cposition)
             % Calculate the slice and position based on selection cposition
-            if isempty(cposition)
+            if isempty(cposition) || isempty(obj.ValidElements)
                 position = [];
                 dSlice = [];
                 return;

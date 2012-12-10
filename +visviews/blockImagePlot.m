@@ -154,7 +154,7 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
         function [dSlice, bFunction, position] = getClicked(obj, cposition)
             % Clicking on the image always causes plot of group of blocks
             bFunction = obj.CurrentFunction;
-            if isempty(cposition)
+            if isempty(cposition) 
                 point = get(obj.MainAxes, 'CurrentPoint');
                 position = point(1, 1);
             else

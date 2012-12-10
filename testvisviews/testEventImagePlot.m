@@ -389,10 +389,20 @@ for k = 1:32
 end
 fprintf('It should move the marker to beginning when position is -inf\n');
 pause(0.5);
-ep1.getClicked(-inf);
+[ds1, f1, p1] = ep1.getClicked(-inf); %#ok<ASGLU>
+assertElementsAlmostEqual(1, p1);
+assertTrue(~isempty(ds1));
+
 fprintf('It should move the marker to end when position is inf\n');
 pause(0.5);
+[ds2, f2, p2] = ep1.getClicked(inf); %#ok<ASGLU>
+assertElementsAlmostEqual(123, p2);
+assertTrue(~isempty(ds2));
+
+fprintf('It marker should not move when the position is empty\n');
+pause(0.5);
 ep1.getClicked(inf);
+pause off
 pause off
 
 if values.deleteFigures
