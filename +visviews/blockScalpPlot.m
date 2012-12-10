@@ -433,6 +433,11 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         
         function  [dSlice, position] = calculateClickedSlice(obj, cposition)
             % Calculate the slice and position based on selection cposition
+            if isempty(cposition)
+                position = [];
+                dSlice = [];
+                return;
+            end
             if cposition == -inf
                 position = 1;
             elseif cposition == inf
@@ -457,7 +462,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
         
          function drawMarker(obj, p)
             % Draw a triangle outside axes at position p
-            if isempty(obj.SelectedPointer) || ...
+            if isempty(p) || isnan(p) || isempty(obj.SelectedPointer) || ...
                ~ishandle(obj.SelectedPointer) || ...
                strcmpi(class(obj.SelectedPointer), 'visviews.navigator')
                 obj.SelectedPointer = findobj('Tag', num2str(p), ...
