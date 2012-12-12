@@ -387,37 +387,47 @@ classdef blockImagePlot < visviews.axesPanel & visprops.configurable
                 'Enabled',       { ... % display in property manager?
                  true,             ... %1 blocks/clump
                  true              ... %2 method for combining clumps
+                 true              ... %3 link to details on click
                 }, ...
                 'Category',      { ... % category for property
                 cName,             ... %1 blocks/clump
-                cName              ... %2 method for combining clumps
+                cName,             ... %2 method for combining clumps
+                cName              ... %3 link to details on click
                 }, ...
                 'DisplayName',   { ... % display name in property manager
                 'Clump size',      ... %1 blocks/clump
-                'Combine method'   ... %2 method for combining clumps
+                'Combine method',  ... %2 method for combining clumps
+                'Link to details'  ... %3 link to details on click
                 }, ...
                 'FieldName',     { ... % name of public property
                 'ClumpSize',       ... %1 blocks/clump
-                'CombineMethod'    ... %2 method for combining clumps
+                'CombineMethod',   ... %2 method for combining clumps
+                'LinkDetails'      ... %3 link to details on click
                 }, ...
                 'Value',         { ... % default or initial value
                 1,                 ... %1 blocks/clump        
-                'max'              ... %2 method for combining clumps
+                'max',             ... %2 method for combining clumps
+                true               ... %3 link to details on click             
                 }, ...
                 'Type',          { ...  % type of property for validation
                 'visprops.unsignedIntegerProperty', ...  %1 blocks/clump
-                'visprops.enumeratedProperty' ... %2 method for combining clumps
+                'visprops.enumeratedProperty', ... %2 method for combining clumps
+                'visprops.logicalProperty'  ... %3 link to details on click             
                 }, ...
                 'Editable',      { ... % grayed out if false
                 true,              ... %1 blocks/clump    
-                true               ... %2 method for combining clumps
+                true,              ... %2 method for combining clumps
+                true               ... %3 link to details on click                
                 }, ...
                 'Options',       { ...
                 [1, inf],          ...  %1 blocks/clump
-                {'max', 'min', 'mean', 'median', 'sum'}}, ... %2 method for combining clumps
+                {'max', 'min', 'mean', 'median', 'sum'}, ... %2 method for combining clumps
+                ''                  ... %3 link to details on click
+                }, ...
                 'Description',   {...
                 'Number of blocks grouped into a clump represented by one image pixel column', ... %1
-                'Method for combining blocks in a clump'} ... %2
+                'Method for combining blocks in a clump', ... %2
+                'If true, click causes detail plot redisplay'} ... %3 
                 );
         end % getDefaultProperties
         

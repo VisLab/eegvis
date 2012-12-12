@@ -477,7 +477,7 @@ classdef blockBoxPlot < visviews.axesPanel  & visprops.configurable
                 'Description',   {  ... % description for property manager
                 'blockBoxPlot alternating box colors (cannot be empty)', ... %1
                 'Number of blocks grouped into a clump represented by one box plot', ... %2
-                'Method for combining blocks in a clump', ... %3
+                'Method for combining blocks in a clump',      ... %3
                 'If true, click causes detail plot redisplay'} ... %4
                 );
         end % getDefaultProperties

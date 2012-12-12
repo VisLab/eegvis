@@ -430,7 +430,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                  true,             ... %3 blocks/clump
                  true,             ... %4 color levels
                  true,             ... %5 color map for image
-                 true              ... %6 method for combining clumps
+                 true,             ... %6 method for combining clumps
+                 true              ... %7 link to details on click
                  }, ...
                 'Category',      {  ... % category for property
                  cName,             ... %1 background color                 
@@ -438,7 +439,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                  cName,             ... %3 blocks/clump
                  cName,             ... %4 color levels
                  cName,             ... %5 color map for image
-                 cName              ... %6 method for combining clumps
+                 cName,             ... %6 method for combining clumps
+                 cName              ... %7 link to details on click
                  }, ...
                 'DisplayName',   {  ... % display name in property manager
                 'Background color',    ... %1 background color              
@@ -446,7 +448,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 'Clump size',          ... %3 blocks/clump
                 'Color levels',        ... %4 color levels
                 'Color map',           ... %5 color map for image
-                'Combine method'       ... %6 method for combining clumps
+                'Combine method',      ... %6 method for combining clumps
+                'Link to details'      ... %7 link to details on click
                 },    ...
                 'FieldName',     {  ... % name of public property
                 'Background',         ... %1 background color              
@@ -454,7 +457,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 'ClumpSize',          ... %3 blocks/clump
                 'ColorLevels',        ... %4 color levels
                 'Colormap',           ... %5 color map for image
-                'CombineMethod'       ... %6 method for combining clumps
+                'CombineMethod',      ... %6 method for combining clumps
+                'LinkDetails'         ... %7 link to details on click        
                 }, ...
                 'Value',         {  ... % default or initial value
                  [0.7, 0.7, 0.7],     ... %1 background color                 
@@ -462,7 +466,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                  1,                   ... %3 blocks/clump
                  [1, 2, 3],           ... %4 color levels
                 'jet',                ... %5 color map for image
-                'sum'                 ... %6 method for combining clumps
+                'sum',                ... %6 method for combining clumps
+                true,                 ... %7 link to details on click           
                 }, ...
                 'Type',          { ... % type of property for validation
                 'visprops.colorProperty',           ... %1 background color                
@@ -470,7 +475,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 'visprops.unsignedIntegerProperty', ... %3 blocks/clump
                 'visprops.vectorProperty',          ... %4 color levels
                 'visprops.enumeratedProperty',      ... %5 color map for image
-                'visprops.enumeratedProperty'       ... %6 method for combining clumps
+                'visprops.enumeratedProperty',      ... %6 method for combining clumps
+                'visprops.logicalProperty'          ... %7 link to details on click                
                 }, ...
                 'Editable',      { ... % grayed out if false
                  true,             ... %1 background color                
@@ -478,7 +484,8 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                  true,             ... %3 blocks/clump
                  true,             ... %4 color levels
                  true,             ... %5 color map for image
-                 true              ... %6 method for combining clumps
+                 true,             ... %6 method for combining clumps
+                 true              ... %7 link to details on click               
                  }, ...
                 'Options',       { ... % restrictions on input values
                 '',                ... %1 background color
@@ -488,16 +495,18 @@ classdef eventImagePlot < visviews.axesPanel & visprops.configurable
                 {'jet', 'hsv', 'hot', 'cool', 'spring', 'summer', ...
                 'autumn', 'winter', 'gray', 'bone', 'copper', ...
                 'pink', 'lines'},  ... %5 color map for image
-                {'max', 'min', 'mean', 'median', 'sum'} ...
-                                   ... %6 method for combining clumps
+                {'max', 'min', 'mean', 'median', 'sum'}, ...
+                                    ... %6 method for combining clumps
+                ''                  ... %7 link to details on click                                  
                 }, ...
                 'Description',   {... % description of property
-                'Color of pixels with no events',         ... %1  
+                'Color of pixels with no events',             ... %1  
                 'Only display events that are at least this certain', ... %2 
                 'Number of blocks grouped into a clump represented by one image pixel column', ... %3
                 'Vector of count thresholds for choosing display colors', ... %4
-                'Color map for the counts',               ... %5
-                'Method for combining blocks in a clump'  ... %6
+                'Color map for the counts',                   ... %5
+                'Method for combining blocks in a clump',     ... %6
+                'If true, click causes detail plot redisplay' ... %7                
                 } ...
                 );
         end % getDefaultProperties
