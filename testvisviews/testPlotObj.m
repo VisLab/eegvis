@@ -8,7 +8,7 @@ values = [];
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
 
-function testConstuctor(values) %#ok<DEFNU>
+function testConstuctor(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.plotObject normal constructor
 fprintf('\nUnit tests for visviews.plotObject valid constructor\n');
 

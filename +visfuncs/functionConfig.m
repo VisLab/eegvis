@@ -124,6 +124,9 @@ classdef functionConfig < viscore.tableConfig
             % Constructor - brings up GUI
             obj = obj@viscore.tableConfig(selector, title);
             if ~strcmpi(class(obj), selector.getType())
+                if ~isempty(obj.ConFig) && ishandle(obj.ConFig)
+                    delete(obj.ConFig)
+                end
                 throw(MException('functionConfig:InvalidParameters', ...
                     ['Selector must have conType ' class(obj)]));
             end

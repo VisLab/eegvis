@@ -19,7 +19,7 @@ values.bData = viscore.blockedData(EEG.data, 'EEG', ...
 values.plots = visviews.plotObj.createObjects( ...
            'visviews.plotObj', viewTestClass.getDefaultPlotsSummaryOnly(), []);
 values.man = viscore.dataManager();
-values.deleteFigures = false;
+values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test

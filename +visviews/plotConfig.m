@@ -95,6 +95,9 @@ classdef plotConfig < viscore.tableConfig
             % Constructor creates a GUI for configuring plots
             obj = obj@viscore.tableConfig(selector, title);
             if ~strcmpi(class(obj), selector.getType())
+               if ~isempty(obj.ConFig) && ishandle(obj.ConFig)
+                    delete(obj.ConFig)
+                end
                 throw(MException('plotConfig:InvalidParameters', ...
                     ['Selector must have conType ' class(obj)]));
             end

@@ -14,7 +14,7 @@ load('EEG.mat');
 values.EEG = EEG;
 values.bData = viscore.blockedData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate, 'ElementLocations', EEG.chanlocs);    
-values.deleteFigures = false;
+values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
@@ -107,10 +107,6 @@ if values.deleteFigures
     delete(fig2);
     delete(fig3);
     delete(fig4);
-    delete(fig5);
-    delete(fig6);
-    delete(fig7);
-    delete(fig8);
 end
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>
@@ -301,5 +297,11 @@ fprintf('It should produce an empty slice and position when clicked position is 
 [s3, bf3, p3] = sm2.getClicked(inf); %#ok<ASGLU>
 assertTrue(isempty(s3));
 assertTrue(isempty(p3));
+
+drawnow
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+end
 
 

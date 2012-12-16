@@ -17,7 +17,7 @@ values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
 load('EEG.mat'); 
 values.bData = viscore.blockedData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);    
-values.deleteFigures = false;
+values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test

@@ -2,7 +2,13 @@ function test_suite = testEegbrowse %#ok<STOUT>
 % Unit tests for eegbrowse
 initTestSuite;
 
-function testNormalConstructor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values.deleteFigures = true;
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testNormalConstructor(values) %#ok<DEFNU>
 % Unit test for eegbrowse constructor
 fprintf('\nUnit tests for eegbrowse valid constructor\n');
 
@@ -136,27 +142,28 @@ aname = which('eeglab');
 pos = strfind(aname, filesep);
 filePath = [aname(1:pos(end)) 'sample_data'];
 fileName = 'eeglab_data.set';
-bv16 = eegbrowse('FilePath', filePath, 'FileName', fileName, ...
+bv17 = eegbrowse('FilePath', filePath, 'FileName', fileName, ...
               'UseEEGLab', true, 'Title', 'Understands when eeglab is running');
 drawnow
-assertTrue(isvalid(bv16));
+assertTrue(isvalid(bv17));
 
-
-delete(bv);
-delete(bv1);
-delete(bv2);
-delete(bv3);
-delete(bv4);
-delete(bv5);
-delete(bv6);
-delete(bv7);
-delete(bv8);
-delete(bv9);
-delete(bv10);
-delete(bv11);
-delete(bv12);
-delete(bv13);
-delete(bv14);
-delete(bv15);
-delete(bv16);
-
+if values.deleteFigures
+    delete(bv);
+    delete(bv1);
+    delete(bv2);
+    delete(bv3);
+    delete(bv4);
+    delete(bv5);
+    delete(bv6);
+    delete(bv7);
+    delete(bv8);
+    delete(bv9);
+    delete(bv10);
+    delete(bv11);
+    delete(bv12);
+    delete(bv13);
+    delete(bv14);
+    delete(bv15);
+    delete(bv16);
+    delete(bf17);
+end

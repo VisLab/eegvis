@@ -171,7 +171,7 @@ classdef dataSelector < hgsetget
             end
             
             % Inform the configuration GUI of the change
-            if ~isempty(obj.Config)
+            if ~isempty(obj.Config) && isvalid(obj.Config) && isa(obj.Config, 'hgsetget')
                 obj.Config.setCurrentManager(manager);
             end
         end % setManager

@@ -20,7 +20,7 @@ load('EEGArtifact.mat');
 values.EEGArtifact = EEGArtifact;
 load('ArtifactEvents.mat');
 values.artifactEvents = artifactEvents;
-values.deleteFigures = false;
+values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
@@ -139,24 +139,24 @@ gaps = sp5.getGaps();
 sp5.reposition(gaps);
 
 fprintf('It should produce a plot a slice along dimension 1 with multiple elements, when epoched\n');
-slice5 = viscore.dataSlice('Slices', {'2:3', ':', '5:12'}, ...
-    'DimNames', {'Channel', 'Sample', 'Epoch'}, 'CombineDim', 1);
-fig5 = figure('Name', 'visviews.eventStackedPlot element (epochs 5-12)');
-sp5 = visviews.eventStackedPlot(fig5, [], []);
-assertTrue(isvalid(sp5));
-sp5.plot(testVD3, fun, slice5);
-gaps = sp5.getGaps();
-sp5.reposition(gaps);
-
-fprintf('It should produce a plot a slice along dimension 1 with multiple elements, when not epoched\n');
 slice6 = viscore.dataSlice('Slices', {'2:3', ':', '5:12'}, ...
     'DimNames', {'Channel', 'Sample', 'Epoch'}, 'CombineDim', 1);
-fig6 = figure('Name', 'visviews.eventStackedPlot element (windows 5-12)');
+fig6 = figure('Name', 'visviews.eventStackedPlot element (epochs 5-12)');
 sp6 = visviews.eventStackedPlot(fig6, [], []);
 assertTrue(isvalid(sp6));
-sp6.plot(testVD1, fun, slice6);
+sp6.plot(testVD3, fun, slice6);
 gaps = sp6.getGaps();
 sp6.reposition(gaps);
+
+fprintf('It should produce a plot a slice along dimension 1 with multiple elements, when not epoched\n');
+slice7 = viscore.dataSlice('Slices', {'2:3', ':', '5:12'}, ...
+    'DimNames', {'Channel', 'Sample', 'Epoch'}, 'CombineDim', 1);
+fig7 = figure('Name', 'visviews.eventStackedPlot element (windows 5-12)');
+sp7 = visviews.eventStackedPlot(fig7, [], []);
+assertTrue(isvalid(sp7));
+sp7.plot(testVD1, fun, slice7);
+gaps = sp7.getGaps();
+sp7.reposition(gaps);
 drawnow
 if values.deleteFigures
     delete(fig1);
@@ -165,6 +165,7 @@ if values.deleteFigures
     delete(fig4);
     delete(fig5);
     delete(fig6);
+    delete(fig7);
 end
 
 function testPlotWithLabeledData(values) %#ok<DEFNU>
@@ -229,6 +230,7 @@ gaps = sp4.getGaps();
 sp4.reposition(gaps);
 drawnow
 
+drawnow
 if values.deleteFigures
     delete(fig1);
     delete(fig2);
@@ -244,9 +246,9 @@ s = visviews.eventStackedPlot.getDefaultProperties();
 assertTrue(isa(s, 'struct'));
 
 fprintf('It should allow threshold to be changed through the property manager\n')
-fig = figure('Name', 'visviews.eventStackedPlot test settings structure threshold');
+fig1 = figure('Name', 'visviews.eventStackedPlot test settings structure threshold');
 spKey = 'Stacked event';
-sp = visviews.eventStackedPlot(fig, [], spKey);
+sp = visviews.eventStackedPlot(fig1, [], spKey);
 assertTrue(isvalid(sp));
 
 % check the underlying configurable object
@@ -279,13 +281,18 @@ defFuns= visfuncs.functionObj.createObjects( ...
 slice1 = viscore.dataSlice('Slices', {':', ':', '1'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 fun = defFuns{1};
-fig1 = figure('Name', 'visviews.eventStackedPlot test plot slice 1 window');
-sp1 = visviews.eventStackedPlot(fig1, [], []);
+fig2 = figure('Name', 'visviews.eventStackedPlot test plot slice 1 window');
+sp1 = visviews.eventStackedPlot(fig2, [], []);
 assertTrue(isvalid(sp1));
 sp1.plot(testVD, fun, slice1);
 gaps = sp1.getGaps();
 sp1.reposition(gaps);
 drawnow
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+end
+
 
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>

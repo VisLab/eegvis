@@ -136,29 +136,6 @@ classdef propertyConfig < hgsetget & viscore.dataConfig
             set(obj.ApplyButton, 'Enable', 'on');
         end %exitEditMode
         
-%         function s = makeConfig(obj, objList) %#ok<MANU>
-%             % Create configuration structure for the objList
-%             if isempty(objList)
-%                 s = [];
-%                 return;
-%             end
-%             
-%             s(length(objList)) = struct('CategoryModifier', '', ...
-%                 'ClassName', '', ...
-%                 'ObjectID', '', ...
-%                 'TargetClass', '', ...
-%                 'properties', '');
-%             
-%             for k = 1:length(objList)  % Only save properties of configurable objects
-%                 if isa(objList{k}, 'visprops.configurableObj')
-%                     s(k).CategoryModifier = objList{k}.CategoryModifier;
-%                     s(k).ObjectID = objList{k}.getObjectID();
-%                     s(k).ClassName = class(objList{k});
-%                     s(k).TargetClass = objList{k}.getClassName();
-%                     s(k).properties = objList{k}.getStructure();
-%                 end
-%             end
-%         end % makeConfig
         
         function mObjs = makeManagedObjs(obj, s) %#ok<MANU>
             % Create a list of managed objects from a configuration

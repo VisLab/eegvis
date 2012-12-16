@@ -2,7 +2,13 @@ function test_suite = testFunctionConfig %#ok<STOUT>
 % Unit tests for visfunc.functionConfig
 initTestSuite;
 
-function testConstructor %#ok<DEFNU>
+function values = setup %#ok<DEFNU>
+values.deleteFigures = true;
+
+function teardown(values) %#ok<INUSD,DEFNU>
+% Function executed after each test
+
+function testConstructor(values) %#ok<DEFNU>
 % Unit test for visfunc.functionConfig constructor
 fprintf('\nUnit tests for visfunc.functionConfig valid constructor\n');
 
@@ -20,11 +26,13 @@ fprintf('It should construct a valid function configuration with an empty title'
 fc2 = visfuncs.functionConfig(selector, title);
 assertTrue(isvalid(fc2));
 drawnow
-delete(fc1);
-delete(fc2);
+if values.deleteFigures
+   delete(fc1);
+   delete(fc2);
+end
 
 
-function testInvalidConstructor %#ok<DEFNU>
+function testInvalidConstructor(values) %#ok<DEFNU>
 % Unit test for visfuncs.functionConfig constructor
 fprintf('\nUnit tests for visfuncs.functionConfig invalid constructor\n');
 

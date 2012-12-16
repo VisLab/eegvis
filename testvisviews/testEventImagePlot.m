@@ -20,7 +20,7 @@ load('EEGArtifact.mat');
 values.EEGArtifact = EEGArtifact;
 load('ArtifactEvents.mat');
 values.artifactEvents = artifactEvents;
-values.deleteFigures = false;
+values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test

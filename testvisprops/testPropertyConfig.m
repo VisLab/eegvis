@@ -3,7 +3,7 @@ function test_suite = testPropertyConfig %#ok<STOUT>
 initTestSuite;
 
 function values = setup %#ok<DEFNU>
-values.deleteFigures = false;
+values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test

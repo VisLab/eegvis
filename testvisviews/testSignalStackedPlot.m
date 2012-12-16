@@ -38,7 +38,7 @@ values.fun = defFuns{1};
 
 values.slice = viscore.dataSlice('Slices', {':', ':', '1'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-values.deleteFigures = false;
+values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
