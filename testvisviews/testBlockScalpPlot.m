@@ -13,6 +13,10 @@ values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
 load('EEG.mat');
 values.EEG = EEG;
 values.bData = viscore.blockedData(EEG.data, 'EEG', ...
+    'SampleRate', EEG.srate, 'ElementLocations', EEG.chanlocs);
+values.sFrame = viscore.blockedData(EEG.data(:, 1), 'EEG', ...
+    'SampleRate', EEG.srate, 'ElementLocations', EEG.chanlocs);  
+values.sChannel = viscore.blockedData(EEG.data(:, 1), 'EEG', ...
     'SampleRate', EEG.srate, 'ElementLocations', EEG.chanlocs);    
 values.deleteFigures = true;
 
@@ -101,12 +105,23 @@ sm4.plot(values.bData, values.fun, slice4);
 gaps = sm4.getGaps();
 sm4.reposition(gaps);
 
+fprintf('It should produce a plot for a slice consisting of single frame\n');
+fig5 = figure('Name', 'Slice is single frame');
+sm5 = visviews.blockScalpPlot(fig5, [], []);
+slice5 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+assertTrue(isvalid(sm5));
+sm5.plot(values.sFrame, values.fun, slice5);
+gaps = sm5.getGaps();
+sm5.reposition(gaps);
+
 drawnow
 if values.deleteFigures
     delete(fig1);
     delete(fig2);
     delete(fig3);
     delete(fig4);
+    delete(fig5);
 end
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>
