@@ -165,5 +165,5 @@ if values.deleteFigures
     delete(bv14);
     delete(bv15);
     delete(bv16);
-    delete(bf17);
+    delete(bv17);
 end

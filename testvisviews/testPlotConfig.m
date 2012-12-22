@@ -29,7 +29,7 @@ if values.deleteFigures
     delete(fig2);
 end
 
-function testInvalidConstructor(values) %#ok<DEFNU>
+function testInvalidConstructor(values) %#ok<INUSD,DEFNU>
 % Unit test for visviews.plotConfig constructor
 fprintf('\nUnit tests for visviews.plotConfig invalid constructor\n');
 
@@ -52,9 +52,3 @@ fig4 =  @() visviews.plotConfig(sel, []);
 assertExceptionThrown(fig4, 'MATLAB:hg:set_chck:Matrix_to_string_set_check_fcn:ExpectedString');
 
 drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-end

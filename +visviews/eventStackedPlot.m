@@ -102,7 +102,7 @@
 %
 %    doc visviews.eventStackedPlot
 %
-% See also: visviews.clickable, visviews.configurable, 
+% See also: visviews.axesPanel, visviews.clickable, visviews.configurable, 
 %           visviews.eventImagePlot, visviews.resizable, and
 %           visviews.shadowSignalPlot
 %

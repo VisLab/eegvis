@@ -39,6 +39,7 @@
             </tocitem>
             <tocitem target="eegvis_functions_by_cat.html#2">Core package
                 <tocitem target="blockedData_help.html" image="HelpIcon.FUNCTION">blockedData</tocitem>
+                <tocitem target="blockedEvents_help.html" image="HelpIcon.FUNCTION">blockedEvents</tocitem>
                 <tocitem target="counter_help.html" image="HelpIcon.FUNCTION">counter</tocitem>
                 <tocitem target="dataConfig_help.html" image="HelpIcon.FUNCTION">dataConfig</tocitem>
                 <tocitem target="dataManager_help.html" image="HelpIcon.FUNCTION">dataManager</tocitem>
@@ -80,6 +81,8 @@
                 <tocitem target="cursorExplorer_help.html" image="HelpIcon.FUNCTION">cursorExplorer</tocitem>
                 <tocitem target="dualView_help.html" image="HelpIcon.FUNCTION">dualView</tocitem>
                 <tocitem target="elementBoxPlot_help.html" image="HelpIcon.FUNCTION">elementBoxPlot</tocitem> 
+                <tocitem target="eventImagePlot_help.html" image="HelpIcon.FUNCTION">eventImagePlot</tocitem>
+                <tocitem target="eventStackedPlot_help.html" image="HelpIcon.FUNCTION">eventStackedPlot</tocitem>
                 <tocitem target="horizontalPanel_help.html" image="HelpIcon.FUNCTION">horizontalPanel</tocitem>
                 <tocitem target="plotConfig_help.html" image="HelpIcon.FUNCTION">plotConfig</tocitem>
                 <tocitem target="plotObj_help.html" image="HelpIcon.FUNCTION">plotObj</tocitem>

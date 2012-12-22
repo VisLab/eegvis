@@ -17,6 +17,8 @@ scriptNames = {'eegvis_features', ...
 for k = 1:length(scriptNames)
    publish([scriptNames{k} '.m'], publish_options);
 end
+close all
+clear all
 
 %% Publish the function scripts
 baseDirectory = pwd;
@@ -33,6 +35,8 @@ topLevelScripts = { ...
 for k = 1:length(topLevelScripts)
    publish([topLevelScripts{k} '.m'], publish_options);
 end
+close all
+clear all
 
 %% Publish the function scripts
 baseDirectory = pwd;
@@ -40,6 +44,7 @@ publish_options.outputDir = baseDirectory;
 publish_options.maxHeight = 300;
 coreScripts = { ...
               'blockedData_help', ...
+              'blockedEvents_help', ...
               'counter_help', ...
               'dataConfig_help', ...
               'dataManager_help', ...
@@ -53,7 +58,8 @@ coreScripts = { ...
 for k = 1:length(coreScripts)
    publish([coreScripts{k} '.m'], publish_options);
 end
-
+close all
+clear all
 
 %% Publish the function scripts
 baseDirectory = pwd;
@@ -67,6 +73,8 @@ funcScripts = { ...
 for k = 1:length(funcScripts)
    publish([funcScripts{k} '.m'], publish_options);
 end
+close all
+clear all
 
 %% Publish the property scripts
 baseDirectory = pwd;
@@ -94,6 +102,8 @@ propertyScripts = { ...
 for k = 1:length(propertyScripts)
    publish([propertyScripts{k} '.m'], publish_options);
 end
+close all
+clear all
 
 %% Publish the visualization scripts
 baseDirectory = pwd;
@@ -126,3 +136,5 @@ viewScripts = { ...
 for k = 1:length(viewScripts)
    publish([viewScripts{k} '.m'], publish_options);
 end
+close all
+clear all

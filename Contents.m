@@ -1,5 +1,5 @@
 % EegVis Visualization Package
-% Version 1.0n Beta 10-Dec-2012
+% Version 1.0p Beta 19-Dec-2012
 %
 % Requires Statistics Toolbox.
 %
@@ -13,7 +13,7 @@
 %
 %
 % Kay A. Robbins
-% Copyright 2011-2012 The University of Texas at San Antonio
+% Copyright 2011-2013 The University of Texas at San Antonio
 
 
 

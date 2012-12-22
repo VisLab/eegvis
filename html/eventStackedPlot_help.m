@@ -1,12 +1,12 @@
-%% visviews.eventSignalPlot
+%% visviews.eventStackedPlot
 % Display stacked view of individual events
 %
 %% Syntax
-%     visviews.eventSignalPlot(parent, manager, key)
-%     obj = visviews.eventSignalPlot(parent, manager, key)
+%     visviews.eventStackedPlot(parent, manager, key)
+%     obj = visviews.eventStackedPlot(parent, manager, key)
 %
 %% Description
-% |obj = visviews.eventSignalPlot(parent, manager, key)| shows each 
+% |obj = visviews.eventStackedPlot(parent, manager, key)| shows each 
 % member of a slice of events offset vertically, with the lowest numbered 
 % member at the top and the highest number slice at the bottom. 
 % The stacked event plot shows individual events as a function of time.
@@ -24,92 +24,67 @@
 % identifying this object in the property manager GUI.
 % 
 % 
-% |obj = visviews.eventSignalPlot(parent, manager, key)| returns a handle to
+% |obj = visviews.eventStackedPlot(parent, manager, key)| returns a handle to
 % the newly created object.
 %
-% |visviews.eventSignalPlot| is configurable, resizable, and cursor explorable.
+% |visviews.eventStackedPlot| is configurable, resizable, and cursor explorable.
 %
-% The shadow signal plot changes the labeling of the horizontal axis 
-% depending on whether the display is for epoched data or not. For window 
-% slices of non-epoched data, the plot uses the sampling rate to 
-% calculate the actual time in seconds corresponding to the data. 
-% For channel slices of non-epoched data, the plot labels the horizontal 
-% axis with the duration of the slice in seconds starting from zero. 
-% For window or channel slices of epoched data, the plot labels the 
-% horizontal axis using the epoch times in ms of the samples within 
-% the epoch. The plot always labels the horizontal axis with the window 
-% number (or range of windows numbers) of the corresponding slice.
-%
-% Clicking one of the signals causes it to become the selected signal. 
-% The object displays the selected signal using a wider line and 
-% adds an indicator identifying the selected line to the label on the 
-% vertical axis. Selecting a signal causes dependent views to update 
-% their values. Unselect a signal by clicking in an empty part of 
-% the plot area.
 
 %% Configurable properties
-% The |visviews.eventSignalPlot| has seven configurable parameters: 
+% The |visviews.eventStackedPlot| has five configurable parameters: 
+%
+% |CertaintyThreshold| is a number between 0 and 1 inclusively, specifying a
+% certainty threshold for displaying events. Events whose certainty is
+% below the threshold will be ignored in the display. This feature is
+% useful for displaying computed events such as classification labels
+% because the user can choose to display only those events that are
+% likely to have happened. By defaults, events have a certainty value
+% of 1, meaning that there is not doubt that they occurred, while a
+% certainty value of 0 means that there is no certainty that they
+% occurred. Set the certainty threshold to 1 to include all events,
+% regardless of certainty. 
+%
+% |ColorCertain| is a 3-element row vector specifying the edge color 
+% for markers designating events whose certainty value is above
+% the certainty treshold.
+%
+% |ColorUncertain| is a 3-element row vector specifying the edge color 
+% for markers designating events whose certainty values is less
+% than or equal to the certainty threshold.
+%
+% |ColorSelected| is a 3-element row vector specifying the face color 
+%     for a marker designating an event that has been selected.
+%
+% |ColorUnselected| is a 3-element row vector specifying the face color 
+%     for markers designating events not currently selected.
 %
 % |CombineMethod| specifies how to combine multiple blocks 
-% when displaying a clumped slice.  The value can be 
-% |'max'|, |'min'|, |'mean'|, |'median'|, or |'none'| (the default). 
-%
-% |CutoffScore| specifies the size of the z-score cutoff for outliers. 
-%
-% |RangeType| specifies the direction of outliers from the mean. A
-% value of |'both'| (the default) indicates that outliers can occur in either direction 
-% from the mean, while |'upper'| and |'lower'| indicate outliers 
-% occur only above or below the mean, respectively.
-%
-% |RemoveMean| is a boolean flag specifiying whether to remove the 
-% the individual channel means for the data before trimming or plotting.
-%
-% |ShowMean| is a boolean flag indicating whether to show the mean signal
-% on the graph. If |true| (the default), the plot displays the signal mean 
-% as a dark gray line.
-%
-% |ShowStd| is a boolean flag indicating whether to show the standard
-% deviation of the signal on the graph. If |true| (the default), 
-% the plot displays the signal standard deviation using light gray lines
-% to mark the distance above and below the mean at each time point.
-%
-% |SignalLabel| is a string specifying the units for the y-axis.
-%
-% |TrimPercent| is a numerical value specifying the percentage of extreme
-% points to remove from the window before plotting. If the percentage is 
-% t, the largest t/2 percentage and the smallest t/2 percentage of the
-% data points are removed (over all elements or channels). The signal
-% scale is calculated relative to the trimmed signal and all of the
-% signals are clipped at the trim cutoff before plotting.
+%               when displaying a clumped slice.  The value can be 
+%               |'max'|, |'min'|, |'mean'|, |'median'|, or 
+%               |'none'| (the default). 
 %
 %% Example  
-% Create a shadow signal plot for random sinusoidal signals
+% Create a stacked event plot for EEG data
+  % Load the sample EEG structure
+  load('EEGData.mat');
+  
+  events = viscore.eventData.getEEGTimes(EEG);
+  testVD = viscore.blockedData(data, 'Rand1', 'SampleRate', EEG.srate, ...
+            'Events', events);
 
-    % Create a sinusoidal data set with random amplitude and phase 
-    nSamples = 1000;
-    nChans = 32;
-    a = repmat(10*rand(nChans, 1), 1, nSamples);
-    p = repmat(pi*rand(nChans, 1), 1, nSamples);
-    x = repmat(linspace(0, 1, nSamples), nChans, 1);
-    data = 0.01*random('normal', 0, 1, [nChans, nSamples]) + ...
-      a.*cos(2*pi*x + p);
-    data(1, :) = 2*data(1, :);  % Make first signal bigber
-    testVD = viscore.blockedData(data, 'Cosine');
+  % Create a block function and a slice
+  defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+             visfuncs.functionObj.getDefaultFunctions());
+  thisFunc = defaults{1};
+  thisSlice = viscore.dataSlice('Slices', {':', ':', '1'}, ...
+              'DimNames', {'Channel', 'Sample', 'Window'});
 
-    % Create a block function and a slice
-    defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-               visfuncs.functionObj.getDefaultFunctions());
-    thisFunc = defaults{1};
-    thisSlice = viscore.dataSlice('Slices', {':', ':', '1'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
- 
-    % Create the figure and plot the data, adjusting the margins
-    sfig = figure('Name', 'Plot with smoothed signals');
-    sp = visviews.signalShadowPlot(sfig, [], []);
-    sp.CutoffScore = 2.0;
-    sp.plot(testVD, thisFunc, thisSlice);
-    gaps = sp.getGaps();
-    sp.reposition(gaps);
+  % Create the figure and plot the data, adjusting the margins
+  sfig  = figure('Name', 'Stacked event plot for EEG');
+  sp = visviews.eventStackedPlot(sfig, [], []);
+  sp.plot(testVD, thisFunc, thisSlice);
+  gaps = sp.getGaps();
+  sp.reposition(gaps);
 
 %% Notes
 %
@@ -119,9 +94,9 @@
 %
 %% Class documentation
 % Execute the following in the MATLAB command window to view the class 
-% documentation for |visviews.eventSignalPlot|:
+% documentation for |visviews.eventStackedPlot|:
 %
-%    doc visviews.eventSignalPlot
+%    doc visviews.eventStackedPlot
 %
 
 %% See also
@@ -135,4 +110,4 @@
 %
 
 %% 
-% Copyright 2011 Kay A. Robbins, University of Texas at San Antonio
+% Copyright 2012 Kay A. Robbins, University of Texas at San Antonio

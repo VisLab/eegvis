@@ -7,10 +7,18 @@
 %
 % Description:
 % viscore.blockedEvents(event) creates an object to hold events for
-%    visualization. The event parameter is an array of structures.
+%    visualization. The event parameter is a structure array with three
+%    fields: type, time, and certainty. The type is a string or
+%    numerical value indicating the event type. The time is a double
+%    representing the time in seconds at which the event occurred. The
+%    certainty is a value between 0 and 1 indicating how certain the event
+%    is. Generally, externally recorded events will have a certainty of 1.
+%    However, events may also be computed from signal features. In this
+%    case the certainty value may be assigned from probabilities derived
+%    from an algorithm.
+%
 %    The visualization is assumed to be divided into (potentially
 %    overlapping) fixed length blocks that are used for summaries.
-%
 %
 % viscore.blockedEvents(events, 'Name1', 'Value1', ...) specifies
 %     optional name/value parameter pairs:
@@ -32,40 +40,14 @@
 % object.
 %
 % Example 1:
-% Create a blocked data object for a random array
-%   data = random('normal', 0, 1, [32, 1000, 20]);
-%   bd = viscore.blockedEvents(data);
+% Create a blocked events object for an EEGLAB EEG structure
+%   load('EEG.mat');
+%   blockTime = 1000/128;
+%   eventTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
+%   events = struct('type', {EEG.event.type}', 'time', num2cell(eventTimes), ...
+%                   'certainty', ones(length(eventTimes), 1));
+%   ed2 = viscore.blockedEvents(events, 'BlockTime', blockTime);
 %
-% Example 2:
-% Reblock a data object in blocks of 500 frames
-%   data = random('normal', 0, 1, [32, 1000, 20]);
-%   bd = viscore.blockedEvents(data, 'Normal(0, 1)');
-%   bd.reblock(500);
-%   [rows, cols, blks] = bd.getDataSize();
-%
-% Notes:
-%  - Data that is initially epoched cannot be reblocked.
-%  - An empty sampling rate implies that the data is not sampled at a fixed
-%    sampling rate. This feature will be supported in the future in a child class.
-%  - This data object has a version ID that changes each time the data
-%    is modified. The version ID enables functions to know whether
-%    to recompute their values.
-%  - The events are sorted in increasing chronological order by start times
-%
-% The event structure array should contain the following fields fields:
-%    type        a string identifying the type of event
-%    time        double time in seconds of the event  
-%    certainty  (optional) measure between 0 and 1 indicating how
-%                certain this event is (for computed events).  If omitted, 
-%                the certainty is 1
-%    blocks     (optional) number of blocks in which the event is to be
-%                placed (for epoched data)
-% The event structure array may have other fields, which are ignored.
-%
-% Notes:
-%   - the blocks field is needed windows may overlap and EEG duplicates
-%     events in overlapping blocks so times can't always be used to
-%     determine membership
 %
 % Class documentation:
 % Execute the following in the MATLAB command window to view the class
@@ -73,7 +55,8 @@
 %
 %    doc viscore.blockedEvents
 %
-% See also: viscore.blockData
+% See also: viscore.blockedData, visviews.eventImagePlot, and
+% visviews.eventStackedPlot
 %
 
 %1234567890123456789012345678901234567890123456789012345678901234567890

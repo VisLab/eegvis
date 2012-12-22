@@ -3,7 +3,7 @@
 %
 %% Syntax
 %     visviews.eventImagePlot(parent, manager, key)
-%     obj = visviews.blockImabePlot(parent, manager, key)
+%     obj = visviews.eventImagePlot(parent, manager, key)
 %
 %% Description
 % |visviews.eventImagePlot(parent, manager, key)| displays the 
