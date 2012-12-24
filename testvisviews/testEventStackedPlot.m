@@ -15,11 +15,6 @@ values.random = random('exp', 2, [32, 1000, 20]);
 
 load('EEGEpoch.mat'); 
 values.EEGEpoch = EEGEpoch;
-
-load('EEGArtifact.mat');
-values.EEGArtifact = EEGArtifact;
-load('ArtifactEvents.mat');
-values.artifactEvents = artifactEvents;
 values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
@@ -172,8 +167,8 @@ function testPlotWithLabeledData(values) %#ok<DEFNU>
 % Unit test visviews.eventStackedPlot plot with labeled data
 fprintf('\nUnit tests for visviews.eventStackedPlot plot method with labeled data\n')
 
-testVD1 = viscore.blockedData(values.EEGArtifact.data, 'EEG Artifact', ...
-    'SampleRate', values.EEGArtifact.srate, 'Events', values.artifactEvents);
+testVD1 = viscore.blockedData(values.EEG.data, 'EEG', ...
+    'SampleRate', values.EEG.srate, 'Events', values.event);
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
@@ -191,7 +186,7 @@ drawnow
 fprintf('It should allow callbacks to be registered\n')
 sp1.registerCallbacks([]);
 
-bstart = 1000/values.EEGArtifact.srate;
+bstart = 1000/values.EEG.srate;
 bend = 5*bstart;
 fprintf(['It should produce a plot of artifacts for a slice along dimension 3 with 4 blocks \n' ...
     '..... time scale should be ' num2str(bstart) ' to ' num2str(bend) '\n'] );

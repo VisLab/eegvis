@@ -57,13 +57,13 @@
 %
 %% Example 1
 % Create a viewer to show some data
-
+                                           % Sample EEG dataset
    data = random('exp', 2, [32, 1000, 20]); % Create some random data
    visviews.dualView('VisData', data); % View the data
 
 %% Example 2
 % Create a viewer and then set it to show some data
-
+   
    bv = visviews.dualView();                % Create an empty viewer
    data = random('exp', 2, [32, 1000, 20]);
    testData = viscore.blockedData(data, 'Random exponential 32x1000x20');
@@ -72,12 +72,24 @@
 
 %% Example 3
 % Create a viewer with only one tab
-
    f = visviews.dualView.getDefaultFunctions();
    data = random('normal', 0, 2, [32, 1000, 20]);
    testData = viscore.blockedData(data, 'Random normal 32x1000x20');
    bv = visviews.dualView('VisData', testData, 'Functions', f(1)); 
+
    
+%% Example 4
+% Create a viewer with only one tab
+    pS = visviews.dualView.getDefaultPlots();
+    pS(2).Enabled = false;      % disable the element box plot
+    pS(5).Enabled = true;       % enable the scalp map plot
+    pS(9).Enabled = true;       % enable the signal shadow plot
+    pS(10).Enabled = false;     % disable the signal stacked plot
+    load('EEG.mat');            % load a sample EEG structure with channels set
+    testData = viscore.blockedData(EEG.data, 'Shows block scalp plot', ...
+              'SampleRate', EEG.srate, 'ElementLocations', EEG.chanlocs);
+    bv = visviews.dualView('VisData', testData, 'Plots', pS');
+
 %% Notes
 %
 % * Many summaries supported by this viewer are window or epoch oriented.

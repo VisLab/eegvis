@@ -66,10 +66,10 @@
 %% Example  
 % Create a stacked event plot for EEG data
   % Load the sample EEG structure
-  load('EEGData.mat');
+  load('EEG.mat');
   
-  events = viscore.eventData.getEEGTimes(EEG);
-  testVD = viscore.blockedData(data, 'Rand1', 'SampleRate', EEG.srate, ...
+  events = viscore.blockedEvents.getEEGTimes(EEG);
+  testVD = viscore.blockedData(EEG.data, 'Sample data', 'SampleRate', EEG.srate, ...
             'Events', events);
 
   % Create a block function and a slice

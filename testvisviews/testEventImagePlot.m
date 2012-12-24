@@ -15,11 +15,6 @@ values.random = random('exp', 2, [32, 1000, 20]);
 
 load('EEGEpoch.mat'); 
 values.EEGEpoch = EEGEpoch;
-
-load('EEGArtifact.mat'); 
-values.EEGArtifact = EEGArtifact;
-load('ArtifactEvents.mat');
-values.artifactEvents = artifactEvents;
 values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
@@ -199,23 +194,7 @@ ep11.plot(testVD, thisFunc, slice11);
 gaps = ep11.getGaps();
 ep11.reposition(gaps);
 
-fprintf('It should plot the artifact data with labeled data\n');
-fig12 = figure('Name', 'Artifact plot');
-ep12 = visviews.eventImagePlot(fig12, [], []);
-assertTrue(isvalid(ep12));
 
-testVD12 = viscore.blockedData(values.EEGArtifact.data, 'Artifact', ...
-    'Events', values.artifactEvents, ...
-    'SampleRate', values.EEGArtifact.srate, 'BlockSize', 1000);
-numBlocks = ceil(size(values.EEGArtifact.data, 2)/1000);
-ev12 = testVD12.getEvents();
-counts = ev12.getEventCounts(1, numBlocks, 0);
-assertVectorsAlmostEqual(size(counts), ...
-    [length(ev12.getUniqueTypes()) + 1, numBlocks]);
-ep12.plot(testVD12, thisFunc, slice1);
-gaps = ep12.getGaps();
-ep12.reposition(gaps);
-drawnow
 if values.deleteFigures
     delete(fig1);
     delete(fig2);
@@ -228,7 +207,6 @@ if values.deleteFigures
     delete(fig9);
     delete(fig10);
     delete(fig11);
-    delete(fig12);
 end
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>
@@ -358,16 +336,16 @@ if values.deleteFigures
 end
 
 function testBlockPtr(values) %#ok<DEFNU>
-% Unit test for visviews.elementkBoxPlot position of block pointer
-fprintf('\nUnit tests for visviews.elementkBoxPlot positioning of block pointer\n');
+% Unit test for visviews.eventImagePlot position of block pointer
+fprintf('\nUnit tests for visviews.eventImagePlot positioning of block pointer\n');
 
-fprintf('It should allow callbacks to be registers\n');
+fprintf('It should allow callbacks to be registered\n');
 fig1 = figure('Name', 'Clumps of one window');
 ep1 = visviews.eventImagePlot(fig1, [], []);
 assertTrue(isvalid(ep1));
-testVD = viscore.blockedData(values.EEGArtifact.data, 'Artifact', ...
-    'Events', values.artifactEvents, ...
-    'SampleRate', values.EEGArtifact.srate, 'BlockSize', 1000);
+testVD = viscore.blockedData(values.EEG.data, 'EEG', ...
+    'Events', values.event, ...
+    'SampleRate', values.EEG.srate, 'BlockSize', 1000);
 slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
@@ -396,7 +374,7 @@ assertTrue(~isempty(ds1));
 fprintf('It should move the marker to end when position is inf\n');
 pause(0.5);
 [ds2, f2, p2] = ep1.getClicked(inf); %#ok<ASGLU>
-assertElementsAlmostEqual(123, p2);
+assertElementsAlmostEqual(31, p2);
 assertTrue(~isempty(ds2));
 
 fprintf('It marker should not move when the position is empty\n');

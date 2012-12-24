@@ -15,11 +15,6 @@ values.random = random('exp', 2, [32, 1000, 20]);
 
 load('EEGEpoch.mat');
 values.EEGEpoch = EEGEpoch;
-
-load('EEGArtifact.mat');
-values.EEGArtifact = EEGArtifact;
-load('ArtifactEvents.mat');
-values.artifactEvents = artifactEvents;
 values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
@@ -325,41 +320,18 @@ bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
 assertTrue(isvalid(bv1));
 drawnow
 
-fprintf('It should produce a valid figure for artifacts with VEP events\n');
-pS = viewTestClass.getDefaultPlotsWithEvents();
-assertEqual(length(pS), 10);
-events = viscore.blockedEvents.getEEGTimes(values.EEGArtifact);
-testVD2 = viscore.blockedData(values.EEGArtifact.data, ...
-    'Artifact (VEP events)', 'Events', events, ...
-    'BlockSize', 1000, 'SampleRate', values.EEGArtifact.srate);
-bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
-assertTrue(isvalid(bv2));
-drawnow
-
-fprintf('It should produce a valid figure for artifacts with artifact events\n');
-pS = viewTestClass.getDefaultPlotsWithEvents();
-assertEqual(length(pS), 10);
-testVD3 = viscore.blockedData(values.EEGArtifact.data, ...
-    'Artifact (Artifact events)', 'Events', values.artifactEvents, ...
-    'BlockSize', 1000, 'SampleRate', values.EEGArtifact.srate);
-bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
-assertTrue(isvalid(bv3));
-drawnow
-
 fprintf('It should produce a valid figure for epoched data\n');
 pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
 [events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
-testVD4 = viscore.blockedData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
+testVD2 = viscore.blockedData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
     'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
     'BlockTimeScale', escales, 'Epoched', true);
-bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
-assertTrue(isvalid(bv4));
+bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
+assertTrue(isvalid(bv2));
 drawnow
 
 if values.deleteFigures
    delete(bv1)
    delete(bv2)
-   delete(bv3)
-   delete(bv4)
 end

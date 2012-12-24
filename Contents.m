@@ -1,5 +1,5 @@
 % EegVis Visualization Package
-% Version 1.0p Beta 19-Dec-2012
+% Version 1.0q Beta 19-Dec-2012
 %
 % Requires Statistics Toolbox.
 %
