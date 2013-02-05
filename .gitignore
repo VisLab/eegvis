@@ -1,6 +1,7 @@
 *.asv
 
-
+*.mat
+*.set
 *.html
 !index.html
 !functionsByCategoryIndex.html
