@@ -1,5 +1,5 @@
 % +visfuncs
-% Version 1.0q Beta 19-Dec-2012
+% Version 1.0r Beta 26-Jan-2013
 %
 % Files
 %   functionConfig - visfuncs.functionConfig  GUI for function configuration

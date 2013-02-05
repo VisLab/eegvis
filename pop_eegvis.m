@@ -13,7 +13,7 @@
 %
 % Notes:
 %  -  pop_eegvis() is meant to be used as the callback for a visualizate
-%     item under the the EEGLAB Plot menu. It is a singleton and clicking
+%     item under the EEGLAB Plot menu. It is a singleton and clicking
 %     the menu item again will not create a new window if one already
 %     exists.
 % 

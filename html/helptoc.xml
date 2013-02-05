@@ -111,7 +111,7 @@
         <!-- Optional link or links to your or other Web sites -->
         <tocitem target="http://visual.cs.utsa.edu/eegvis" 
                  image="$toolbox/matlab/icons/webicon.gif">
-        EegVis Toobox Home page
+        EegVis Toolbox Home page
         </tocitem>
     </tocitem>
 </toc>
