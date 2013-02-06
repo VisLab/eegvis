@@ -3,6 +3,7 @@
 *.mat
 *.set
 *.html
+testdata/*
 !index.html
 !functionsByCategoryIndex.html
 

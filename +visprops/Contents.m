@@ -1,5 +1,5 @@
 % +visprops
-% Version 1.0r Beta 26-Jan-2013
+% Version 1.0s Beta 06-Feb-2013
 %
 % Files
 %   colorListProperty       - visprops.colorListProperty property representing a list of colors 

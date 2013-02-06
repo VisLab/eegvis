@@ -1,5 +1,5 @@
 % +visviews
-% Version 1.0r Beta 26-Jan-2013
+% Version 1.0s Beta 06-Feb-2013
 %
 % Files
 %   axesPanel           - visviews.axesPanel base class for an axes with fixed margins
