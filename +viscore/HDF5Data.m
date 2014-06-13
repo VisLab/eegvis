@@ -28,7 +28,7 @@
 %   'BlockTimeScale'   times corresponding to block samples
 %   'ElementLocations' structure of element (channel) locations
 %   'Epoched'          if true, data is epoched and can't be reblocked
-%   'Events'           blockedEvents object if this data has events 
+%   'Events'           blockedEvents object if this data has events
 %   'PadValue'         numeric value to pad uneven blocks (defaults to 0)
 %   'SampleRate'       sampling rate in Hz for data (defaults to 1)
 %
@@ -61,12 +61,12 @@
 % The ElementLocations structure follows the standard EEGLAB chanlocs
 % structure with the following fields:
 %    theta    polar coordinates theta for flattened scalp
-%    radius   polar-coordinate radii (arc_lengths) for flattened scalp 
+%    radius   polar-coordinate radii (arc_lengths) for flattened scalp
 %    labels   short label of element name
 %    X        x coordinate of element location (nose is +X direction)
 %    Y        y coordinate of element location
 %    Z        z coordinate of element location
-%  
+%
 %
 %
 % Class documentation:
@@ -102,23 +102,24 @@
 %
 
 classdef HDF5Data < hgsetget
-
+    
     properties (Access = private)
-        BlockDim              % dimension used for reblocking (default 2)
-        BlockSize = [];       % window size to use when data is reshaped
-        BlockStartTimes = []  % start times of blocks in seconds
-        BlockTimeScale = [];  % time offsets in seconds for block samples
-        Data;                 % 2D or 3D array of data, first dim for elements
+%         BlockDim              % dimension used for reblocking (default 2)
+%         BlockSize = [];       % window size to use when data is reshaped
+%         BlockStartTimes = []  % start times of blocks in seconds
+%         BlockTimeScale = [];  % time offsets in seconds for block samples
+%         Data;                 % 2D or 3D array of data, first dim for elements
         DataID                % ID of the data contained in this object
-        ElementLocations = [];% element locations structure with ElementFields
-        Epoched;              % true if the data is epoched
-        Events;               % blockedEvent object if this object has events
-        OriginalMean;         % overall mean of data set (before padding)
-        OriginalPrctile;      % original percentiles
-        OriginalStd           % overall std of data set (before padding)
-        PadValue = 0;         % use to pad data if not divisible by BlockSize
-        SampleRate = 1;       % sampling rate in Hz of data
-        TotalValues           % total number of values in original data
+        HDF5File              % The hdf5 file containing the computed data
+%         ElementLocations = [];% element locations structure with ElementFields
+%         Epoched;              % true if the data is epoched
+%         Events;               % blockedEvent object if this object has events
+%         OriginalMean;         % overall mean of data set (before padding)
+%         OriginalPrctile;      % original percentiles
+%         OriginalStd           % overall std of data set (before padding)
+%         PadValue = 0;         % use to pad data if not divisible by BlockSize
+%         SampleRate = 1;       % sampling rate in Hz of data
+%         TotalValues           % total number of values in original data
         VersionID             % version ID of this data
     end % private properties
     
@@ -128,11 +129,11 @@ classdef HDF5Data < hgsetget
     
     methods
         
-        function obj = HDF5Data(data, dataID, varargin)
+        function obj = HDF5Data(hdf5file, dataID, varargin)
             % Constructor parses parameters and sets up initial data
             c = viscore.counter.getInstance();
             obj.VersionID = num2str(c.getNext());  % Get a unique ID
-            obj.parseParameters(data, dataID, varargin{:});
+            obj.parseParameters(hdf5file, dataID, varargin{:});
         end % blockedData constructor
         
         function blockSize = getBlockSize(obj)
@@ -147,7 +148,7 @@ classdef HDF5Data < hgsetget
             else
                 bStarts = obj.BlockStartTimes(varargin{1});
             end
-        end % getBlockStartTimes       
+        end % getBlockStartTimes
         
         function bTimes = getBlockTimeScale(obj, varargin)
             % Return the relative times of individual samples in one block
@@ -157,7 +158,7 @@ classdef HDF5Data < hgsetget
                 bTimes = obj.BlockTimeScale(varargin{1});
             end
         end % getBlockTimeScale
-           
+        
         function data = getData(obj)
             % Return the blocked data (may have padding at the end)
             data = obj.Data;
@@ -181,14 +182,14 @@ classdef HDF5Data < hgsetget
                 slices = [];
             end
             [values, sValues] = viscore.dataSlice.getDataSlice(...
-                                      obj.Data, slices, [], []);
+                obj.Data, slices, [], []);
         end % getDataSlice
         
         function elocs = getElementLocations(obj)
             % Return the structure containing element locations
             elocs = obj.ElementLocations;
-        end % getElementLocations       
-
+        end % getElementLocations
+        
         function events = getEvents(obj)
             % Return the blockedEvents object containing events for this data
             events = obj.Events;
@@ -250,7 +251,11 @@ classdef HDF5Data < hgsetget
             % Return true if data is epoched and false otherwise
             e = obj.Epoched;
         end % isEpoched
-       
+        
+        function data = readData(obj,dataset)
+            data = h5read(obj.HDF5File,dataset);
+        end
+        
         function reblock(obj, blockSize)
             % Reblock the data to a new blocksize if not epoched
             %
@@ -299,7 +304,7 @@ classdef HDF5Data < hgsetget
                 newDims = [newDims, 1];
             end
             obj.Data = reshape(obj.Data, newDims);
-
+            
             % Calculate actual size of reblocked dimensions and pad as needed
             aSize = obj.TotalValues;
             rStart = '';
@@ -334,30 +339,31 @@ classdef HDF5Data < hgsetget
     
     methods(Access = private)
         
-        function parseParameters(obj, data, dataID, varargin)
+        function parseParameters(obj, hdf5file, dataID, varargin)
             % Parse parameters provided by user in constructor
-            parser = viscore.blockedData.getParser();
-            parser.parse(data, dataID, varargin{:})
+            parser = viscore.HDF5Data.getParser();
+            parser.parse(hdf5file, dataID, varargin{:})
             pdata = parser.Results;
+            obj.HDF5File = pdata.hdf5file;
             
             % Assign specified private properties
-            obj.BlockDim = pdata.BlockDim;
-            obj.BlockSize = pdata.BlockSize;
-            obj.DataID = pdata.DataID;
-
-            obj.PadValue = pdata.PadValue;
-            obj.SampleRate = pdata.SampleRate;
+            %             obj.BlockDim = pdata.BlockDim;
+            %             obj.BlockSize = pdata.BlockSize;
+                        obj.DataID = pdata.DataID;
+            
+            %             obj.PadValue = pdata.PadValue;
+            %             obj.SampleRate = pdata.SampleRate;
             
             % Now handle the data
-            obj.Data = double(pdata.Data);
-            obj.OriginalMean = mean(obj.Data(:));
-            obj.OriginalStd = std(obj.Data(:));
-            obj.TotalValues = length(obj.Data(:));
-            setElementLocations(obj, pdata); % handle element locations
-            setBlocks(obj, pdata);           % handle block time information         
-            obj.Events = [];
-            obj.reblock(obj.BlockSize);     
-            obj.setEvents(pdata);
+            %             obj.Data = double(pdata.Data);
+            %             obj.OriginalMean = mean(obj.Data(:));
+            %             obj.OriginalStd = std(obj.Data(:));
+            %             obj.TotalValues = length(obj.Data(:));
+            %             setElementLocations(obj, pdata); % handle element locations
+            %             setBlocks(obj, pdata);           % handle block time information
+            %             obj.Events = [];
+            %             obj.reblock(obj.BlockSize);
+            %             obj.setEvents(pdata);
         end % parseParameters
         
         function  [] = setElementLocations(obj, pdata)
@@ -367,12 +373,12 @@ classdef HDF5Data < hgsetget
                     isequal(pdata.ElementLocations, struct())
                 return;
             end
-            obj.ElementLocations = pdata.ElementLocations;       
+            obj.ElementLocations = pdata.ElementLocations;
         end % setElementLocations
         
         function [] = setBlocks(obj, pdata)
             % Helper function to set epochs
-            obj.Epoched = pdata.Epoched;      
+            obj.Epoched = pdata.Epoched;
             if ~obj.Epoched
                 obj.BlockSize = pdata.BlockSize;
                 obj.BlockTimeScale = [];
@@ -381,13 +387,13 @@ classdef HDF5Data < hgsetget
             end
             obj.BlockSize = size(pdata.Data, obj.BlockDim);
             obj.BlockTimeScale = pdata.BlockTimeScale;
-            obj.BlockStartTimes = pdata.BlockStartTimes;                                 
-            if isempty(obj.BlockTimeScale) 
+            obj.BlockStartTimes = pdata.BlockStartTimes;
+            if isempty(obj.BlockTimeScale)
                 obj.BlockTimeScale = (0:(obj.BlockSize - 1))./obj.SampleRate;
             end
             if isempty(obj.BlockStartTimes)
-                  obj.BlockStartTimes = obj.BlockSize*...
-                       (0:(size(obj.Data, 3) - 1))./obj.SampleRate;
+                obj.BlockStartTimes = obj.BlockSize*...
+                    (0:(size(obj.Data, 3) - 1))./obj.SampleRate;
             end
         end % setBlocks
         
@@ -408,44 +414,44 @@ classdef HDF5Data < hgsetget
             obj.Events = viscore.blockedEvents(pdata.Events, ...
                 'BlockStartTimes', bStarts, 'MaxTime', maxTime, ...
                 'BlockTime', obj.BlockSize./obj.SampleRate);
-        end % setEvents     
-           
+        end % setEvents
+        
     end % private methods
     
     methods(Static = true)
-
+        
         
         function parser = getParser()
             % Create a parser for blockedData
             parser = inputParser;
-            parser.addRequired('Data', ...
+            parser.addRequired('hdf5file', ...
                 @(x) (~isempty(x) && ischar(x)));
             parser.addRequired('DataID', ...
                 @(x) validateattributes(x, {'char'}, {}));
-            parser.addParamValue('SampleRate', 1, ...
-                @(x) validateattributes(x, {'numeric'}, ...
-                {'scalar', 'nonempty', 'positive'}));
-            parser.addParamValue('ElementLocations', [], ...
-                @(x) (isempty(x) || isequal(x, struct()) || (isstruct(x)) ...
-                && sum(isfield(x, viscore.blockedData.ElementFields)) ...
-                == length(viscore.blockedData.ElementFields)));
-            parser.addParamValue('BlockDim', 2, ...
-                @(x) validateattributes(x, {'numeric'}, ...
-                {'scalar', 'nonnegative'}));
-            parser.addParamValue('BlockSize', 1000, ...
-                @(x) validateattributes(x, {'numeric'}, ...
-                {'scalar', 'nonnegative'}));
-            parser.addParamValue('BlockStartTimes', [], ...
-                @(x) validateattributes(x, {'numeric'}, {}));
-            parser.addParamValue('BlockTimeScale', [], ...
-                @(x) validateattributes(x, {'numeric'}, {}));
-            parser.addParamValue('Epoched', false, ...
-                @(x) validateattributes(x, {'logical'}, {}));
-            parser.addParamValue('Events', [], ...
-                 @(x) (isempty(x) || (isstruct(x)) && ...
-                sum(isfield(x, {'type', 'time'})) == 2));
-            parser.addParamValue('PadValue', 0, ...
-                @(x) validateattributes(x, {'numeric'}, {'scalar'}));
+%             parser.addParamValue('SampleRate', 1, ...
+%                 @(x) validateattributes(x, {'numeric'}, ...
+%                 {'scalar', 'nonempty', 'positive'}));
+%             parser.addParamValue('ElementLocations', [], ...
+%                 @(x) (isempty(x) || isequal(x, struct()) || (isstruct(x)) ...
+%                 && sum(isfield(x, viscore.blockedData.ElementFields)) ...
+%                 == length(viscore.blockedData.ElementFields)));
+%             parser.addParamValue('BlockDim', 2, ...
+%                 @(x) validateattributes(x, {'numeric'}, ...
+%                 {'scalar', 'nonnegative'}));
+%             parser.addParamValue('BlockSize', 1000, ...
+%                 @(x) validateattributes(x, {'numeric'}, ...
+%                 {'scalar', 'nonnegative'}));
+%             parser.addParamValue('BlockStartTimes', [], ...
+%                 @(x) validateattributes(x, {'numeric'}, {}));
+%             parser.addParamValue('BlockTimeScale', [], ...
+%                 @(x) validateattributes(x, {'numeric'}, {}));
+%             parser.addParamValue('Epoched', false, ...
+%                 @(x) validateattributes(x, {'logical'}, {}));
+%             parser.addParamValue('Events', [], ...
+%                 @(x) (isempty(x) || (isstruct(x)) && ...
+%                 sum(isfield(x, {'type', 'time'})) == 2));
+%             parser.addParamValue('PadValue', 0, ...
+%                 @(x) validateattributes(x, {'numeric'}, {'scalar'}));
         end % getParser
         
     end % static methods
