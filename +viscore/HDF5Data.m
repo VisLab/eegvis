@@ -105,7 +105,7 @@ classdef HDF5Data < hgsetget
     
     properties (Access = private)
 %         BlockDim              % dimension used for reblocking (default 2)
-%         BlockSize = [];       % window size to use when data is reshaped
+        BlockSize = [];       % window size to use when data is reshaped
 %         BlockStartTimes = []  % start times of blocks in seconds
 %         BlockTimeScale = [];  % time offsets in seconds for block samples
 %         Data;                 % 2D or 3D array of data, first dim for elements
@@ -135,6 +135,13 @@ classdef HDF5Data < hgsetget
             obj.VersionID = num2str(c.getNext());  % Get a unique ID
             obj.parseParameters(hdf5file, dataID, varargin{:});
         end % blockedData constructor
+        
+        function values = funEval(obj, fn, fh)
+            numElements = readData(obj,'/numelements');
+            numBlocks = readData(obj,'/numblocks');
+            values = reshape(readData(obj,['/',fn,'_',obj.BlockSize]), ...
+                numElements, numBlocks);
+        end % funEval
         
         function blockSize = getBlockSize(obj)
             % Return current block size

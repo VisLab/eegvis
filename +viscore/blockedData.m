@@ -135,6 +135,12 @@ classdef blockedData < hgsetget
             obj.parseParameters(data, dataID, varargin{:});
         end % blockedData constructor
         
+        function values = funEval(obj, fh)
+            [e, s, b] = obj.getDataSize(); %#ok<ASGLU>
+            values = reshape(...
+                feval(fh, obj.getData()), e, b);
+        end % funEval
+        
         function blockSize = getBlockSize(obj)
             % Return current block size
             blockSize = obj.BlockSize;

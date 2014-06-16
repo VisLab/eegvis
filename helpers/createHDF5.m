@@ -15,15 +15,21 @@ hdf5file = [checkdirsepeartor(p.hdf5dir),...
 numelements = size(data,1);
 numframes = size(data,2);
 numblocks = ceil(numframes/blocksize);
+h5create(hdf5file, '/numelements', 1);
+h5write(hdf5file, '/numelements', size(data,1));
+h5create(hdf5file, '/numblocks', 1);
+h5write(hdf5file, '/numblocks', numblocks);
+h5create(hdf5file, '/blocksize', 1);
+h5write(hdf5file, '/blocksize', blocksize);
 h5create(hdf5file, '/data', size(data));
 h5write(hdf5file, '/data', data);
 h5create(hdf5file, ['/Kurtosis_',num2str(blocksize)], ...
     [1, numelements * numblocks]);
 h5write(hdf5file, ['/Kurtosis_',num2str(blocksize)], computeblocks(data,...
     numelements, numframes, numblocks, blocksize, 'kurtosis'));
-h5create(hdf5file, ['/SD_',num2str(blocksize)], ...
+h5create(hdf5file, ['/StandardDeviation_',num2str(blocksize)], ...
     [1, numelements * numblocks]);
-h5write(hdf5file, ['/SD_',num2str(blocksize)], computeblocks(data,...
+h5write(hdf5file, ['/StandardDeviation_',num2str(blocksize)], computeblocks(data,...
     numelements, numframes, numblocks, blocksize, 'std'));
 
 

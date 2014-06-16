@@ -314,9 +314,15 @@ classdef functionObj < hgsetget & viscore.managedObj
         function reevaluate(obj)
             % Evaluate the function and the threshold mask
             fh = str2func(obj.ManStruct.Definition);
-            [e, s, b] = obj.getDataSize(); %#ok<ASGLU>
-            obj.CurrentValues = reshape(...
-                feval(fh, obj.CurrentData.getData()), e, b);
+            %             [e, s, b] = obj.getDataSize(); %#ok<ASGLU>
+            %             obj.CurrentValues = reshape(...
+            %                 feval(fh, obj.CurrentData.getData()), e, b);
+            if isa(obj.CurrentData, 'viscore.blockedData')
+                obj.CurrentValues = obj.CurrentData.funEval(fh);
+            elseif isa(obj.CurrentData, 'viscore.HDF5Data')
+                 fn = obj.ManStruct.DisplayName;
+                 obj.CurrentValues = obj.CurrentData.funEval(fn, fh);
+            end
             obj.BlockMean = nanmean(obj.CurrentValues(:));
             obj.BlockStd = nanstd(obj.CurrentValues(:));
             obj.calculateLimits();
