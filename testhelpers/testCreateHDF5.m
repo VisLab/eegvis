@@ -28,7 +28,7 @@ datadataset = '/data';
 data = h5read(hdf5file,datadataset);
 stdblockvalue = std(data(1,1:1000));
 kurtosisblockvalue = kurtosis(data(1,1:1000));
-stddataset = '/SD_1000';
+stddataset = '/StandardDeviation_1000';
 stdarray = h5read(hdf5file,stddataset);
 assertEqual(length(stdarray), 992);
 assertElementsAlmostEqual(stdblockvalue, stdarray(1), 'relative', .0001);

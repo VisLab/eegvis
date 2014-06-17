@@ -17,15 +17,15 @@ vd = viscore.HDF5Data(values.hdf5file, 'ID1');
 assertTrue(isvalid(vd));
 assertTrue(strcmp(vd.getDataID(), 'ID1'));
 
-function testReadData(values) %#ok<DEFNU>
+function testReadHDF5Data(values) %#ok<DEFNU>
 % Unit test for HDF5Data readData
-fprintf('\nUnit tests for viscore.HDF5Data readData \n');
+fprintf('\nUnit tests for viscore.HDF5Data readHDF5Data \n');
 
 fprintf('It should read the data from a valid HDF5 file\n');
 vd = viscore.HDF5Data(values.hdf5file, 'ID1');
-kData = vd.readData('/Kurtosis_1000');
+kData = vd.readHDF5Data('/Kurtosis_1000');
 assertTrue(~isempty(kData));
-stdData = vd.readData('/SD_1000');
+stdData = vd.readHDF5Data('/StandardDeviation_1000');
 assertTrue(~isempty(stdData));
 
 

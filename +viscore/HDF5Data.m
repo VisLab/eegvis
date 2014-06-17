@@ -137,10 +137,16 @@ classdef HDF5Data < hgsetget
         end % blockedData constructor
         
         function values = funEval(obj, fn, fh)
-            numElements = readData(obj,'/numelements');
-            numBlocks = readData(obj,'/numblocks');
-            values = reshape(readData(obj,['/',fn,'_',obj.BlockSize]), ...
-                numElements, numBlocks);
+            try
+                numElements = readHDF5Data(obj,'/numelements');
+                numBlocks = readHDF5Data(obj,'/numblocks');
+                values = reshape(readHDF5Data(obj,['/',fn,...
+                    '_',num2str(obj.BlockSize)]), numElements, numBlocks);
+            catch
+                [e, s, b] = obj.getDataSize(); %#ok<ASGLU>
+                values = reshape(...
+                    feval(fh, readHDF5Data(obj,'/data')), e, b);
+            end
         end % funEval
         
         function blockSize = getBlockSize(obj)
@@ -178,7 +184,9 @@ classdef HDF5Data < hgsetget
         
         function [nElements, nSamples, nBlocks] = getDataSize(obj)
             % Return number of elements, samples and blocks in data
-            [nElements, nSamples, nBlocks] = size(obj.Data);
+            nElements = readHDF5Data(obj, '/numelements');
+            nSamples = readHDF5Data(obj, '/blocksize');
+            nBlocks = readHDF5Data(obj, '/numblocks');
         end % getDataSize
         
         function [values, sValues] = getDataSlice(obj, dSlice)
@@ -259,7 +267,7 @@ classdef HDF5Data < hgsetget
             e = obj.Epoched;
         end % isEpoched
         
-        function data = readData(obj,dataset)
+        function data = readHDF5Data(obj,dataset)
             data = h5read(obj.HDF5File,dataset);
         end
         
@@ -357,6 +365,7 @@ classdef HDF5Data < hgsetget
             %             obj.BlockDim = pdata.BlockDim;
             %             obj.BlockSize = pdata.BlockSize;
                         obj.DataID = pdata.DataID;
+                        obj.BlockSize = pdata.BlockSize;
             
             %             obj.PadValue = pdata.PadValue;
             %             obj.SampleRate = pdata.SampleRate;
@@ -445,9 +454,9 @@ classdef HDF5Data < hgsetget
 %             parser.addParamValue('BlockDim', 2, ...
 %                 @(x) validateattributes(x, {'numeric'}, ...
 %                 {'scalar', 'nonnegative'}));
-%             parser.addParamValue('BlockSize', 1000, ...
-%                 @(x) validateattributes(x, {'numeric'}, ...
-%                 {'scalar', 'nonnegative'}));
+            parser.addParamValue('BlockSize', 1000, ...
+                @(x) validateattributes(x, {'numeric'}, ...
+                {'scalar', 'nonnegative'}));
 %             parser.addParamValue('BlockStartTimes', [], ...
 %                 @(x) validateattributes(x, {'numeric'}, {}));
 %             parser.addParamValue('BlockTimeScale', [], ...

@@ -244,7 +244,7 @@ dSlice3 = viscore.dataSlice('Slices', {'45:58', ':', ':'});
 colors = bf.getBlockColorsSlice(dSlice3);
 assertTrue(isempty(colors));
 
-function testSetData %#ok<DEFNU>
+function testSetBlockedData %#ok<DEFNU>
 % Unit test for visfuncs.functionObj for setData
 fprintf('\nUnit tests for visfuncs.functionObj setData\n');
 
@@ -269,6 +269,32 @@ testVD.reblock(500);
 bf.setData(testVD);
 testVD.reblock(1000);
 bf.setData(testVD);
+
+function testSetHDF5Data %#ok<DEFNU>
+% Unit test for visfuncs.functionObj for setData
+fprintf('\nUnit tests for visfuncs.functionObj setData\n');
+
+fprintf('It should set the function values when setData is called\n');
+fs = functionTestClass.getDefaultFunctions();
+bf = visfuncs.functionObj([], fs(1));
+fprintf('\nOriginal object:\n');
+bf.printObject();
+hdf5file = which('eeglab_data.hdf5');
+testVD = viscore.HDF5Data(hdf5file, 'eeglab_data');
+bf.setData(testVD);
+[e, s, b] = bf.getDataSize();
+assertEqual(e, h5read(hdf5file, '/numelements'));
+assertEqual(s, h5read(hdf5file, '/blocksize'));
+assertEqual(b, h5read(hdf5file, '/numblocks'));
+values = bf.getBlockValues();
+assertEqual(uint64(size(values, 1)), h5read(hdf5file, '/numelements'));
+
+% fprintf('It should reset the data and functions when data reblocked\n');
+% fprintf('----------Needs to be revisited--------------------\n');
+% testVD.reblock(500);
+% bf.setData(testVD);
+% testVD.reblock(1000);
+% bf.setData(testVD);
 
 function testGetThresholdLevels %#ok<DEFNU>
 % Unit test for functionObj for getThresholdLevels
