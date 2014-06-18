@@ -3,39 +3,53 @@ function test_suite = testCreateHDF5 %#ok<STOUT>
 initTestSuite;
 
 function values = setup %#ok<DEFNU>
-values.eegfile = which('eeg.set');  
-values.outputdir = strrep(values.eegfile, 'eeg.set', '');
+load('EEG.mat');
+values.data = double(EEG.data);
+path = which('EEG.mat');  
+values.HDF5Dir1 = regexprep(path, '[\\/]EEG.mat$', '');
+values.HDF5Dir2 = regexprep(path, 'EEG.mat$', '');
+values.HDF5File = regexprep(path, 'EEG.mat$', 'EEG.hdf5');
 
 function teardown(values) %#ok<INUSD,DEFNU>
-delete('eeg.hdf5');
+
 % Function executed after each test
 
-function testValidParameters(values) %#ok<DEFNU>
+function testNoAdditionalArguments(values) %#ok<DEFNU>
 % Unit test for createHDF5 function
-fprintf('\nUnit tests for createHDF5 with valid constructor\n');
-fprintf('It should create a hdf5 file with a valid parameters');
-createHDF5(values.eegfile, 1000, values.outputdir);
-hdf5file = strrep(values.eegfile, 'eeg.set', 'eeg.hdf5');
-assertEqual(exist(hdf5file, 'file'), 2);
+fprintf('\nUnit tests for createHDF5 with no additional arguments\n');
 
-function testArrays(values) %#ok<DEFNU>
-fprintf('\nUnit tests for createHDF5 with computed arrays\n');
-fprintf(['It should create a hdf5 file containing the original data, ' ...
-    'and precomputed data arrays']);
-createHDF5(values.eegfile, 1000, values.outputdir);
-hdf5file = strrep(values.eegfile, 'eeg.set', 'eeg.hdf5');
-datadataset = '/data';
-data = h5read(hdf5file,datadataset);
-stdblockvalue = std(data(1,1:1000));
-kurtosisblockvalue = kurtosis(data(1,1:1000));
-stddataset = '/StandardDeviation_1000';
-stdarray = h5read(hdf5file,stddataset);
-assertEqual(length(stdarray), 992);
-assertElementsAlmostEqual(stdblockvalue, stdarray(1), 'relative', .0001);
-stddataset = '/Kurtosis_1000';
-kurtosisarray = h5read(hdf5file,stddataset);
-assertEqual(length(kurtosisarray), 992);
-assertElementsAlmostEqual(kurtosisblockvalue, kurtosisarray(1), ...
-    'relative', .0001);
+fprintf(['It should create a hdf5 file with an array containing the' ...
+    ' data\n']);
+createHDF5(values.data);
+HDF5File = [pwd,filesep,'data.hdf5'];
+data = h5read(HDF5File, '/data');
+assertEqual(data, values.data);
 
+fprintf(['It should create a hdf5 file in the current directory named' ...
+    ' data.hdf5\n']);
+assertEqual(exist(HDF5File, 'file'), 2);
+delete(HDF5File);
 
+function testHDF5FileArgument(values) %#ok<DEFNU>
+% Unit test for createHDF5 function
+fprintf('\nUnit tests for createHDF5 with HDF5File agrument\n');
+
+fprintf(['It should create a hdf5 file named data.hdf5 in the' ...
+    ' specified directory not ending with a file separator\n']);
+createHDF5(values.data, 'HDF5File', values.HDF5Dir1);
+HDF5File = [values.HDF5Dir1,filesep,'data.hdf5'];
+assertEqual(exist(HDF5File, 'file'), 2);
+delete(HDF5File);
+
+fprintf(['It should create a hdf5 file named data.hdf5 in the' ...
+    ' specified directory ending with a file separator\n']);
+createHDF5(values.data, 'HDF5File', values.HDF5Dir2);
+HDF5File = [values.HDF5Dir2,'data.hdf5'];
+assertEqual(exist(HDF5File, 'file'), 2);
+delete(HDF5File);
+
+fprintf('It should create a hdf5 file with the specified name\n');
+createHDF5(values.data, 'HDF5File', values.HDF5File);
+HDF5File = values.HDF5File;
+assertEqual(exist(HDF5File, 'file'), 2);
+delete(HDF5File);
