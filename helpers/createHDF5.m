@@ -1,26 +1,14 @@
-function createHDF5(data,varargin)
+function createHDF5(data, hdf5file)
 parser = inputParser();
 parser.addRequired('Data', @(x) validateattributes(x, ...
     {'numeric'}, {'nonempty'}));
-parser.addParamValue('HDF5File', [pwd,filesep,'data.hdf5'], ...
-    @(x) validateattributes(x, {'char'}, {'nonempty'}));
-parser.addParamValue('AddFunctions', false, @(x) ...
-    isa(x,'visfunc.functionObj'));
-parser.parse(data, varargin{:});
+parser.addRequired('HDF5File', @(x) validateattributes(x, ...
+    {'char'}, {'nonempty'}));
+parser.parse(data, hdf5file);
 pdata = parser.Results;
-hdf5file = formatFile(pdata.HDF5File);
-h5create(hdf5file, '/data', size(data));
-h5write(hdf5file, '/data', data);
-
-    function file = formatFile(file)
-        if isdir(file)
-            if isempty(regexp(file,'[\\/]$', 'once'))
-                file = [file,filesep,'data.hdf5'];
-            else
-                file = [file,'data.hdf5'];
-            end
-        end
-    end
-
+h5create(pdata.HDF5File, '/dims', [1 ndims(pdata.Data)]);
+h5write(pdata.HDF5File, '/dims', size(pdata.Data));
+h5create(pdata.HDF5File, '/data', size(pdata.Data(:)));
+h5write(pdata.HDF5File, '/data', double(pdata.Data(:)));
 end
 
