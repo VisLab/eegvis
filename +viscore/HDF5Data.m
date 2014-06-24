@@ -128,9 +128,7 @@ classdef HDF5Data < hgsetget
                     '_',num2str(obj.BlockSize)]);
             catch
                 % Compute the data and store it in the file
-                [e, s, b] = obj.getDataSize(); %#ok<ASGLU>
-                values = reshape(...
-                    feval(fh, h5read(obj.HDF5File,'/data')), e, b);
+                values = obj.computeBlocks(fh);
                 h5create(obj.HDF5File,['/',fn,...
                     '_',num2str(obj.BlockSize)],size(values));
                 h5write(obj.HDF5File,['/',fn,...
@@ -151,7 +149,14 @@ classdef HDF5Data < hgsetget
             nBlocks = ceil(dims(2) / obj.BlockSize);
         end % getDataSize
         
+        function version = getVersionID(obj)
+            % Return version ID of this data source
+            version = obj.VersionID;
+        end % getVersionID
+        
         function reblock(obj, blockSize)
+            c = viscore.counter.getInstance();
+            obj.VersionID = num2str(c.getNext());
             obj.BlockSize = blockSize;
         end
         
@@ -198,9 +203,25 @@ classdef HDF5Data < hgsetget
             end
         end % compareDataAndHDF5File
         
-        function data = computeData(data)
-            
-        end
+        function computedBlocks = computeBlocks(obj, fh)
+            dims = h5read(obj.HDF5File, '/dims');
+            numElements = dims(1);
+            numFrames = dims(2);
+            numBlocks = ceil(dims(2) / obj.BlockSize);
+            computedBlocks = zeros(numElements, numBlocks);
+            readFrames = 0;
+            realBlockSize = min(obj.BlockSize, numFrames - readFrames);
+            for a = 1:numBlocks
+                for b = 1:numElements
+                    computedBlocks(b,a) = fh(h5read(obj.HDF5File, ...
+                        '/data', ...
+                        [(readFrames * numElements + b) 1], ...
+                        [realBlockSize 1], [numElements 1])');
+                end
+                readFrames = readFrames + realBlockSize;
+                realBlockSize = min(obj.BlockSize, numFrames - readFrames);
+            end
+        end % computeBlocks
         
     end % private methods
     

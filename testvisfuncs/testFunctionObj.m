@@ -274,20 +274,37 @@ function testSetHDF5Data %#ok<DEFNU>
 % Unit test for visfuncs.functionObj for setData
 fprintf('\nUnit tests for visfuncs.functionObj setData\n');
 
-fprintf('It should set the function values when setData is called\n');
+fprintf('It should create a hdf5 file that only consist of the data\n');
 fs = functionTestClass.getDefaultFunctions();
 bf = visfuncs.functionObj([], fs(1));
 fprintf('\nOriginal object:\n');
 bf.printObject();
-hdf5file = which('eeglab_data.hdf5');
-testVD = viscore.HDF5Data(hdf5file, 'eeglab_data');
+load('EEG.mat');
+[numElements, numSamples] = size(EEG.data);
+numBlocks = ceil(numSamples / 1000);
+HDF5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+testVD = viscore.HDF5Data(EEG.data, 'eeg_data', HDF5File);
+
+fprintf('It should set the kurtosis function values with block size of 1000 and store them in the hdf5 file\n');
+HDF5Info = h5info(HDF5File);
+HDF5Datasets = {HDF5Info.Datasets.Name};
+assertFalse(any(strcmpi(HDF5Datasets,'Kurtosis_1000')));
 bf.setData(testVD);
-[e, s, b] = bf.getDataSize();
-assertEqual(e, h5read(hdf5file, '/numelements'));
-assertEqual(s, h5read(hdf5file, '/blocksize'));
-assertEqual(b, h5read(hdf5file, '/numblocks'));
-values = bf.getBlockValues();
-assertEqual(uint64(size(values, 1)), h5read(hdf5file, '/numelements'));
+HDF5Info = h5info(HDF5File);
+HDF5Datasets = {HDF5Info.Datasets.Name};
+assertTrue(any(strcmpi(HDF5Datasets,'Kurtosis_1000')));
+assertEqual(size(h5read(HDF5File, '/Kurtosis_1000')), [numElements,numBlocks]);
+
+fprintf('It should set the kurtosis function values with block size of 500 and store them in the hdf5 file\n');
+assertFalse(any(strcmpi(HDF5Datasets,'Kurtosis_500')));
+testVD.reblock(500);
+bf.setData(testVD);
+HDF5Info = h5info(HDF5File);
+HDF5Datasets = {HDF5Info.Datasets.Name};
+assertTrue(any(strcmpi(HDF5Datasets,'Kurtosis_500')));
+numBlocks = ceil(numSamples / 500);
+assertEqual(size(h5read(HDF5File, '/Kurtosis_500')), [numElements,numBlocks]);
+delete(HDF5File);
 
 % fprintf('It should reset the data and functions when data reblocked\n');
 % fprintf('----------Needs to be revisited--------------------\n');
