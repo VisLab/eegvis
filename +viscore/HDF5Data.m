@@ -101,24 +101,18 @@
 % $Initial version $
 %
 
-classdef HDF5Data < hgsetget
+classdef HDF5Data < hgsetget & viscore.blockedData
     
     properties (Access = private)
-        BlockDim              % dimension used for reblocking (default 2)
-        BlockSize = [];       % window size to use when data is reshaped
-        Data;                 % 2D or 3D array of data, first dim for elements
-        DataID                % ID of the data contained in this object
         HDF5File;             % hdf5 file that contains a data array
-        VersionID             % version ID of this data
     end % private properties
     
     methods
         
         function obj = HDF5Data(data, dataID, hdf5File, varargin)
             % Constructor parses parameters and sets up initial data
-            c = viscore.counter.getInstance();
-            obj.VersionID = num2str(c.getNext());  % Get a unique ID
-            obj.parseParameters(data, dataID, hdf5File, varargin{:});
+            obj = obj@viscore.blockedData(dataID, varargin);
+            obj.parseParameters(data, hdf5File, varargin{:});
         end % blockedData constructor
         
         function values = funEval(obj, fn, fh)
@@ -136,11 +130,6 @@ classdef HDF5Data < hgsetget
             end
         end % funEval
         
-        function dataID = getDataID(obj)
-            % Return the data ID
-            dataID = obj.DataID;
-        end % getDataID
-        
         function [nElements, nSamples, nBlocks] = getDataSize(obj)
             % Return number of elements, samples and blocks in data
             dims = h5read(obj.HDF5File, '/dims');
@@ -149,10 +138,37 @@ classdef HDF5Data < hgsetget
             nBlocks = ceil(dims(2) / obj.BlockSize);
         end % getDataSize
         
-        function version = getVersionID(obj)
-            % Return version ID of this data source
-            version = obj.VersionID;
-        end % getVersionID
+                function [values, sValues] = getDataSlice(obj, dSlice)
+            % Return function values and starting indices corresponding to this slice
+            if ~isempty(dSlice)
+                slices = dSlice.getParameters(3);
+            else
+                slices = [];
+            end
+            [values, sValues] = viscore.dataSlice.getDataSlice(...
+                                      obj.Data, slices, [], []);
+        end % getDataSlice
+       
+        
+        function [tMean, tStd, tLow, tHigh] = getTrimValues(obj, percent, data)
+            % Return trim mean, trim std, trim low cutoff, trim high cutoff
+            if nargin == 3
+                myData = data(:);
+            else
+                myData = h5read(obj.HDF5File, '/data');
+            end
+            if isempty(percent) || percent <= 0 || percent >= 100
+                tLow = min(myData);
+                tHigh = max(myData);
+            else
+                tValues = prctile(myData, [percent/2, 100 - percent/2]);
+                tLow = tValues(1);
+                tHigh = tValues(2);
+                myData(myData < tLow | myData > tHigh) = [];
+            end
+            tMean = mean(myData);
+            tStd = std(myData, 1);
+        end % getTrimValues
         
         function reblock(obj, blockSize)
             c = viscore.counter.getInstance();
@@ -164,18 +180,12 @@ classdef HDF5Data < hgsetget
     
     methods(Access = private)
         
-        function parseParameters(obj, data, dataID, hdf5File, varargin)
+        function parseParameters(obj, data, hdf5File, varargin)
             % Parse parameters provided by user in constructor
             parser = viscore.HDF5Data.getParser();
-            parser.parse(data, dataID, hdf5File, varargin{:})
+            parser.parse(data, hdf5File, varargin{:})
             pdata = parser.Results;
-            
-            % Assign specified private properties
-            obj.BlockDim = pdata.BlockDim;
-            obj.BlockSize = pdata.BlockSize;
-            obj.DataID = pdata.DataID;
-            obj.Data = double(pdata.Data);
-            
+                      
             % Check the hdf5 file
             checkHDF5File(obj, pdata);
             
@@ -232,18 +242,10 @@ classdef HDF5Data < hgsetget
             parser = inputParser;
             parser.addRequired('Data', ...
                 @(x) (isempty(x) || isnumeric(x)));
-            parser.addRequired('DataID', ...
-                @(x) validateattributes(x, {'char'}, {}));
             parser.addRequired('HDF5File', ...
                 @(x) (isempty(x) || ischar(x)));
             parser.addParamValue('Overwrite', false, ...
                 @(x) validateattributes(x, {'logical'}, {}));
-            parser.addParamValue('BlockDim', 2, ...
-                @(x) validateattributes(x, {'numeric'}, ...
-                {'scalar', 'nonnegative'}));
-            parser.addParamValue('BlockSize', 1000, ...
-                @(x) validateattributes(x, {'numeric'}, ...
-                {'scalar', 'nonnegative'}));
         end % getParser
         
     end % static methods

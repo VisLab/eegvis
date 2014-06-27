@@ -1,5 +1,5 @@
-function test_suite = testBlockedData %#ok<STOUT>
-% Unit tests for blockedData
+function test_suite = testMemoryData %#ok<STOUT>
+% Unit tests for memoryData
 initTestSuite;
 
 function values = setup %#ok<DEFNU>
@@ -19,36 +19,36 @@ function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
 
 function testNormalConstructor(values) %#ok<DEFNU>
-% Unit test for blockedData normal constructor
-fprintf('\nUnit tests for viscore.blockedData valid constructor\n');
+% Unit test for memoryData normal constructor
+fprintf('\nUnit tests for viscore.memoryData valid constructor\n');
 
 fprintf('It should construct a valid generic slice when constructor has no parameters\n');
-vd = viscore.blockedData(values.random, 'ID1');
+vd = viscore.memoryData(values.random, 'ID1');
 assertTrue(isvalid(vd));
 assertTrue(strcmp(vd.getDataID(), 'ID1'));
 
 function testBadConstructor(values) %#ok<DEFNU>
-% Unit test for viscore.blockedData bad constructor
-fprintf('\nUnit tests for viscore.blockedData invalid constructor parameters\n');
+% Unit test for viscore.memoryData bad constructor
+fprintf('\nUnit tests for viscore.memoryData invalid constructor parameters\n');
 
 fprintf('It should throw an exception when no parameters are passed\n');
-f = @() viscore.blockedData();
+f = @() viscore.memoryData();
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 fprintf('It should throw an exception when only one parameter is passed\n');
-f = @() viscore.blockedData(values.random);
+f = @() viscore.memoryData(values.random);
 assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
 
 
 function testReblockSimple(values) %#ok<DEFNU>
-% Unit test for viscore.blockedData reblocking
-fprintf('\nUnit tests for viscore.blockedData reblocking\n');
+% Unit test for viscore.memoryData reblocking
+fprintf('\nUnit tests for viscore.memoryData reblocking\n');
 
 fprintf('It should reblock data when data is unepoched\n')
 n = [32, 1000, 20];
 data = 1:prod(n);
 data1 = reshape(data, n);
-vd = viscore.blockedData(data1, 'ID1');
+vd = viscore.memoryData(data1, 'ID1');
 assertTrue(isvalid(vd));
 vd.reblock(500);
 assertElementsAlmostEqual(data1(1, 1, 2), 32001);
@@ -57,7 +57,7 @@ assertVectorsAlmostEqual(size(a), [32, 500, 40]);
 assertElementsAlmostEqual(a(1, 1, 2), 16001);
 
 fprintf('It should not reblock when data is epoched')
-vd2 = viscore.blockedData(values.random, 'ID1', 'Epoched', true);
+vd2 = viscore.memoryData(values.random, 'ID1', 'Epoched', true);
 assertTrue(isvalid(vd2));
 assertTrue(vd2.isEpoched())
 vd2.reblock(500);
@@ -66,92 +66,92 @@ assertVectorsAlmostEqual(size(a), [32, 1000, 20]);
 assertElementsAlmostEqual(a(:), values.random(:));
 
 function testConstructorWithElementLocations(values) %#ok<DEFNU>
-% Unit test for viscore.blockedData with element locations
-fprintf('\nUnit tests for viscore.blockedData with element locations\n');
+% Unit test for viscore.memoryData with element locations
+fprintf('\nUnit tests for viscore.memoryData with element locations\n');
 fprintf('It should allow element locations specified by structure array\n')
 elocs(32) = struct('X', 2, 'Y', 3, 'Z', 1, 'labels', {'FPOZ'}, 'theta', 3, 'radius', 4);
-vd1 = viscore.blockedData(values.random, 'ID1', 'ElementLocations', elocs);
+vd1 = viscore.memoryData(values.random, 'ID1', 'ElementLocations', elocs);
 assertTrue(isvalid(vd1));
 fprintf('It should ignore the element locations if parameter is empty\n');
-vd2 = viscore.blockedData(values.random, 'ID2', 'ElementLocations', []);
+vd2 = viscore.memoryData(values.random, 'ID2', 'ElementLocations', []);
 assertTrue(isvalid(vd2));
 assertTrue(isempty(vd2.getElementLocations));
 fprintf('It should ignore the element locations if parameter is empty structure\n');
-vd3 = viscore.blockedData(values.random, 'ID2', 'ElementLocations', []);
+vd3 = viscore.memoryData(values.random, 'ID2', 'ElementLocations', []);
 assertTrue(isvalid(vd3));
 assertTrue(isempty(vd3.getElementLocations));
-vd4 = viscore.blockedData(values.random, 'ID2', 'ElementLocations', '');
+vd4 = viscore.memoryData(values.random, 'ID2', 'ElementLocations', '');
 assertTrue(isvalid(vd4));
 assertTrue(isempty(vd4.getElementLocations));
 fprintf('It should throw an exception of required location fields not present\n');
 elocs1(32) = struct('X', 2, 'Y', 3, 'Z', 1, 'labels', {'FPOZ'});
-f = @() viscore.blockedData(values.random, 'ID1', 'ElementLocations', elocs1);
+f = @() viscore.memoryData(values.random, 'ID1', 'ElementLocations', elocs1);
 assertExceptionThrown(f, 'MATLAB:InputParser:ArgumentFailedValidation');
 
 function testConstructorFewerThanThreeDimensions(values) %#ok<INUSD,DEFNU>
-% Unit test for viscore.blockedData with fewer than 3 dimensions
+% Unit test for viscore.memoryData with fewer than 3 dimensions
 data2 = random('exp', 1, [1, 1000, 20]);
-fprintf('\nUnit tests for viscore.blockedData with singleton dimensions\n');
+fprintf('\nUnit tests for viscore.memoryData with singleton dimensions\n');
 
 fprintf('It should allow a data array with a singleton first dimension\n');
-testVD2 = viscore.blockedData(data2, 'Rand2');
+testVD2 = viscore.memoryData(data2, 'Rand2');
 [x, y, z] = testVD2.getDataSize();
 assertVectorsAlmostEqual([x, y, z], [1, 1000, 20]);
 
 fprintf('It should allow a data array with two dimensions\n');
 n = [1000, 20];
 data2 = reshape(1:prod(n), n);
-testVD2 = viscore.blockedData(data2, 'Numeric', 'BlockDim', 1);
+testVD2 = viscore.memoryData(data2, 'Numeric', 'BlockDim', 1);
 [x, y, z] = testVD2.getDataSize();
 assertVectorsAlmostEqual([x, y, z], [1000, 20, 1]);
 
-testVD3 = viscore.blockedData(data2, 'Numeric2', 'BlockSize', 10);
+testVD3 = viscore.memoryData(data2, 'Numeric2', 'BlockSize', 10);
 [x, y, z] = testVD3.getDataSize();
 assertVectorsAlmostEqual([x, y, z], [1000, 10, 2]);
 
-testVD4 = viscore.blockedData(data2, 'Numeric3', 'BlockDim', 3, 'BlockSize', 1);
+testVD4 = viscore.memoryData(data2, 'Numeric3', 'BlockDim', 3, 'BlockSize', 1);
 [x, y, z] = testVD4.getDataSize();
 assertVectorsAlmostEqual([x, y, z], [1000, 20, 1]);
 
 function testConstructorWithEpochs(values) %#ok<DEFNU>
-% Unit test for viscore.blockedData epoch parameters
-fprintf('\nUnit tests for viscore.blockedData epoch start times\n');
+% Unit test for viscore.memoryData epoch parameters
+fprintf('\nUnit tests for viscore.memoryData epoch start times\n');
 
 fprintf('Non-epoched data should have empty epoch start times\n');
-testVD1 = viscore.blockedData(values.random, 'Rand normal');
+testVD1 = viscore.memoryData(values.random, 'Rand normal');
 assertTrue(isempty(testVD1.getBlockStartTimes()));
 
 fprintf('Epoched data with no start times should have defaults\n');
-testVD2 = viscore.blockedData(values.random, 'Random normal epoched', 'Epoched', true);
+testVD2 = viscore.memoryData(values.random, 'Random normal epoched', 'Epoched', true);
 assertElementsAlmostEqual(testVD2.getBlockStartTimes(), (0:19)*1000);
 
 fprintf('Epoched data with no start times should be correct when sampling rate not 1\n');
-testVD3 = viscore.blockedData(values.random, 'Rand normal sample rate 2', 'Epoched', true, ...
+testVD3 = viscore.memoryData(values.random, 'Rand normal sample rate 2', 'Epoched', true, ...
     'SampleRate', 2);
 assertElementsAlmostEqual(testVD3.getBlockStartTimes(), (0:19)*500);
 fprintf('Blocked data should have blocksize that agrees with epoch size\n');
 assertEqual(testVD3.getBlockSize(), 1000);
 
 fprintf('Epoched data with explicit start times should match\n');
-testVD4 = viscore.blockedData(values.random, 'Rand normal start times', 'Epoched', true, ...
+testVD4 = viscore.memoryData(values.random, 'Rand normal start times', 'Epoched', true, ...
     'BlockStartTimes', (0:19)*2000);
 assertElementsAlmostEqual(testVD4.getBlockStartTimes(), (0:19)*2000);
 
 fprintf('Epoched data with no sampling rate and block times should have correct defaults\n')
-testVD5 = viscore.blockedData(values.random, 'Rand normal', 'Epoched', true);
+testVD5 = viscore.memoryData(values.random, 'Rand normal', 'Epoched', true);
 assertElementsAlmostEqual(testVD5.getBlockTimeScale(), 0:999);
 
 fprintf('Epoched data with sampling rate and no block times should have correct defaults\n')
-testVD5 = viscore.blockedData(values.random, 'Rand normal', 'Epoched', true, ...
+testVD5 = viscore.memoryData(values.random, 'Rand normal', 'Epoched', true, ...
     'SampleRate', 250);
 assertElementsAlmostEqual(testVD5.getBlockTimeScale(), (0:999)*4/1000);
 
 function testReblock(values) %#ok<DEFNU>
-% Unit test for blockedData reblock
-fprintf('\nUnit tests for viscore.blockedData reblock\n');
+% Unit test for memoryData reblock
+fprintf('\nUnit tests for viscore.memoryData reblock\n');
 
 fprintf('It should allow reblock a two dimensional array to be 3D\n');
-vd = viscore.blockedData(values.random, 'ID1', 'BlockSize', 1000);
+vd = viscore.memoryData(values.random, 'ID1', 'BlockSize', 1000);
 assertTrue(isvalid(vd));
 [x1, y1, z1] = size(values.random);
 [x, y, z] = vd.getDataSize();
@@ -188,12 +188,12 @@ data1 = vd.getData();
 assertVectorsAlmostEqual(values.random(:), data1(:));
 
 function testMeans(values) %#ok<DEFNU>
-% Unit test for blockedData various means
-fprintf('\nUnit tests for viscore.blockedData mean\n');
+% Unit test for memoryData various means
+fprintf('\nUnit tests for viscore.memoryData mean\n');
 data = permute(values.random, [2, 3, 1]);
 
 fprintf('It should compute the mean of original data ignoring padding\n');
-vd = viscore.blockedData(data, 'ID1');
+vd = viscore.memoryData(data, 'ID1');
 assertTrue(isvalid(vd));
 [r, c, d] = vd.getDataSize(); %#ok<ASGLU,NASGU>
 % Test overall statistics
@@ -206,11 +206,11 @@ assertTrue(isnumeric(ds));
 assertEqual(length(ds), 1);
 
 function testGetDataSlice(values) %#ok<DEFNU>
-% Unit test for viscore.blockedData for getBlockSlice
-fprintf('\nUnit tests for viscore.blockedData getDataSlice :\n');
+% Unit test for viscore.memoryData for getBlockSlice
+fprintf('\nUnit tests for viscore.memoryData getDataSlice :\n');
 
 fprintf('It should return 1 block of values for each element when blocks are sliced\n');
-testVD = viscore.blockedData(values.random, 'Rand1');
+testVD = viscore.memoryData(values.random, 'Rand1');
 dSlice1 = viscore.dataSlice('Slices', {':', ':', '3'});
 [xvalues, sValues] = testVD.getDataSlice(dSlice1);
 assertEqual(size(xvalues), [32, 1000]);
@@ -225,7 +225,7 @@ assertVectorsAlmostEqual(xvalues, values.random(5, :, :));
 assertVectorsAlmostEqual(sValues, [5, 1, 1]);
 
 fprintf('It should return a single value when data is 2D and slice is by element\n');
-testVD = viscore.blockedData(values.random, 'Rand1');
+testVD = viscore.memoryData(values.random, 'Rand1');
 dSlice1 = viscore.dataSlice('Slices', {'2', ':', ':'});
 [xvalues, sValues] = testVD.getDataSlice(dSlice1);
 assertEqual(size(xvalues, 1), 1);
@@ -234,10 +234,10 @@ assertVectorsAlmostEqual(xvalues, values.random(2, :, :));
 assertVectorsAlmostEqual(sValues, [2, 1, 1]);
 
 function testGetDataSliceOneElement(values) %#ok<DEFNU>
-% Unit test for viscore.blockedData for getDataSlice
-fprintf('\nUnit tests for viscore.blockedData getDataSlice when data has one element:\n');
+% Unit test for viscore.memoryData for getDataSlice
+fprintf('\nUnit tests for viscore.memoryData getDataSlice when data has one element:\n');
 
-testVD = viscore.blockedData(values.random(1, :, :), 'Rand1');
+testVD = viscore.memoryData(values.random(1, :, :), 'Rand1');
 
 fprintf('It should return 1 value when blocks are sliced\n');
 dSlice1 = viscore.dataSlice('Slices', {':', ':', '3'});
@@ -255,7 +255,7 @@ assertVectorsAlmostEqual(sValues, [1, 1, 1]);
 
 fprintf('It should return a single value when data is 2D and slice is by element\n');
 data = squeeze(values.random(:, :, 1));
-testVD = viscore.blockedData(data, 'Rand1');
+testVD = viscore.memoryData(data, 'Rand1');
 dSlice1 = viscore.dataSlice('Slices', {'2', ':', ':'});
 [xvalues, sValues] = testVD.getDataSlice(dSlice1);
 assertEqual(size(xvalues, 1), 1);
@@ -264,25 +264,25 @@ assertVectorsAlmostEqual(xvalues, data(2, :));
 assertVectorsAlmostEqual(sValues, [2, 1, 1]);
 
 function testSinglePrecision(values) %#ok<DEFNU>
-% Unit test for viscore.blockedData for single precision
-fprintf('\nUnit tests for viscore.blockedData when data is single precision:\n');
+% Unit test for viscore.memoryData for single precision
+fprintf('\nUnit tests for viscore.memoryData when data is single precision:\n');
 
 data = single(values.random);
-testVD = viscore.blockedData(data, 'Random single precision data');
+testVD = viscore.memoryData(data, 'Random single precision data');
 storedData = testVD.getData();
 assertTrue(isa(storedData, 'double'));
 
 function testConstructorWithEvents(values) %#ok<DEFNU>
-% Unit test for viscore.blockedData with blockedEvents
-fprintf('\nUnit tests for viscore.blockedData with events\n');
+% Unit test for viscore.memoryData with blockedEvents
+fprintf('\nUnit tests for viscore.memoryData with events\n');
 
 fprintf('It should have an empty events, if none are passed in\n');
-vd1 = viscore.blockedData(values.random, 'ID1');
+vd1 = viscore.memoryData(values.random, 'ID1');
 assertTrue(isvalid(vd1));
 assertTrue(isempty(vd1.getEvents()));
 
 fprintf('It should return the blockedEvents, if it is passed in\n');
-vd2 = viscore.blockedData(values.EEG.data, 'ID2', ...
+vd2 = viscore.memoryData(values.EEG.data, 'ID2', ...
           'Events', values.event, ...
            'SampleRate', values.EEG.srate, 'BlockSize', 1000);
 assertTrue(isvalid(vd2));
@@ -298,8 +298,8 @@ assertEqual(size(counts, 2), numBlocks);
 assertEqual(sum(counts(:)), length(values.event));
 
 function testGetMethods(values) %#ok<DEFNU>
-% Unit test for viscore.blockedData with get methods
-fprintf('\nUnit tests for viscore.blockedData with getEpochTimes\n');
+% Unit test for viscore.memoryData with get methods
+fprintf('\nUnit tests for viscore.memoryData with getEpochTimes\n');
 fprintf('It should have the correct number of start times\n');
 [events, startTimes, timeScale] = ...
     viscore.blockedEvents.getEEGTimes(values.EEGEpoch); %#ok<ASGLU>
@@ -310,7 +310,7 @@ fprintf('It should have the correct block start times (to within a sample)\n');
 assertElementsAlmostEqual(startTimes(1), 0.0);
 assertTrue( abs(startTimes(2)- 0.6953) < 10-05);
 assertTrue( abs(startTimes(3)- 3.7081) < 10-05);
-bData = viscore.blockedData(values.EEGEpoch.data, 'bData', 'SampleRate', ...
+bData = viscore.memoryData(values.EEGEpoch.data, 'bData', 'SampleRate', ...
     values.EEGEpoch.srate, 'BlockStartTimes', startTimes, ...
     'BlockTimeScale', timeScale, 'Epoched', true);
 fprintf('It should correctly get a subset of block start times when data is epoched\n');
