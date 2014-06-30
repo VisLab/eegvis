@@ -119,7 +119,7 @@ classdef (Abstract) blockedData < hgsetget
             obj.BlockDim = pdata.BlockDim;
             obj.BlockSize = pdata.BlockSize;
             obj.BlockStartTimes = pdata.BlockStartTimes;
-            obj.BlockTimeScale = obj.BlockTimeScale;
+            obj.BlockTimeScale = pdata.BlockTimeScale;
             obj.DataID = pdata.DataID;
             obj.ElementLocations = pdata.ElementLocations;
             obj.Epoched = pdata.Epoched;

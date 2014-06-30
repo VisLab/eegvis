@@ -62,7 +62,7 @@ function testPlot(values) %#ok<DEFNU>
 % Unit test visviews.eventStackedPlot plot
 fprintf('\nUnit tests for visviews.eventStackedPlot plot method\n')
 
-testVD1 = viscore.blockedData(values.EEG.data, 'EEG', ...
+testVD1 = viscore.memoryData(values.EEG.data, 'EEG', ...
     'SampleRate', values.EEG.srate, 'Events', values.event);
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
@@ -86,7 +86,7 @@ bstart = 1000/values.EEG.srate;
 bend = 5*bstart;
 fprintf(['It should produce a plot for a slice along dimension 3 with 4 blocks \n' ...
     '..... time scale should be ' num2str(bstart) ' to ' num2str(bend) '\n'] );
-testVD2 = viscore.blockedData(values.EEG.data, 'EEG', ...
+testVD2 = viscore.memoryData(values.EEG.data, 'EEG', ...
     'SampleRate', values.EEG.srate, 'Events', values.event);
 slice2 = viscore.dataSlice('Slices', {':', ':', '2:5'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
@@ -167,7 +167,7 @@ function testPlotWithLabeledData(values) %#ok<DEFNU>
 % Unit test visviews.eventStackedPlot plot with labeled data
 fprintf('\nUnit tests for visviews.eventStackedPlot plot method with labeled data\n')
 
-testVD1 = viscore.blockedData(values.EEG.data, 'EEG', ...
+testVD1 = viscore.memoryData(values.EEG.data, 'EEG', ...
     'SampleRate', values.EEG.srate, 'Events', values.event);
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
@@ -268,7 +268,7 @@ sp.updateProperties(pMan);
 assertElementsAlmostEqual(sp.CertaintyThreshold, s(1).Value);
 
 fprintf('It should still plot after threshold has been changed\n');
-testVD = viscore.blockedData(values.EEG.data, 'EEG', ...
+testVD = viscore.memoryData(values.EEG.data, 'EEG', ...
     'SampleRate', values.EEG.srate, 'Events', values.event);
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
@@ -306,7 +306,7 @@ thisFuncS = func{2};
 % All zeros
 fprintf('It should produce a plot for when all of the values are 0\n');
 data = zeros([32, 1000, 20]);
-testVD = viscore.blockedData(data, 'All zeros');
+testVD = viscore.memoryData(data, 'All zeros');
 slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 fig1 = figure('Name', 'All zero values');
@@ -320,7 +320,7 @@ drawnow
 % Data zeros, function NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
 data = zeros([32, 1000, 20]);
-testVD = viscore.blockedData(data, 'Data zeros, func NaN');
+testVD = viscore.memoryData(data, 'Data zeros, func NaN');
 slice2 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 fig2 = figure('Name', 'Data zero, func NaN');

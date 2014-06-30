@@ -13,12 +13,12 @@ function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
 
 function testNormalConstructor(values) %#ok<DEFNU>
-% Unit test for HDF5Data normal constructor
-fprintf('\nUnit tests for viscore.HDF5Data valid constructor\n');
+% Unit test for hdf5Data normal constructor
+fprintf('\nUnit tests for viscore.hdf5Data valid constructor\n');
 
 fprintf(['It should create an HDF5 file that consists of the data' ...
     ' passed in\n']);
-bd = viscore.HDF5Data(values.Data, 'ID1', values.HDF5NewFile);
+bd = viscore.hdf5Data(values.Data, 'ID1', values.HDF5NewFile);
 assertTrue(strcmp(bd.getDataID(), 'ID1'));
 assertEqual(exist(values.HDF5NewFile, 'file'), 2);
 assertTrue(~isempty(h5read(values.HDF5NewFile,'/data')));
@@ -29,7 +29,7 @@ delete(values.HDF5NewFile);
 
 fprintf(['It should use the data from the hdf5 file when Overwrite is' ...
     ' false and non-empty data is passed in']);
-bd = viscore.HDF5Data(values.Data, 'ID2', values.HDF5ExistingFile);
+bd = viscore.hdf5Data(values.Data, 'ID2', values.HDF5ExistingFile);
 assertTrue(strcmp(bd.getDataID(), 'ID2'));
 assertEqual(exist(values.HDF5ExistingFile, 'file'), 2);
 assertTrue(~isempty(h5read(values.HDF5ExistingFile,'/data')));
@@ -39,7 +39,7 @@ assertEqual(h5read(values.HDF5ExistingFile,'/dims'), size(values.Data));
 
 fprintf(['It should use the data from the hdf5 file when empty data is' ...
     ' passed in']);
-bd = viscore.HDF5Data([], 'ID3', values.HDF5ExistingFile);
+bd = viscore.hdf5Data([], 'ID3', values.HDF5ExistingFile);
 assertTrue(strcmp(bd.getDataID(), 'ID3'));
 assertEqual(exist(values.HDF5ExistingFile, 'file'), 2);
 assertTrue(~isempty(h5read(values.HDF5ExistingFile,'/data')));
@@ -50,7 +50,7 @@ assertEqual(h5read(values.HDF5ExistingFile,'/dims'), size(values.Data));
 fprintf(['It should throw an exception when the hdf5 file doesn''t ' ...
     ' exist and empty data is passed in']);
 assertExceptionThrown(...
-    @() error(viscore.HDF5Data([], 'ID4', values.HDF5NewFile)),...
+    @() error(viscore.hdf5Data([], 'ID4', values.HDF5NewFile)),...
     'HDF5Chk:NoData');
 
 

@@ -32,7 +32,7 @@ assertTrue(isvalid(bv0));
 
 fprintf('It should plot data when blockedData is in the constructor\n')
 
-testVD1 = viscore.blockedData(values.random, 'Testing data passed in constructor');
+testVD1 = viscore.memoryData(values.random, 'Testing data passed in constructor');
 bv1 = visviews.dualView('VisData', testVD1);
 drawnow
 assertTrue(isvalid(bv1));
@@ -56,7 +56,7 @@ fprintf('It should produce a valid plot when a Plots argument with linked summar
 pS = viewTestClass.getDefaultPlotsLinkedSummary();
 assertEqual(length(pS), 4);
 load chanlocs.mat;
-testVD2 = viscore.blockedData(values.random, 'Testing data and plots passed in constructor', ...
+testVD2 = viscore.memoryData(values.random, 'Testing data and plots passed in constructor', ...
     'ElementLocations', chanlocs);
 bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS);
 drawnow
@@ -133,7 +133,7 @@ end
 function testLinkageBoxPlot(values) %#ok<DEFNU>
 % Unit test for normal dualView normal constructor
 fprintf('\nUnit test for visviews.dualView for testing box plot linkage\n');
-testVD1 = viscore.blockedData(values.EEG.data, 'Box plot linkage');
+testVD1 = viscore.memoryData(values.EEG.data, 'Box plot linkage');
 fprintf('It should produce a valid plot when blockboxplots are linked\n');
 pS = viewTestClass.getDefaultPlotsBlockBoxPlotLinked();
 assertEqual(length(pS), 4);
@@ -157,7 +157,7 @@ for k = 1:length(uKeys)
 end
 
 fprintf('It should produce a valid plot when a imageBoxplot is linked to a boxBoxPlot\n');
-testVD2 = viscore.blockedData(values.EEG.data, 'Image plot linkage');
+testVD2 = viscore.memoryData(values.EEG.data, 'Image plot linkage');
 
 pS = viewTestClass.getDefaultPlotsBlockImagePlotLinked();
 assertEqual(length(pS), 5);
@@ -218,7 +218,7 @@ fprintf('It should produce a valid plot when a blockScalpPlot is used with one f
 pS = viewTestClass.getDefaultPlotsScalpShort();
 fS = viewTestClass.getOneEnabledFunction();
 assertEqual(length(pS), 8);
-testVD1 = viscore.blockedData(values.EEG.data, 'Shows block scalp plot', ...
+testVD1 = viscore.memoryData(values.EEG.data, 'Shows block scalp plot', ...
     'ElementLocations', values.EEG.chanlocs);
 bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS', 'Functions', fS);
 assertTrue(isvalid(bv1));
@@ -229,7 +229,7 @@ fprintf('It should produce a valid plot when a blockScalpPlot is used with defau
 pS = viewTestClass.getDefaultPlotsScalp();
 fS = viewTestClass.getDefaultFunctions();
 assertEqual(length(pS), 8);
-testVD2 = viscore.blockedData(values.EEG.data, 'Shows block scalp plot', ...
+testVD2 = viscore.memoryData(values.EEG.data, 'Shows block scalp plot', ...
     'ElementLocations', values.EEG.chanlocs);
 bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS', 'Functions', fS);
 assertTrue(isvalid(bv2));
@@ -285,7 +285,7 @@ fprintf('\nUnit tests for visviews.dualView with constant and NaN values\n')
 
 % All zeros
 fprintf('It should produce a plot for when all of the values are 0\n');
-testVD1 = viscore.blockedData(values.EEG.data, 'All zeros');
+testVD1 = viscore.memoryData(values.EEG.data, 'All zeros');
 bv1 = visviews.dualView('VisData', testVD1);
 assertTrue(isvalid(bv1));
 drawnow
@@ -293,7 +293,7 @@ drawnow
 % Data zeros, function NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs --warnings\n');
 data = zeros([32, 1000, 20]);
-testVD2 = viscore.blockedData(data, 'Data zeros, func NaN');
+testVD2 = viscore.memoryData(data, 'Data zeros, func NaN');
 bv2 =  visviews.dualView('VisData', testVD2);
 assertTrue(isvalid(bv2));
 drawnow
@@ -327,7 +327,7 @@ fprintf('\nUnit test for visviews.dualView for event plots\n');
 fprintf('It should produce a valid figure when events are displayed\n');
 pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
-testVD1 = viscore.blockedData(values.EEG.data, 'EEGLABsample', ...
+testVD1 = viscore.memoryData(values.EEG.data, 'EEGLABsample', ...
     'Events', values.event, 'ElementLocations', values.EEG.chanlocs, ...
     'BlockSize', 1000, 'SampleRate', values.EEG.srate);
 bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
@@ -338,7 +338,7 @@ fprintf('It should produce a valid figure for epoched data\n');
 pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
 [events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
-testVD2 = viscore.blockedData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
+testVD2 = viscore.memoryData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
      'ElementLocations', values.EEGEpoch.chanlocs, ...
     'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
     'BlockTimeScale', escales, 'Epoched', true);

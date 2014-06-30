@@ -101,7 +101,7 @@
 % $Initial version $
 %
 
-classdef HDF5Data < hgsetget & viscore.blockedData
+classdef hdf5Data < hgsetget & viscore.blockedData
     
     properties (Access = private)
         HDF5File;             % hdf5 file that contains a data array
@@ -109,9 +109,9 @@ classdef HDF5Data < hgsetget & viscore.blockedData
     
     methods
         
-        function obj = HDF5Data(data, dataID, hdf5File, varargin)
+        function obj = hdf5Data(data, dataID, hdf5File, varargin)
             % Constructor parses parameters and sets up initial data
-            obj = obj@viscore.blockedData(dataID, varargin);
+            obj = obj@viscore.blockedData(dataID, varargin{:});
             obj.parseParameters(data, hdf5File, varargin{:});
         end % blockedData constructor
         
@@ -138,7 +138,7 @@ classdef HDF5Data < hgsetget & viscore.blockedData
             nBlocks = ceil(dims(2) / obj.BlockSize);
         end % getDataSize
         
-                function [values, sValues] = getDataSlice(obj, dSlice)
+        function [values, sValues] = getDataSlice(obj, dSlice)
             % Return function values and starting indices corresponding to this slice
             if ~isempty(dSlice)
                 slices = dSlice.getParameters(3);
@@ -146,9 +146,9 @@ classdef HDF5Data < hgsetget & viscore.blockedData
                 slices = [];
             end
             [values, sValues] = viscore.dataSlice.getDataSlice(...
-                                      obj.Data, slices, [], []);
+                obj.Data, slices, [], []);
         end % getDataSlice
-       
+        
         
         function [tMean, tStd, tLow, tHigh] = getTrimValues(obj, percent, data)
             % Return trim mean, trim std, trim low cutoff, trim high cutoff
@@ -182,10 +182,10 @@ classdef HDF5Data < hgsetget & viscore.blockedData
         
         function parseParameters(obj, data, hdf5File, varargin)
             % Parse parameters provided by user in constructor
-            parser = viscore.HDF5Data.getParser();
+            parser = viscore.hdf5Data.getParser();
             parser.parse(data, hdf5File, varargin{:})
             pdata = parser.Results;
-                      
+            
             % Check the hdf5 file
             checkHDF5File(obj, pdata);
             

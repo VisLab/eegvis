@@ -12,7 +12,7 @@ values.fun = func{1};
 values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
         'DimNames', {'Channel', 'Sample', 'Window'});
 load('EEG.mat'); 
-values.bData = viscore.blockedData(EEG.data, 'EEG', ...
+values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);    
 values.deleteFigures = true;
 
@@ -117,7 +117,7 @@ fprintf('\nUnit tests for visviews.blockHistogramPlot plot method with constant 
 % All zeros
 fprintf('It should produce a plot for when all of the values are 0 (---see warning)\n');
 data = zeros([32, 1000, 20]);
-testVD1 = viscore.blockedData(data, 'All zeros');
+testVD1 = viscore.memoryData(data, 'All zeros');
 fig1 = figure('Name', 'All zero values');
 hp1 = visviews.blockHistogramPlot(fig1, [], []);
 assertTrue(isvalid(hp1));

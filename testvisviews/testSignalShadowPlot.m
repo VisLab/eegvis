@@ -4,7 +4,7 @@ initTestSuite;
 
 function values = setup %#ok<DEFNU>
 load('EEG.mat'); 
-values.bData = viscore.blockedData(EEG.data, 'EEG', ...
+values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);  
 
 load('EEGEpoch.mat');

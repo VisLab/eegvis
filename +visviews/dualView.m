@@ -491,7 +491,7 @@ classdef dualView < hgsetget & visprops.configurable & visviews.clickable
             if isfield(data, 'VisData') && isa(data.VisData, 'viscore.blockedData')
                 obj.VisData = data.VisData;
             elseif isfield(data, 'VisData') && ~isempty(data.VisData)
-                obj.VisData = viscore.blockedData(data.VisData, ...
+                obj.VisData = viscore.memoryData(data.VisData, ...
                     [obj.VisName ' (' obj.VisSource ') args']);
             else
                 obj.VisData = [];

@@ -249,10 +249,10 @@ classdef memoryData < hgsetget & viscore.blockedData
             end
             obj.Data = reshape(obj.Data, [dStart, obj.BlockSize, blocks, dEnd]);
             
-            if ~isempty(obj.Events)
-                bTime = obj.BlockSize./obj.SampleRate;
-                obj.Events.reblock(bTime, blocks*bTime);  % fix this later
-            end
+%             if ~isempty(obj.Events)
+%                 bTime = obj.BlockSize./obj.SampleRate;
+%                 obj.Events.reblock(bTime, blocks*bTime);  % fix this later
+%             end
         end % reblock
         
     end % public methods

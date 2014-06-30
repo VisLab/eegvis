@@ -11,7 +11,7 @@ values.fun = func{1};
 values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
         'DimNames', {'Channel', 'Sample', 'Window'});
 load('EEG.mat'); 
-values.bData = viscore.blockedData(EEG.data, 'EEG', ...
+values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);    
 values.deleteFigures = true;
 
@@ -130,7 +130,7 @@ bp5.reposition(gaps);
 % Set up the data
 data = repmat([1, 1, 1, 2, 2, 2, 3], [5, 1, 4]);
 data = permute(data, [1, 3, 2]);
-testVD6 = viscore.blockedData(data, 'Specific values');
+testVD6 = viscore.memoryData(data, 'Specific values');
 fprintf('It should produce a plot for identity slice with uneven grouping\n');
 fig6 = figure('Name', 'No grouping to compare with specific values');
 bp6 = visviews.elementBoxPlot(fig6, [], []);
@@ -415,7 +415,7 @@ fprintf('\nUnit tests for visviews.elementBoxPlot plot method with constant and 
 % All zeros
 fprintf('It should produce a plot for when all of the values are 0 (---see warning)\n');
 data = zeros([32, 1000, 20]);
-testVD1 = viscore.blockedData(data, 'All zeros');
+testVD1 = viscore.memoryData(data, 'All zeros');
 fig1 = figure('Name', 'All zero values');
 bp1 = visviews.elementBoxPlot(fig1, [], []);
 assertTrue(isvalid(bp1));
