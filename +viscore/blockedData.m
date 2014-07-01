@@ -17,6 +17,7 @@ classdef (Abstract) blockedData < hgsetget
         PadValue              % use to pad data if not divisible by BlockSize
         SampleRate            % sampling rate in Hz of data
         TotalValues           % total number of values in original data
+        UnmatchedArguments    % the unmatched arguments from child class
         VersionID             % version ID of this data
     end
     
@@ -112,10 +113,12 @@ classdef (Abstract) blockedData < hgsetget
         function parseParameters(obj, dataID, varargin)
             % Parse parameters provided by user in constructor
             parser = viscore.blockedData.getParser();
+            parser.KeepUnmatched = true;         
             parser.parse(dataID, varargin{:})
             pdata = parser.Results;
             
             % Assign specified private properties
+            obj.UnmatchedArguments = parser.Unmatched;
             obj.BlockDim = pdata.BlockDim;
             obj.BlockSize = pdata.BlockSize;
             obj.BlockStartTimes = pdata.BlockStartTimes;

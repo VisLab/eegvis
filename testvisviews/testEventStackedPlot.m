@@ -105,7 +105,7 @@ fig3 = figure('Name', 'visviews.eventStackedPlot 1 epoch (2)');
 sp3 = visviews.eventStackedPlot(fig3, [], []);
 assertTrue(isvalid(sp3));
 [event, epochStarts, epochScale] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
-testVD3 = viscore.blockedData(values.EEGEpoch.data, 'EEGEpoch', ...
+testVD3 = viscore.memoryData(values.EEGEpoch.data, 'EEGEpoch', ...
     'SampleRate', values.EEGEpoch.srate, 'Events', event, ...
     'BlockStartTimes', epochStarts, 'BlockTimeScale', epochScale, ...
        'Epoched', true);
@@ -334,7 +334,7 @@ drawnow
 % Data NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
 data = NaN([32, 1000, 20]);
-testVD = viscore.blockedData(data, 'Data NaN');
+testVD = viscore.memoryData(data, 'Data NaN');
 slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 fig3 = figure('Name', 'Data NaNs');
@@ -348,7 +348,7 @@ drawnow
 % Data slice empty
 fprintf('It should produce empty axes when data slice is empty\n');
 data = zeros(5, 1);
-testVD = viscore.blockedData(data, 'Data empty');
+testVD = viscore.memoryData(data, 'Data empty');
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 fig4 = figure('Name', 'Data slice is empty');

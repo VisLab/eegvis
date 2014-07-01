@@ -80,7 +80,7 @@ end
 fprintf('It should produce a valid plot when a Plots argument with unlinked summary is passed\n');
 pS = viewTestClass.getDefaultPlotsUnlinkedSummary();
 assertEqual(length(pS), 4);
-testVD3 = viscore.blockedData(values.random, 'Testing with unlinked summary plots passed in constructor');
+testVD3 = viscore.memoryData(values.random, 'Testing with unlinked summary plots passed in constructor');
 bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS);
 drawnow
 assertTrue(isvalid(bv3));
@@ -102,7 +102,7 @@ end
 
 fprintf('It should create a graph when the Functions parameter is passed to constructor\n');
 f = visviews.dualView.getDefaultFunctions();
-testVD4 = viscore.blockedData(values.EEG.data, 'Testing data and function structure passed in constructor');
+testVD4 = viscore.memoryData(values.EEG.data, 'Testing data and function structure passed in constructor');
 bv4 = visviews.dualView('VisData', testVD4, 'Functions', f);
 drawnow
 assertTrue(isvalid(bv4));
@@ -110,13 +110,13 @@ assertTrue(isvalid(bv4));
 f = visviews.dualView.getDefaultFunctions();
 fMan = viscore.dataManager();
 fMan.putObjects(visfuncs.functionObj.createObjects('visfuncs.functionObj', f));
-testVD5 = viscore.blockedData(values.EEG.data, 'Testing data and function manager passed in constructor');
+testVD5 = viscore.memoryData(values.EEG.data, 'Testing data and function manager passed in constructor');
 bv5 = visviews.dualView('VisData', testVD5, 'Functions', fMan);
 drawnow
 assertTrue(isvalid(bv5));
 f = visviews.dualView.getDefaultFunctions();
 fns = visfuncs.functionObj.createObjects('visfuncs.functionObj', f);
-testVD6 = viscore.blockedData(values.EEG.data, 'Testing data and list of function objects passed in constructor');
+testVD6 = viscore.memoryData(values.EEG.data, 'Testing data and list of function objects passed in constructor');
 bv6 = visviews.dualView('VisData', testVD6, 'Functions', fns);
 drawnow
 assertTrue(isvalid(bv6));
@@ -184,7 +184,7 @@ fprintf('It should produce a valid plot when a imageBoxplot is linked to two box
 pS = viewTestClass.getPlotsBlockImageMultipleLinked();
 assertEqual(length(pS), 5);
 load chanlocs.mat;
-testVD3 = viscore.blockedData(values.EEG.data, 'Image plot linking two different box plots', ...
+testVD3 = viscore.memoryData(values.EEG.data, 'Image plot linking two different box plots', ...
     'ElementLocations', chanlocs);
 bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
 drawnow
@@ -238,7 +238,7 @@ drawnow
 fprintf('It should produce a valid plot when only details are used\n');
 pS = viewTestClass.getDefaultPlotsDetailOnly();
 assertEqual(length(pS), 2);
-testVD3 = viscore.blockedData(values.EEG.data, 'Shows details only');
+testVD3 = viscore.memoryData(values.EEG.data, 'Shows details only');
 bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
 assertTrue(isvalid(bv3));
 drawnow
@@ -246,7 +246,7 @@ drawnow
 fprintf('It should produce a valid plot when only summaries are used\n');
 pS = viewTestClass.getDefaultPlotsSummaryOnly();
 assertEqual(length(pS), 3);
-testVD4 = viscore.blockedData(values.EEG.data, 'Shows summary only');
+testVD4 = viscore.memoryData(values.EEG.data, 'Shows summary only');
 bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
 assertTrue(isvalid(bv4));
 drawnow
@@ -254,7 +254,7 @@ drawnow
 fprintf('It should produce a valid plot when two shadow plots are used\n');
 pS = viewTestClass.getDefaultPlotsTwoShadowPlots();
 assertEqual(length(pS), 6);
-testVD5 = viscore.blockedData(values.EEG.data, 'Shows two shadow plots');
+testVD5 = viscore.memoryData(values.EEG.data, 'Shows two shadow plots');
 bv5 = visviews.dualView('VisData', testVD5, 'Plots', pS');
 assertTrue(isvalid(bv5));
 drawnow
@@ -265,7 +265,7 @@ fns = visfuncs.functionObj.createObjects('visfuncs.functionObj', f);
 assertEqual(length(fns), 1);
 pS = viewTestClass.getDefaultPlotsOneSummaryTwoDetails();
 assertEqual(length(pS), 3);
-testVD6 = viscore.blockedData(values.EEG.data, 'One summary two details');
+testVD6 = viscore.memoryData(values.EEG.data, 'One summary two details');
 bv6 = visviews.dualView('VisData', testVD6, 'Plots', pS', 'Functions', fns);
 assertTrue(isvalid(bv6));
 drawnow
@@ -301,7 +301,7 @@ drawnow
 % Data NaN
 fprintf('It should produce a plot for when data NaNs, funcs NaNs --warnings\n');
 data = NaN([32, 1000, 20]);
-testVD3 = viscore.blockedData(data, 'Data NaN');
+testVD3 = viscore.memoryData(data, 'Data NaN');
 bv3 =  visviews.dualView('VisData', testVD3);
 assertTrue(isvalid(bv3));
 drawnow
@@ -309,7 +309,7 @@ drawnow
 % Data slice empty
 fprintf('It should produce empty axes when data slice is empty --warnings\n');
 data = zeros(5, 1);
-testVD4 = viscore.blockedData(data, 'Data empty');
+testVD4 = viscore.memoryData(data, 'Data empty');
 bv4 =  visviews.dualView('VisData', testVD4);
 assertTrue(isvalid(bv4));
 drawnow

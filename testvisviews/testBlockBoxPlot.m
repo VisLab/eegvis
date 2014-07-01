@@ -149,7 +149,7 @@ bp7.reposition(gaps);
 
 fprintf('It should produce a plot for data with large standard deviation\n');
 data8 = random('normal', 0.0, 10000.0, [40, 1000, 215]);
-bData8 = viscore.blockedData(data8, 'Random normal large std');
+bData8 = viscore.memoryData(data8, 'Random normal large std');
 fig8 = figure('Name', 'Data with large standard deviation');
 bp8 = visviews.blockBoxPlot(fig8, [], []);
 assertTrue(isvalid(bp8));
@@ -433,7 +433,7 @@ bp2.reposition(gaps);
 % Data NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
 data = NaN([32, 1000, 20]);
-testVD3 = viscore.blockedData(data, 'Data NaN');
+testVD3 = viscore.memoryData(data, 'Data NaN');
 fig3 = figure('Name', 'Data NaNs');
 bp3 = visviews.blockBoxPlot(fig3, [], []);
 assertTrue(isvalid(bp3));
@@ -444,7 +444,7 @@ bp3.reposition(gaps);
 % Data slice empty
 fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
 data = zeros(5, 1);
-testVD4 = viscore.blockedData(data, 'Data empty');
+testVD4 = viscore.memoryData(data, 'Data empty');
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 fig4 = figure('Name', 'Data slice is empty');

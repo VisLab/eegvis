@@ -112,7 +112,7 @@ classdef hdf5Data < hgsetget & viscore.blockedData
         function obj = hdf5Data(data, dataID, hdf5File, varargin)
             % Constructor parses parameters and sets up initial data
             obj = obj@viscore.blockedData(dataID, varargin{:});
-            obj.parseParameters(data, hdf5File, varargin{:});
+            obj.parseParameters(data, hdf5File);
         end % blockedData constructor
         
         function values = funEval(obj, fn, fh)
@@ -180,10 +180,10 @@ classdef hdf5Data < hgsetget & viscore.blockedData
     
     methods(Access = private)
         
-        function parseParameters(obj, data, hdf5File, varargin)
+        function parseParameters(obj, data, hdf5File)
             % Parse parameters provided by user in constructor
             parser = viscore.hdf5Data.getParser();
-            parser.parse(data, hdf5File, varargin{:})
+            parser.parse(data, hdf5File, obj.UnmatchedArguments)
             pdata = parser.Results;
             
             % Check the hdf5 file
@@ -199,7 +199,11 @@ classdef hdf5Data < hgsetget & viscore.blockedData
                 obj.HDF5File = pdata.HDF5File;
                 % Case 2
             elseif ~isempty(pdata.Data) && ...
-                    exist(pdata.HDF5File, 'file') && ~pdata.Overwrite
+                    exist(pdata.HDF5File, 'file')
+                if pdata.Overwrite
+                    delete(pdata.HDF5File);
+                    createHDF5(double(pdata.Data), pdata.HDF5File);
+                end
                 obj.HDF5File = pdata.HDF5File;
                 % Case 3
             elseif isempty(pdata.Data) && ...

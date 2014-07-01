@@ -29,7 +29,7 @@ dataSmooth(1, :) = 3*dataSmooth(1, :);
 dataSmooth = dataSmooth';
 dataSmooth = reshape(dataSmooth, [nSamples, nWindows, nChans]);
 dataSmooth = permute(dataSmooth, [3, 1, 2]);
-values.bDataSmooth =  viscore.blockedData(dataSmooth, 'Smooth');
+values.bDataSmooth =  viscore.memoryData(dataSmooth, 'Smooth');
 
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
@@ -180,7 +180,7 @@ sp10 = visviews.signalStackedPlot(fig10, [], []);
 assertTrue(isvalid(sp10));
 data10 = values.bDataSmooth.getData();
 data10(2,:) = 100*data10(6, :);
-testVD10 = viscore.blockedData(data10, 'Large Cosine');
+testVD10 = viscore.memoryData(data10, 'Large Cosine');
 sp10.SignalScale = 3.0;
 sp10.TrimPercent = 5;
 sp10.plot(testVD10, values.fun, values.slice);
@@ -214,7 +214,7 @@ assertTrue(isvalid(sp13));
 bigData = values.bDataSmooth.getData;
 bigData(:, :, 5) = 3*bigData(:, :, 5);
 bigData(:, :, 7) = 3.5*bigData(:, :, 7);
-testVD13 = viscore.blockedData(bigData, 'Sinusoidal', ...
+testVD13 = viscore.memoryData(bigData, 'Sinusoidal', ...
     'Epoched', true, 'SampleRate', 256);
 slice13 = viscore.dataSlice('Slices', {':', ':', '4:8'}, ...
     'DimNames', {'Channel', 'Sample', 'Epoch'}, 'CombineDim', 3);
@@ -269,7 +269,7 @@ fprintf('\nUnit tests for visviews.signalStackedPlot plot method with constant a
 % All zeros
 fprintf('It should produce a plot for when all of the values are 0\n');
 data = zeros([32, 1000, 20]);
-testVD1 = viscore.blockedData(data, 'All zeros');
+testVD1 = viscore.memoryData(data, 'All zeros');
 fig1 = figure('Name', 'All zero values');
 bp1 = visviews.signalStackedPlot(fig1, [], []);
 assertTrue(isvalid(bp1));
@@ -289,7 +289,7 @@ bp2.reposition(gaps);
 % Data NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
 data = NaN([32, 1000, 20]);
-testVD3 = viscore.blockedData(data, 'Data NaN');
+testVD3 = viscore.memoryData(data, 'Data NaN');
 fig3 = figure('Name', 'Data NaNs');
 bp3 = visviews.signalStackedPlot(fig3, [], []);
 assertTrue(isvalid(bp3));
@@ -300,7 +300,7 @@ bp3.reposition(gaps);
 % Data slice empty
 fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
 data = zeros(5, 1);
-testVD4 = viscore.blockedData(data, 'Data empty');
+testVD4 = viscore.memoryData(data, 'Data empty');
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 fig4 = figure('Name', 'Data slice is empty');
