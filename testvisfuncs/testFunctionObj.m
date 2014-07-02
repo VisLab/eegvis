@@ -244,9 +244,9 @@ dSlice3 = viscore.dataSlice('Slices', {'45:58', ':', ':'});
 colors = bf.getBlockColorsSlice(dSlice3);
 assertTrue(isempty(colors));
 
-function testSetBlockedData %#ok<DEFNU>
+function testSetDataMemoryData %#ok<DEFNU>
 % Unit test for visfuncs.functionObj for setData
-fprintf('\nUnit tests for visfuncs.functionObj setData\n');
+fprintf('\nUnit tests for visfuncs.functionObj setData with memory data\n');
 
 fprintf('It should set the function values when setData is called\n');
 fs = functionTestClass.getDefaultFunctions();
@@ -270,9 +270,9 @@ bf.setData(testVD);
 testVD.reblock(1000);
 bf.setData(testVD);
 
-function testSetHDF5Data %#ok<DEFNU>
+function testSetDataHDF5Data %#ok<DEFNU>
 % Unit test for visfuncs.functionObj for setData
-fprintf('\nUnit tests for visfuncs.functionObj setData\n');
+fprintf('\nUnit tests for visfuncs.functionObj setData with hdf5 data\n');
 
 fprintf('It should create a hdf5 file that only consist of the data\n');
 fs = functionTestClass.getDefaultFunctions();
@@ -285,7 +285,8 @@ numBlocks = ceil(numSamples / 1000);
 HDF5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
 testVD = viscore.hdf5Data(EEG.data, 'eeg_data', HDF5File);
 
-fprintf('It should set the kurtosis function values with block size of 1000 and store them in the hdf5 file\n');
+fprintf(['It should set the kurtosis function values with block size' ...
+    ' of 1000 and store them in the hdf5 file\n']);
 HDF5Info = h5info(HDF5File);
 HDF5Datasets = {HDF5Info.Datasets.Name};
 assertFalse(any(strcmpi(HDF5Datasets,'Kurtosis_1000')));
@@ -293,9 +294,11 @@ bf.setData(testVD);
 HDF5Info = h5info(HDF5File);
 HDF5Datasets = {HDF5Info.Datasets.Name};
 assertTrue(any(strcmpi(HDF5Datasets,'Kurtosis_1000')));
-assertEqual(size(h5read(HDF5File, '/Kurtosis_1000')), [numElements,numBlocks]);
+assertEqual(size(h5read(HDF5File, '/Kurtosis_1000')), ...
+    [numElements,numBlocks]);
 
-fprintf('It should set the kurtosis function values with block size of 500 and store them in the hdf5 file\n');
+fprintf(['It should set the kurtosis function values with block size' ...
+    ' of 500 and store them in the hdf5 file\n']);
 assertFalse(any(strcmpi(HDF5Datasets,'Kurtosis_500')));
 testVD.reblock(500);
 bf.setData(testVD);
@@ -303,15 +306,9 @@ HDF5Info = h5info(HDF5File);
 HDF5Datasets = {HDF5Info.Datasets.Name};
 assertTrue(any(strcmpi(HDF5Datasets,'Kurtosis_500')));
 numBlocks = ceil(numSamples / 500);
-assertEqual(size(h5read(HDF5File, '/Kurtosis_500')), [numElements,numBlocks]);
+assertEqual(size(h5read(HDF5File, '/Kurtosis_500')), ...
+    [numElements,numBlocks]);
 delete(HDF5File);
-
-% fprintf('It should reset the data and functions when data reblocked\n');
-% fprintf('----------Needs to be revisited--------------------\n');
-% testVD.reblock(500);
-% bf.setData(testVD);
-% testVD.reblock(1000);
-% bf.setData(testVD);
 
 function testGetThresholdLevels %#ok<DEFNU>
 % Unit test for functionObj for getThresholdLevels
