@@ -12,11 +12,11 @@ values.fun = func{1};
 values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 load('EEG.mat');
-HDF5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_DATA.hdf5');
+hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_DATA.hdf5');
 values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);
-values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', HDF5File, ...
-    'Overwrite', false, 'SampleRate', EEG.srate);
+values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', hdf5File, ...
+    'SampleRate', EEG.srate);
 values.deleteFigures = true;
 
 function teardown(values) %#ok<INUSD,DEFNU>
@@ -199,8 +199,8 @@ ip5.reposition(gaps);
 fprintf('It should produce a plot for identity slice for small data sets\n');
 % Generate some data to plot
 data = random('exp', 1, [5, 1000, 4]);
-HDF5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
-testVD6 = viscore.hdf5Data(data, 'Rand1', HDF5File);
+hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+testVD6 = viscore.hdf5Data(data, 'Rand1', hdf5File);
 fig6 = figure('Name', 'Uneven  small group');
 ip6 = visviews.blockImagePlot(fig6, [], []);
 assertTrue(isvalid(ip6));
@@ -208,13 +208,13 @@ ip6.ClumpSize = 7;
 ip6.plot(testVD6, values.fun, values.slice);
 gaps = ip6.getGaps();
 ip6.reposition(gaps);
-delete(HDF5File)
+delete(hdf5File)
 
 fprintf('It should produce a plot for identity slice with 1 element\n');
 % Generate some data to plot
 data = random('exp', 1, [1, 1000, 20]);
-HDF5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
-testVD7 = viscore.hdf5Data(data, 'Rand1', HDF5File);
+hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+testVD7 = viscore.hdf5Data(data, 'Rand1', hdf5File);
 fig7 = figure('Name', 'One element grouped by 3');
 ip7 = visviews.blockImagePlot(fig1, [], []);
 assertTrue(isvalid(ip7));
@@ -222,7 +222,7 @@ ip7.ClumpSize = 3;
 ip7.plot(testVD7, values.fun, values.slice);
 gaps = ip7.getGaps();
 ip7.reposition(gaps);
-delete(HDF5File);
+delete(hdf5File);
 
 drawnow
 if values.deleteFigures
@@ -475,8 +475,8 @@ fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and 
 
 % Set up the functions
 data = zeros([32, 1000, 20]);
-HDF5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
-testVD1 = viscore.hdf5Data(data, 'All zeros', HDF5File);
+hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File);
 fprintf('It should produce a plot for when all of the values are 0\n');
 fig1 = figure('Name', 'All zero values');
 ip1 = visviews.blockImagePlot(fig1, [], []);
@@ -484,7 +484,7 @@ assertTrue(isvalid(ip1));
 ip1.plot(testVD1, values.fun, values.slice);
 gaps = ip1.getGaps();
 ip1.reposition(gaps);
-delete(HDF5File);
+delete(hdf5File);
 
 fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
 fig2 = figure('Name', 'Data zero, func NaN');
@@ -496,8 +496,8 @@ ip2.reposition(gaps);
 
 fprintf('It should produce a plot for when data is NaNs, funcs NaNs (---see warning)\n');
 data3 = NaN([32, 1000, 20]);
-HDF5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
-testVD3 = viscore.hdf5Data(data3, 'Data NaN', HDF5File);
+hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+testVD3 = viscore.hdf5Data(data3, 'Data NaN', hdf5File);
 fig3 = figure('Name', 'Data NaNs');
 ip3 = visviews.blockImagePlot(fig3, [], []);
 assertTrue(isvalid(ip3));
@@ -505,13 +505,13 @@ ip3.plot(testVD3, values.fun, values.slice);
 gaps = ip3.getGaps();
 ip3.reposition(gaps);
 drawnow
-delete(HDF5File);
+delete(hdf5File);
 
 % Data slice empty
 fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
 data = zeros(5, 1);
-HDF5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
-testVD4 = viscore.hdf5Data(data, 'Data empty', HDF5File);
+hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File);
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 fig4 = figure('Name', 'Data slice is empty');
@@ -520,7 +520,7 @@ assertTrue(isvalid(ip4));
 ip4.plot(testVD4, values.fun, slice4);
 gaps = ip4.getGaps();
 ip4.reposition(gaps);
-delete(HDF5File);
+delete(hdf5File);
 
 drawnow
 if values.deleteFigures
