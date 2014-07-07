@@ -130,6 +130,13 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             end
         end % funEval
         
+        function data = getData(obj)
+            % Return the blocked data (may have padding at the end)
+%             dims = h5read(obj.HDF5File, '/dims');
+%             data = reshape(h5read(obj.HDF5File, '/data'), dims);
+              data = h5read(obj.HDF5File, '/data');
+        end % getData
+        
         function [nElements, nSamples, nBlocks] = getDataSize(obj)
             % Return number of elements, samples and blocks in data
             dims = h5read(obj.HDF5File, '/dims');
@@ -145,8 +152,11 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             else
                 slices = [];
             end
+%             [values, sValues] = viscore.dataSlice.getDataSlice(...
+%                 obj.Data, slices, [], []);
+            dims = h5read(obj.HDF5File, '/dims');
             [values, sValues] = viscore.dataSlice.getDataSlice(...
-                obj.Data, slices, [], []);
+                reshape(h5read(obj.HDF5File, '/data'), dims), slices, [], []);
         end % getDataSlice
         
         
@@ -185,10 +195,9 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             parser = viscore.hdf5Data.getParser();
             parser.parse(data, hdf5File, obj.UnmatchedArguments)
             pdata = parser.Results;
-            
             % Check the hdf5 file
             checkHDF5File(obj, pdata);
-            
+            obj.setEvents();
         end % parseParameters
         
         function checkHDF5File(obj, pdata)
@@ -236,6 +245,25 @@ classdef hdf5Data < hgsetget & viscore.blockedData
                 realBlockSize = min(obj.BlockSize, numFrames - readFrames);
             end
         end % computeBlocks
+        
+        function setEvents(obj)
+            % Helper function to set events
+            if isempty(obj.Events)
+                return;
+            elseif obj.Epoched
+                bStarts = obj.BlockStartTimes;
+                maxTime = [];
+            else
+                bStarts = [];
+                [~, ~, nBlocks] = getDataSize(obj);
+                maxTime = obj.BlockSize*nBlocks./ ...
+                    obj.SampleRate;
+            end
+            
+            obj.Events = viscore.blockedEvents(obj.Events, ...
+                'BlockStartTimes', bStarts, 'MaxTime', maxTime, ...
+                'BlockTime', obj.BlockSize./obj.SampleRate);
+        end % setEvents
         
     end % private methods
     

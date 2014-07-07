@@ -23,6 +23,7 @@ classdef (Abstract) blockedData < hgsetget
     
     methods(Abstract)
         values = funEval(obj, fn, fh);
+        data = getData(obj);
         [nElements, nSamples, nBlocks] = getDataSize(obj);
         [values, sValues] = getDataSlice(obj, dSlice);
         [tMean, tStd, tLow, tHigh] = getTrimValues(obj, percent, data);
@@ -105,7 +106,7 @@ classdef (Abstract) blockedData < hgsetget
             e = obj.Epoched;
         end % isEpoched
         
-        
+                      
     end
     
     methods(Access = private)

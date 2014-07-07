@@ -11,7 +11,7 @@ values.fun = func{1};
 values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
         'DimNames', {'Channel', 'Sample', 'Window'});
 load('EEG.mat'); 
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_DATA.hdf5');
+hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG.hdf5');
 values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);   
 values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', hdf5File, ...
@@ -246,7 +246,7 @@ bp5.reposition(gaps);
 % Set up the data
 data = repmat([1, 1, 1, 2, 2, 2, 3], [5, 1, 4]);
 data = permute(data, [1, 3, 2]);
-hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
 testVD6 = viscore.hdf5Data(data, 'Specific values', hdf5File);
 fprintf('It should produce a plot for identity slice with uneven grouping\n');
 fig6 = figure('Name', 'No grouping to compare with specific values');
@@ -267,7 +267,7 @@ bp7.reposition(gaps);
 
 fprintf('It should produce a plot for data with large standard deviation\n');
 data8 = random('normal', 0.0, 10000.0, [40, 1000, 215]);
-hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
 bData8 = viscore.hdf5Data(data8, 'Random normal large std', hdf5File);
 fig8 = figure('Name', 'Data with large standard deviation');
 bp8 = visviews.blockBoxPlot(fig8, [], []);
@@ -833,7 +833,7 @@ fprintf('\nUnit tests for visviews.blockBoxPlot plot method with constant and Na
 % All zeros
 fprintf('It should produce a plot for when all of the values are 0 (---see warning)\n');
 data = zeros([32, 1000, 20]);
-hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
 testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File);
 fig1 = figure('Name', 'All zero values');
 bp1 = visviews.blockBoxPlot(fig1, [], []);
@@ -855,7 +855,7 @@ bp2.reposition(gaps);
 % Data NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
 data = NaN([32, 1000, 20]);
-hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
 testVD3 = viscore.hdf5Data(data, 'Data NaN', hdf5File);
 fig3 = figure('Name', 'Data NaNs');
 bp3 = visviews.blockBoxPlot(fig3, [], []);
@@ -868,7 +868,7 @@ delete(hdf5File);
 % Data slice empty
 fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
 data = zeros(5, 1);
-hdf5File = regexprep(which('EEG_DATA.hdf5'), 'EEG_DATA.hdf5$', 'EEG_NO_DATA.hdf5');
+hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
 testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File);
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
