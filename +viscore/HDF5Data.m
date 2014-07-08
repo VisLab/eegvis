@@ -142,7 +142,11 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             dims = h5read(obj.HDF5File, '/dims');
             nElements = dims(1);
             nSamples = obj.BlockSize;
+            if length(dims) == 2          
             nBlocks = ceil(dims(2) / obj.BlockSize);
+            elseif length(dims) == 3
+            nBlocks = ceil(dims(2) * dims(3) / obj.BlockSize);   
+            end
         end % getDataSize
         
         function [values, sValues] = getDataSlice(obj, dSlice)
@@ -154,9 +158,9 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             end
 %             [values, sValues] = viscore.dataSlice.getDataSlice(...
 %                 obj.Data, slices, [], []);
-            dims = h5read(obj.HDF5File, '/dims');
+%             dims = h5read(obj.HDF5File, '/dims');
             [values, sValues] = viscore.dataSlice.getDataSlice(...
-                reshape(h5read(obj.HDF5File, '/data'), dims), slices, [], []);
+                h5read(obj.HDF5File, '/data'), slices, [], []);
         end % getDataSlice
         
         
@@ -227,10 +231,11 @@ classdef hdf5Data < hgsetget & viscore.blockedData
         end % compareDataAndHDF5File
         
         function computedBlocks = computeBlocks(obj, fh)
-            dims = h5read(obj.HDF5File, '/dims');
-            numElements = dims(1);
-            numFrames = dims(2);
-            numBlocks = ceil(dims(2) / obj.BlockSize);
+%             dims = h5read(obj.HDF5File, '/dims');
+%             numElements = dims(1);
+%             numFrames = dims(2);
+%             numBlocks = ceil(dims(2) / obj.BlockSize);
+            [numElements, numFrames, numBlocks] = getDataSize(obj);
             computedBlocks = zeros(numElements, numBlocks);
             readFrames = 0;
             realBlockSize = min(obj.BlockSize, numFrames - readFrames);
