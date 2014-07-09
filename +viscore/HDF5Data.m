@@ -131,21 +131,19 @@ classdef hdf5Data < hgsetget & viscore.blockedData
         end % funEval
         
         function data = getData(obj)
-            % Return the blocked data (may have padding at the end)
-%             dims = h5read(obj.HDF5File, '/dims');
-%             data = reshape(h5read(obj.HDF5File, '/data'), dims);
-              data = h5read(obj.HDF5File, '/data');
+            data = h5read(obj.HDF5File, '/data');
         end % getData
         
         function [nElements, nSamples, nBlocks] = getDataSize(obj)
             % Return number of elements, samples and blocks in data
             dims = h5read(obj.HDF5File, '/dims');
             nElements = dims(1);
-            nSamples = obj.BlockSize;
-            if length(dims) == 2          
-            nBlocks = ceil(dims(2) / obj.BlockSize);
+            if length(dims) == 2
+                nSamples = dims(2);
+                nBlocks = ceil(dims(2) / obj.BlockSize);
             elseif length(dims) == 3
-            nBlocks = ceil(dims(2) * dims(3) / obj.BlockSize);   
+                nSamples = dims(2) * dims(3);
+                nBlocks = ceil(dims(2) * dims(3) / obj.BlockSize);
             end
         end % getDataSize
         
@@ -156,9 +154,6 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             else
                 slices = [];
             end
-%             [values, sValues] = viscore.dataSlice.getDataSlice(...
-%                 obj.Data, slices, [], []);
-%             dims = h5read(obj.HDF5File, '/dims');
             [values, sValues] = viscore.dataSlice.getDataSlice(...
                 h5read(obj.HDF5File, '/data'), slices, [], []);
         end % getDataSlice
@@ -231,10 +226,6 @@ classdef hdf5Data < hgsetget & viscore.blockedData
         end % compareDataAndHDF5File
         
         function computedBlocks = computeBlocks(obj, fh)
-%             dims = h5read(obj.HDF5File, '/dims');
-%             numElements = dims(1);
-%             numFrames = dims(2);
-%             numBlocks = ceil(dims(2) / obj.BlockSize);
             [numElements, numFrames, numBlocks] = getDataSize(obj);
             computedBlocks = zeros(numElements, numBlocks);
             readFrames = 0;
@@ -264,7 +255,6 @@ classdef hdf5Data < hgsetget & viscore.blockedData
                 maxTime = obj.BlockSize*nBlocks./ ...
                     obj.SampleRate;
             end
-            
             obj.Events = viscore.blockedEvents(obj.Events, ...
                 'BlockStartTimes', bStarts, 'MaxTime', maxTime, ...
                 'BlockTime', obj.BlockSize./obj.SampleRate);

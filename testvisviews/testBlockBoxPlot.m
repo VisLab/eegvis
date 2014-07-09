@@ -159,7 +159,7 @@ function teardown(values) %#ok<INUSD,DEFNU>
 % bp8.plot(bData8, values.fun, values.slice);
 % gaps = bp8.getGaps();
 % bp8.reposition(gaps);
-
+% 
 % drawnow
 % if values.deleteFigures
 %     delete(fig1);
@@ -171,112 +171,112 @@ function teardown(values) %#ok<INUSD,DEFNU>
 %     delete(fig7);
 %     delete(fig8);
 % end
-
-function testPlotHDF5(values) %#ok<DEFNU>
-% Unit test visviews.blockBoxPlot plot
-fprintf('\nUnit tests for visviews.blockBoxPlot plot method\n')
-
-fprintf('It should produce a plot for identity slice\n');
-fig1 = figure('Name', 'Clumps of one window');
-bp1 = visviews.blockBoxPlot(fig1, [], []);
-assertTrue(isvalid(bp1));
-bp1.plot(values.hdf5Data, values.fun, values.slice);
-gaps = bp1.getGaps();
-bp1.reposition(gaps);
-
-fprintf('It should allow callbacks to be registered for clumps of one window\n')
-bp1.registerCallbacks([]);
-
-fprintf('It should produce a correct slice for clumps of one window\n');
-dslice = bp1.getClicked(1);
-s = dslice.getParameters(3);
-assertTrue(strcmp(s{1}, '1:32'))
-assertTrue(strcmp(s{2}, ':'))
-assertTrue(strcmp(s{3}, '1'))
-dslice = bp1.getClicked(31);
-s = dslice.getParameters(3);
-assertTrue(strcmp(s{1}, '1:32'))
-assertTrue(strcmp(s{2}, ':'))
-assertTrue(strcmp(s{3}, '31'))
-
-fprintf('It should produce a plot for empty slice\n');
-fig2 = figure('Name', 'Empty slice');
-bp2 = visviews.blockBoxPlot(fig2, [], []);
-assertTrue(isvalid(bp2));
-bp2.plot(values.hdf5Data, values.fun, []);
-gaps = bp2.getGaps();
-bp2.reposition(gaps);
-
-fprintf('It should produce a correct slice when initial slice is empty\n');
-dslice1 = bp2.getClicked(1);
-s = dslice1.getParameters(3);
-assertTrue(strcmp(s{1}, '1:32'))
-assertTrue(strcmp(s{2}, ':'))
-assertTrue(strcmp(s{3}, '1'))
-
-fprintf('It should produce a plot for identity slice with groupings of 2\n');
-fig3 = figure('Name', 'Grouping of 2');
-bp3 = visviews.blockBoxPlot(fig3, [], []);
-assertTrue(isvalid(bp3));
-bp3.ClumpSize = 2;
-bp1.plot(values.hdf5Data, values.fun, values.slice);
-gaps = bp3.getGaps();
-bp3.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice with 1 group\n');
-fig4 = figure('Name', 'Group of one');
-bp4 = visviews.blockBoxPlot(fig4, [], []);
-assertTrue(isvalid(bp4));
-bp4.ClumpSize = 20;
-bp4.plot(values.hdf5Data, values.fun, values.slice);
-gaps = bp4.getGaps();
-bp4.reposition(gaps);
-
-fprintf('It should produce a valid plot for one value\n');
-fig5 = figure('Name', 'One value');
-bp5 = visviews.blockBoxPlot(fig5, [], []);
-assertTrue(isvalid(bp5));
-bp5.ClumpSize = 20;
-slice5 = viscore.dataSlice('Slices', {'3', ':', '2'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-bp5.plot(values.hdf5Data, values.fun, slice5);
-gaps = bp5.getGaps();
-bp5.reposition(gaps);
-
-% Set up the data
-data = repmat([1, 1, 1, 2, 2, 2, 3], [5, 1, 4]);
-data = permute(data, [1, 3, 2]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD6 = viscore.hdf5Data(data, 'Specific values', hdf5File);
-fprintf('It should produce a plot for identity slice with uneven grouping\n');
-fig6 = figure('Name', 'No grouping to compare with specific values');
-bp6 = visviews.blockBoxPlot(fig6, [], []);
-assertTrue(isvalid(bp6));
-bp6.plot(testVD6, values.fun, values.slice);
-gaps = bp6.getGaps();
-bp6.reposition(gaps);
-
-fig7 = figure('Name', 'Grouping with specific values');
-bp7 = visviews.blockBoxPlot(fig7, [], []);
-assertTrue(isvalid(bp7));
-bp7.ClumpSize = 3;
-bp7.plot(testVD6, values.fun, values.slice);
-gaps = bp7.getGaps();
-bp7.reposition(gaps);
-delete(hdf5File);
-
-fprintf('It should produce a plot for data with large standard deviation\n');
-data8 = random('normal', 0.0, 10000.0, [40, 1000, 215]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-bData8 = viscore.hdf5Data(data8, 'Random normal large std', hdf5File);
-fig8 = figure('Name', 'Data with large standard deviation');
-bp8 = visviews.blockBoxPlot(fig8, [], []);
-assertTrue(isvalid(bp8));
-bp8.plot(bData8, values.fun, values.slice);
-gaps = bp8.getGaps();
-bp8.reposition(gaps);
-delete(hdf5File);
-
+% 
+% function testPlotHDF5(values) %#ok<DEFNU>
+% % Unit test visviews.blockBoxPlot plot
+% fprintf('\nUnit tests for visviews.blockBoxPlot plot method\n')
+% 
+% fprintf('It should produce a plot for identity slice\n');
+% fig1 = figure('Name', 'Clumps of one window');
+% bp1 = visviews.blockBoxPlot(fig1, [], []);
+% assertTrue(isvalid(bp1));
+% bp1.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = bp1.getGaps();
+% bp1.reposition(gaps);
+% 
+% fprintf('It should allow callbacks to be registered for clumps of one window\n')
+% bp1.registerCallbacks([]);
+% 
+% fprintf('It should produce a correct slice for clumps of one window\n');
+% dslice = bp1.getClicked(1);
+% s = dslice.getParameters(3);
+% assertTrue(strcmp(s{1}, '1:32'))
+% assertTrue(strcmp(s{2}, ':'))
+% assertTrue(strcmp(s{3}, '1'))
+% dslice = bp1.getClicked(31);
+% s = dslice.getParameters(3);
+% assertTrue(strcmp(s{1}, '1:32'))
+% assertTrue(strcmp(s{2}, ':'))
+% assertTrue(strcmp(s{3}, '31'))
+% 
+% fprintf('It should produce a plot for empty slice\n');
+% fig2 = figure('Name', 'Empty slice');
+% bp2 = visviews.blockBoxPlot(fig2, [], []);
+% assertTrue(isvalid(bp2));
+% bp2.plot(values.hdf5Data, values.fun, []);
+% gaps = bp2.getGaps();
+% bp2.reposition(gaps);
+% 
+% fprintf('It should produce a correct slice when initial slice is empty\n');
+% dslice1 = bp2.getClicked(1);
+% s = dslice1.getParameters(3);
+% assertTrue(strcmp(s{1}, '1:32'))
+% assertTrue(strcmp(s{2}, ':'))
+% assertTrue(strcmp(s{3}, '1'))
+% 
+% fprintf('It should produce a plot for identity slice with groupings of 2\n');
+% fig3 = figure('Name', 'Grouping of 2');
+% bp3 = visviews.blockBoxPlot(fig3, [], []);
+% assertTrue(isvalid(bp3));
+% bp3.ClumpSize = 2;
+% bp1.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = bp3.getGaps();
+% bp3.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice with 1 group\n');
+% fig4 = figure('Name', 'Group of one');
+% bp4 = visviews.blockBoxPlot(fig4, [], []);
+% assertTrue(isvalid(bp4));
+% bp4.ClumpSize = 20;
+% bp4.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = bp4.getGaps();
+% bp4.reposition(gaps);
+% 
+% fprintf('It should produce a valid plot for one value\n');
+% fig5 = figure('Name', 'One value');
+% bp5 = visviews.blockBoxPlot(fig5, [], []);
+% assertTrue(isvalid(bp5));
+% bp5.ClumpSize = 20;
+% slice5 = viscore.dataSlice('Slices', {'3', ':', '2'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% bp5.plot(values.hdf5Data, values.fun, slice5);
+% gaps = bp5.getGaps();
+% bp5.reposition(gaps);
+% 
+% % Set up the data
+% data = repmat([1, 1, 1, 2, 2, 2, 3], [5, 1, 4]);
+% data = permute(data, [1, 3, 2]);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD6 = viscore.hdf5Data(data, 'Specific values', hdf5File);
+% fprintf('It should produce a plot for identity slice with uneven grouping\n');
+% fig6 = figure('Name', 'No grouping to compare with specific values');
+% bp6 = visviews.blockBoxPlot(fig6, [], []);
+% assertTrue(isvalid(bp6));
+% bp6.plot(testVD6, values.fun, values.slice);
+% gaps = bp6.getGaps();
+% bp6.reposition(gaps);
+% 
+% fig7 = figure('Name', 'Grouping with specific values');
+% bp7 = visviews.blockBoxPlot(fig7, [], []);
+% assertTrue(isvalid(bp7));
+% bp7.ClumpSize = 3;
+% bp7.plot(testVD6, values.fun, values.slice);
+% gaps = bp7.getGaps();
+% bp7.reposition(gaps);
+% delete(hdf5File);
+% 
+% fprintf('It should produce a plot for data with large standard deviation\n');
+% data8 = random('normal', 0.0, 10000.0, [40, 1000, 215]);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% bData8 = viscore.hdf5Data(data8, 'Random normal large std', hdf5File);
+% fig8 = figure('Name', 'Data with large standard deviation');
+% bp8 = visviews.blockBoxPlot(fig8, [], []);
+% assertTrue(isvalid(bp8));
+% bp8.plot(bData8, values.fun, values.slice);
+% gaps = bp8.getGaps();
+% bp8.reposition(gaps);
+% delete(hdf5File);
+% 
 % 
 % drawnow
 % if values.deleteFigures
@@ -291,9 +291,9 @@ delete(hdf5File);
 % end
 % 
 % function testPlotSlice(values) %#ok<DEFNU>
-% % Unit test visviews.blockBoxPlot plot  with nonempy slice
+% Unit test visviews.blockBoxPlot plot  with nonempy slice
 % fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice\n')
-% 
+
 % fig1 = figure('Name', 'Slice of windows at beginning');
 % bp1 = visviews.blockBoxPlot(fig1, [], []);
 % assertTrue(isvalid(bp1));
@@ -302,7 +302,7 @@ delete(hdf5File);
 % bp1.plot(values.bData, values.fun, slice1);
 % gaps = bp1.getGaps();
 % bp1.reposition(gaps);
-% 
+
 % fprintf('It should produce a plot for a slice of windows in the middle\n');
 % fig2 = figure('Name', 'Slice of windows in middle');
 % bp2 = visviews.blockBoxPlot(fig2, [], []);
@@ -342,7 +342,7 @@ delete(hdf5File);
 % bp5.plot(values.bData, values.fun, slice5);
 % gaps = bp5.getGaps();
 % bp5.reposition(gaps);
-% 
+
 % drawnow
 % if values.deleteFigures
 %     delete(fig1);
@@ -353,9 +353,9 @@ delete(hdf5File);
 % end
 % 
 % function testPlotSliceHDF5(values) %#ok<DEFNU>
-% % Unit test visviews.blockBoxPlot plot  with nonempy slice
+% Unit test visviews.blockBoxPlot plot  with nonempy slice
 % fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice\n')
-% 
+
 % fig1 = figure('Name', 'Slice of windows at beginning');
 % bp1 = visviews.blockBoxPlot(fig1, [], []);
 % assertTrue(isvalid(bp1));
@@ -364,7 +364,7 @@ delete(hdf5File);
 % bp1.plot(values.hdf5Data, values.fun, slice1);
 % gaps = bp1.getGaps();
 % bp1.reposition(gaps);
-% 
+
 % fprintf('It should produce a plot for a slice of windows in the middle\n');
 % fig2 = figure('Name', 'Slice of windows in middle');
 % bp2 = visviews.blockBoxPlot(fig2, [], []);
@@ -416,10 +416,10 @@ delete(hdf5File);
 % 
 % 
 % 
-% function testPlotSliceClumped(values) %#ok<DEFNU>
-% %Unit test visviews.blockBoxPlot plot with nonempy slice and clumping
-% fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice and clumps\n')
-% 
+function testPlotSliceClumped(values) %#ok<DEFNU>
+%Unit test visviews.blockBoxPlot plot with nonempy slice and clumping
+fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice and clumps\n')
+
 % fprintf('It should produce a plot for a slice of windows at beginning (even)\n');
 % 
 % fig1 = figure('Name', 'Slice of windows at beginning with clump factor 2');
@@ -453,18 +453,18 @@ delete(hdf5File);
 % bp3.plot(values.bData, values.fun, slice3);
 % gaps = bp3.getGaps();
 % bp3.reposition(gaps);
-% 
-% fprintf('It should produce a plot for subset of elements and a slice of clumps uneven at end\n');
-% fig4 = figure('Name', 'Elements 14:18 with slice of clumps uneven at the end');
-% bp4 = visviews.blockBoxPlot(fig4, [], []);
-% assertTrue(isvalid(bp4));
-% slice4 = viscore.dataSlice('Slices', {'14:18', ':', '27:32'}, ...
-%          'DimNames', {'Channel', 'Sample', 'Window'});
-% bp4.ClumpSize = 3;
-% bp4.plot(values.bData, values.fun, slice4);
-% gaps = bp4.getGaps();
-% bp4.reposition(gaps);
-% 
+
+fprintf('It should produce a plot for subset of elements and a slice of clumps uneven at end\n');
+fig4 = figure('Name', 'Elements 14:18 with slice of clumps uneven at the end');
+bp4 = visviews.blockBoxPlot(fig4, [], []);
+assertTrue(isvalid(bp4));
+slice4 = viscore.dataSlice('Slices', {'14:18', ':', '27:32'}, ...
+         'DimNames', {'Channel', 'Sample', 'Window'});
+bp4.ClumpSize = 3;
+bp4.plot(values.bData, values.fun, slice4);
+gaps = bp4.getGaps();
+bp4.reposition(gaps);
+
 % fprintf('It should produce a plot for one element and a slice of clumps uneven at end\n');
 % fig5 = figure('Name', 'Element 3 with slice of clumps uneven at the end');
 % bp5 = visviews.blockBoxPlot(fig5, [], []);
@@ -485,10 +485,10 @@ delete(hdf5File);
 % end
 % 
 % 
-% function testPlotSliceClumpedHDF5(values) %#ok<DEFNU>
-% %Unit test visviews.blockBoxPlot plot with nonempy slice and clumping
-% fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice and clumps\n')
-% 
+function testPlotSliceClumpedHDF5(values) %#ok<DEFNU>
+%Unit test visviews.blockBoxPlot plot with nonempy slice and clumping
+fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice and clumps\n')
+
 % fprintf('It should produce a plot for a slice of windows at beginning (even)\n');
 % 
 % fig1 = figure('Name', 'Slice of windows at beginning with clump factor 2');
@@ -522,18 +522,18 @@ delete(hdf5File);
 % bp3.plot(values.hdf5Data, values.fun, slice3);
 % gaps = bp3.getGaps();
 % bp3.reposition(gaps);
-% 
-% fprintf('It should produce a plot for subset of elements and a slice of clumps uneven at end\n');
-% fig4 = figure('Name', 'Elements 14:18 with slice of clumps uneven at the end');
-% bp4 = visviews.blockBoxPlot(fig4, [], []);
-% assertTrue(isvalid(bp4));
-% slice4 = viscore.dataSlice('Slices', {'14:18', ':', '27:32'}, ...
-%          'DimNames', {'Channel', 'Sample', 'Window'});
-% bp4.ClumpSize = 3;
-% bp4.plot(values.hdf5Data, values.fun, slice4);
-% gaps = bp4.getGaps();
-% bp4.reposition(gaps);
-% 
+
+fprintf('It should produce a plot for subset of elements and a slice of clumps uneven at end\n');
+fig4 = figure('Name', 'Elements 14:18 with slice of clumps uneven at the end');
+bp4 = visviews.blockBoxPlot(fig4, [], []);
+assertTrue(isvalid(bp4));
+slice4 = viscore.dataSlice('Slices', {'14:18', ':', '27:32'}, ...
+         'DimNames', {'Channel', 'Sample', 'Window'});
+bp4.ClumpSize = 3;
+bp4.plot(values.hdf5Data, values.fun, slice4);
+gaps = bp4.getGaps();
+bp4.reposition(gaps);
+
 % fprintf('It should produce a plot for one element and a slice of clumps uneven at end\n');
 % fig5 = figure('Name', 'Element 3 with slice of clumps uneven at the end');
 % bp5 = visviews.blockBoxPlot(fig5, [], []);

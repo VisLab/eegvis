@@ -262,7 +262,7 @@ classdef memoryData < hgsetget & viscore.blockedData
         function parseParameters(obj, data)
             % Parse parameters provided by user in constructor
             parser = viscore.memoryData.getParser();
-            parser.parse(data)
+            parser.parse(data);
             pdata = parser.Results;
             
             % Now handle the data
