@@ -145,7 +145,6 @@ if values.deleteFigures
     delete(fig7);
 end
 
-
 function testPlotHDF5(values) %#ok<DEFNU>
 % Unit test for visviews.blockImagePlot plot
 fprintf('\nUnit tests for visviews.blockImagePlot plot method with hdf5 data\n')
@@ -413,7 +412,6 @@ if values.deleteFigures
     delete(fig7);
 end
 
-
 function testConstantAndNaNValues(values) %#ok<DEFNU>
 % Unit test visviews.blockImagePlot plot constant and NaN
 fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and NaN values\n')
@@ -462,12 +460,12 @@ gaps = ip4.getGaps();
 ip4.reposition(gaps);
 
 drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-end
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
 
 function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
 % Unit test visviews.blockImagePlot plot constant and NaN
@@ -523,13 +521,12 @@ ip4.reposition(gaps);
 delete(hdf5File);
 
 drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-end
-
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
 
 function testSettingStructure(values) %#ok<DEFNU>
 % Unit test for visviews.blockImagePlot getDefaultProperties
@@ -579,6 +576,50 @@ fig1 = figure('Name', 'Clumps of one window');
 ip1 = visviews.blockImagePlot(fig1, [], []);
 assertTrue(isvalid(ip1));
 ip1.plot(values.bData, values.fun, values.slice);
+gaps = ip1.getGaps();
+ip1.reposition(gaps + 10);
+ip1.registerCallbacks([]);
+
+fprintf('It should move the position marker when incremented\n');
+pause on
+for k = 1:31
+    pause(0.25);
+    ip1.getClicked(k);
+end
+fprintf('It should move the marker to beginning when position is empty\n');
+pause(0.5);
+[ds1, f1, p1] = ip1.getClicked(-inf); %#ok<ASGLU>
+assertElementsAlmostEqual(1, p1);
+assertTrue(~isempty(ds1));
+
+fprintf('It should move the marker to beginning when position is -inf\n');
+pause(0.5);
+[ds2, f2, p2] = ip1.getClicked(inf); %#ok<ASGLU>
+assertElementsAlmostEqual(31, p2);
+assertTrue(~isempty(ds2));
+
+fprintf('It should move the marker to end when position is inf\n');
+pause(0.5);
+ip1.getClicked(inf);
+
+fprintf('It marker should not move when the position is empty\n');
+pause(0.5);
+ip1.getClicked(inf);
+pause off
+pause off
+if values.deleteFigures
+    delete(fig1);
+end
+
+function testBlockPtrHDF5(values) %#ok<DEFNU>
+% Unit test for visviews.blockImagePlot position of block pointer
+fprintf('\nUnit tests for visviews.blockImagePlot positioning of block pointer\n');
+
+fprintf('It should allow callbacks to be registers\n');
+fig1 = figure('Name', 'Clumps of one window');
+ip1 = visviews.blockImagePlot(fig1, [], []);
+assertTrue(isvalid(ip1));
+ip1.plot(values.hdf5Data, values.fun, values.slice);
 gaps = ip1.getGaps();
 ip1.reposition(gaps + 10);
 ip1.registerCallbacks([]);

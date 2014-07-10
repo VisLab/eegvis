@@ -224,7 +224,6 @@ if values.deleteFigures
     delete(fig4);
 end
 
-
 function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
 % Unit test visviews.blockHistogramPlot plot constant and NaN
 fprintf('\nUnit tests for visviews.blockHistogramPlot plot method with constant and NaN values\n')
@@ -240,7 +239,6 @@ assertTrue(isvalid(hp1));
 hp1.plot(testVD1, values.fun, values.slice);
 gaps = hp1.getGaps();
 hp1.reposition(gaps);
-delete(hdf5File);
 
 % Data zeros, function NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
@@ -250,6 +248,7 @@ assertTrue(isvalid(hp2));
 hp2.plot(testVD1, [], values.slice);
 gaps = hp2.getGaps();
 hp2.reposition(gaps);
+delete(hdf5File);
 
 % Data NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
@@ -279,10 +278,10 @@ hp4.plot(testVD4, values.fun, slice4);
 gaps = hp4.getGaps();
 hp4.reposition(gaps);
 drawnow
+delete(hdf5File);
 if values.deleteFigures
     delete(fig1);
     delete(fig2);
     delete(fig3);
     delete(fig4);
 end
-delete(hdf5File);
