@@ -13,7 +13,7 @@ startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate;
 values.event = struct('type', types, 'time', num2cell(startTimes), ...
     'certainty', ones(length(startTimes), 1));
 values.random = random('exp', 2, [32, 1000, 20]);
-
+values.hdf5EpochFile = regexprep(which('EEGEpoch.mat'), 'EEGEpoch.mat$', 'EEGEpoch.hdf5');
 load('EEGEpoch.mat'); 
 values.EEGEpoch = EEGEpoch;
 values.deleteFigures = true;
@@ -74,7 +74,6 @@ fig1 = figure('Name', 'Basic event plot');
 ep1 = visviews.eventImagePlot(fig1, [], []);
 assertTrue(isvalid(ep1));
 
-
 numBlocks = ceil(size(values.EEG.data, 2)/1000);
 ev = testVD.getEvents();
 counts = ev.getEventCounts(1, numBlocks, 0);
@@ -195,7 +194,6 @@ ep11.plot(testVD, thisFunc, slice11);
 gaps = ep11.getGaps();
 ep11.reposition(gaps);
 
-
 if values.deleteFigures
     delete(fig1);
     delete(fig2);
@@ -209,7 +207,6 @@ if values.deleteFigures
     delete(fig10);
     delete(fig11);
 end
-
 
 function testPlotHDF5(values) %#ok<DEFNU>
 % Unit test for visviews.eventImagePlot plot
@@ -227,7 +224,6 @@ fig1 = figure('Name', 'Basic event plot');
 ep1 = visviews.eventImagePlot(fig1, [], []);
 assertTrue(isvalid(ep1));
 
-
 numBlocks = ceil(size(values.EEG.data, 2)/1000);
 ev = testVD.getEvents();
 counts = ev.getEventCounts(1, numBlocks, 0);
@@ -348,7 +344,6 @@ ep11.plot(testVD, thisFunc, slice11);
 gaps = ep11.getGaps();
 ep11.reposition(gaps);
 
-
 if values.deleteFigures
     delete(fig1);
     delete(fig2);
@@ -362,7 +357,6 @@ if values.deleteFigures
     delete(fig10);
     delete(fig11);
 end
-
 
 function testConstantAndNaNValues(values) %#ok<DEFNU>
 % Unit test visviews.eventImagePlot plot constant and NaN
@@ -432,13 +426,13 @@ bp4.plot(testVD, thisFuncS, slice4);
 gaps = bp4.getGaps();
 bp4.reposition(gaps);
 drawnow
+
 if values.deleteFigures
     delete(fig1);
     delete(fig2);
     delete(fig3);
     delete(fig4);
 end
-
 
 function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
 % Unit test visviews.eventImagePlot plot constant and NaN
@@ -514,6 +508,7 @@ gaps = bp4.getGaps();
 bp4.reposition(gaps);
 drawnow
 delete(hdf5File);
+
 if values.deleteFigures
     delete(fig1);
     delete(fig2);
@@ -724,4 +719,3 @@ pause off
 if values.deleteFigures
     delete(fig1);
 end
-

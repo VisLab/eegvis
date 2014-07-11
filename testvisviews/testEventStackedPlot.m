@@ -15,6 +15,7 @@ values.event = struct('type', types, 'time', num2cell(startTimes), ...
     'certainty', ones(length(startTimes), 1));
 values.random = random('exp', 2, [32, 1000, 20]);
 
+values.hdf5FileEpoch = regexprep(which('EEGEpoch.mat'), 'EEGEpoch.mat$', 'EEGEpoch.hdf5');
 load('EEGEpoch.mat'); 
 values.EEGEpoch = EEGEpoch;
 values.deleteFigures = true;
@@ -309,7 +310,6 @@ gaps = sp2.getGaps();
 sp2.reposition(gaps);
 drawnow
 
-
 fprintf('It should produce a plot a slice along dimension 1 when not epoched\n');
 slice3 = viscore.dataSlice('Slices', {'1', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Epoch'});
@@ -378,7 +378,6 @@ sp2.plot(testVD1, fun, slice2);
 gaps = sp2.getGaps();
 sp2.reposition(gaps);
 drawnow
-
 
 fprintf('It should produce a plot a slice along dimension 1 when not epoched\n');
 slice3 = viscore.dataSlice('Slices', {'1', ':', ':'}, ...
@@ -679,4 +678,3 @@ if values.deleteFigures
     delete(fig3);
     delete(fig4);
 end
-

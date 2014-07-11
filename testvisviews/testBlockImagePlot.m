@@ -460,12 +460,12 @@ gaps = ip4.getGaps();
 ip4.reposition(gaps);
 
 drawnow
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-% end
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+end
 
 function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
 % Unit test visviews.blockImagePlot plot constant and NaN
@@ -521,12 +521,12 @@ ip4.reposition(gaps);
 delete(hdf5File);
 
 drawnow
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-% end
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+end
 
 function testSettingStructure(values) %#ok<DEFNU>
 % Unit test for visviews.blockImagePlot getDefaultProperties
@@ -559,6 +559,45 @@ s = cObj.getStructure();
 cObj.setStructure(s);
 ip1.updateProperties(pMan);
 ip1.plot(values.bData, values.fun, values.slice);
+gaps = ip1.getGaps();
+ip1.reposition(gaps);
+
+drawnow
+if values.deleteFigures
+    delete(fig1);
+end
+
+function testSettingStructureHDF5(values) %#ok<DEFNU>
+% Unit test for visviews.blockImagePlot getDefaultProperties
+fprintf('\nUnit tests for visviews.blockImagePlot interaction with settings structure\n');
+
+fprintf('It should have a getDefaultProperties method that returns a structure\n');
+s = visviews.blockImagePlot.getDefaultProperties();
+assertTrue(isa(s, 'struct'));
+
+fprintf('It should allow a key in the instructor\n');
+fig1 = figure('Name', 'Test of the settings structure');
+ipKey = 'Block image';
+ip1 = visviews.blockImagePlot(fig1, [], ipKey);
+assertTrue(isvalid(ip1));
+pConf = ip1.getConfigObj();
+assertTrue(isa(pConf, 'visprops.configurableObj'));
+assertTrue(strcmp(ipKey, pConf.getObjectID()));
+
+fprintf('It should allow configuration and lookup by key\n')
+% Create and set the data manager
+pMan = viscore.dataManager();
+visprops.configurableObj.updateManager(pMan, {pConf});
+ip1.updateProperties(pMan);
+
+% Change the background color to blue through the property manager
+cObj = pMan.getObject(ipKey);
+assertTrue(isa(cObj, 'visprops.configurableObj'));
+s = cObj.getStructure();
+% s(1).Value = [0, 0, 1];
+cObj.setStructure(s);
+ip1.updateProperties(pMan);
+ip1.plot(values.hdf5Data, values.fun, values.slice);
 gaps = ip1.getGaps();
 ip1.reposition(gaps);
 

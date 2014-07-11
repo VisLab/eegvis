@@ -172,7 +172,6 @@ if values.deleteFigures
     delete(fig8);
 end
 
-
 function testPlotHDF5(values) %#ok<DEFNU>
 % Unit test evisviews.elementBoxPlot plot
 fprintf('\nUnit tests for visviews.elementBoxPlot plot method\n');
@@ -289,7 +288,6 @@ if values.deleteFigures
     delete(fig8);
 end
 
-
 function testPlotSlice(values) %#ok<DEFNU>
 % Unit test visviews.elementBoxPlot plot  with nonempy slice
 fprintf('\nUnit tests for visviews.elementBoxPlot plot method with slice\n')
@@ -352,7 +350,6 @@ if values.deleteFigures
     delete(fig5);
 end
 
-
 function testPlotSliceHDF5(values) %#ok<DEFNU>
 % Unit test visviews.elementBoxPlot plot  with nonempy slice
 fprintf('\nUnit tests for visviews.elementBoxPlot plot method with slice\n')
@@ -414,7 +411,6 @@ if values.deleteFigures
     delete(fig4);
     delete(fig5);
 end
-
 
 function testPlotSliceClumped(values) %#ok<DEFNU>
 %Unit test visviews.elementBoxPlot plot with nonempy slice and clumping
@@ -483,7 +479,6 @@ if values.deleteFigures
     delete(fig4);
     delete(fig5);
 end
-
 
 function testPlotSliceClumpedHDF5(values) %#ok<DEFNU>
 %Unit test visviews.elementBoxPlot plot with nonempy slice and clumping
@@ -585,7 +580,6 @@ bp1.ClumpSize = 3;
 ds1 = bp1.getClicked(1);
 assertTrue(isempty(ds1));
 
-
 fprintf('It should produce a correct slice with a clump factor\n');
 bp1.ClumpSize = 3;
 bp1.plot(values.bData, values.fun, []);
@@ -660,7 +654,6 @@ if values.deleteFigures
  delete(fig1)
 end
 
-
 function testgetClickedHDF5(values) %#ok<DEFNU>
 %Unit test visviews.elementBoxPlot getClicked
 fprintf('\nUnit tests for visviews.elementBoxPlot getClicked\n')
@@ -692,7 +685,6 @@ fprintf('It should produce an empty slice when clump factor has changed without 
 bp1.ClumpSize = 3;
 ds1 = bp1.getClicked(1);
 assertTrue(isempty(ds1));
-
 
 fprintf('It should produce a correct slice with a clump factor\n');
 bp1.ClumpSize = 3;
@@ -824,7 +816,6 @@ if values.deleteFigures
     delete(fig4);
 end
 
-
 function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
 % Unit test visviews.elementBoxPlot plot constant and NaN
 fprintf('\nUnit tests for visviews.elementBoxPlot plot method with constant and NaN values\n')
@@ -934,7 +925,6 @@ pause off
 if values.deleteFigures
     delete(fig1);
 end
-
 
 function testBlockPtrHDF5(values) %#ok<DEFNU>
 % Unit test for visviews.elementkBoxPlot position of block pointer

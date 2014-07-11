@@ -196,7 +196,6 @@ if values.deleteFigures
     delete(fig5);
 end
 
-
 function testConstantAndNaNValues(values) %#ok<DEFNU>
 % Unit test visviews.blockScalpPlot plot constant and NaN
 fprintf('\nUnit tests for visviews.blockScalpPlot plot method with constant and NaN values\n')
@@ -254,7 +253,6 @@ if values.deleteFigures
     delete(fig4);
 end
 
-
 function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
 % Unit test visviews.blockScalpPlot plot constant and NaN
 fprintf('\nUnit tests for visviews.blockScalpPlot plot method with constant and NaN values\n')
@@ -271,7 +269,6 @@ sm1.plot(testVD1, values.fun, values.slice);
 gaps = sm1.getGaps();
 sm1.reposition(gaps);
 drawnow
-delete(hdf5File);
 
 % Data zeros, function NaN
 fprintf('It should produce a bad plot for when data is zero, funcs NaNs (---see warning)\n');
@@ -281,6 +278,7 @@ assertTrue(isvalid(sm2));
 sm2.plot(testVD1, [], values.slice);
 gaps = sm2.getGaps();
 sm2.reposition(gaps);
+delete(hdf5File);
 
 % Data NaN
 fprintf('It should produce a plot for when data is NaN\n');
@@ -380,7 +378,6 @@ if values.deleteFigures
     delete(fig5);
 end
 
-
 function testPropertiesHDF5(values) %#ok<DEFNU>
 % Unit test for visviews.blockScalpPlot properties
 fprintf('\nUnit tests for visviews.blockScalpPlot properties\n');
@@ -397,7 +394,7 @@ sm1.plot(values.hdf5Data, values.fun, values.slice);
 gaps = sm1.getGaps();
 sm1.reposition(gaps);
 sm1.setBackgroundColor([1, 0, 0]);
-sm1.plot(values.bData, values.fun, values.slice);
+sm1.plot(values.hdf5Data, values.fun, values.slice);
 
 fprintf('It should produce a plot different interpolation methods\n');
 fig2 = figure('Name', 'Random expoential: Interpolation v4 (default)');
@@ -503,7 +500,6 @@ if values.deleteFigures
     delete(fig1);
 end
 
-
 function testGetClicked(values) %#ok<DEFNU>
 % Unit test for visviews.blockScalpPlot getClicked
 fprintf('\nUnit tests for visviews.getClicked\n');
@@ -537,7 +533,6 @@ fprintf('It should produce an empty slice and position when clicked position is 
 assertTrue(isempty(s2));
 assertTrue(isempty(p2));
 
-
 fprintf('It should produce an empty slice and position when clicked position is empty and no channels\n');
 [s3, bf3, p3] = sm2.getClicked(inf); %#ok<ASGLU>
 assertTrue(isempty(s3));
@@ -549,7 +544,6 @@ if values.deleteFigures
     delete(fig2);
 end
 
-
 function testGetClickedHDF5(values) %#ok<DEFNU>
 % Unit test for visviews.blockScalpPlot getClicked
 fprintf('\nUnit tests for visviews.getClicked\n');
@@ -558,7 +552,7 @@ fprintf('It should allow callbacks to be registers\n');
 fig1 = figure('Name', 'Testing click with channels');
 sm1 = visviews.blockScalpPlot(fig1, [], []);
 assertTrue(isvalid(sm1));
-sm1.plot(values.bData, values.fun, values.slice);
+sm1.plot(values.hdf5Data, values.fun, values.slice);
 gaps = sm1.getGaps();
 sm1.reposition(gaps);
 sm1.registerCallbacks([]);
@@ -585,7 +579,6 @@ fprintf('It should produce an empty slice and position when clicked position is 
 assertTrue(isempty(s2));
 assertTrue(isempty(p2));
 
-
 fprintf('It should produce an empty slice and position when clicked position is empty and no channels\n');
 [s3, bf3, p3] = sm2.getClicked(inf); %#ok<ASGLU>
 assertTrue(isempty(s3));
@@ -596,5 +589,3 @@ if values.deleteFigures
     delete(fig1);
     delete(fig2);
 end
-
-

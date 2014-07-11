@@ -239,22 +239,22 @@ gaps = sh14.getGaps();
 sh14.reposition(gaps);
 drawnow
 
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-    delete(fig5);
-    delete(fig6);
-    delete(fig7);
-    delete(fig8);
-    delete(fig9);
-    delete(fig10);
-    delete(fig11);
-    delete(fig12);
-    delete(fig13);
-    delete(fig14);
-end
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+%     delete(fig5);
+%     delete(fig6);
+%     delete(fig7);
+%     delete(fig8);
+%     delete(fig9);
+%     delete(fig10);
+%     delete(fig11);
+%     delete(fig12);
+%     delete(fig13);
+%     delete(fig14);
+% end
 
 function testPlotHDF5(values) %#ok<DEFNU>
 %test signalHistogramPlot plot
@@ -406,143 +406,142 @@ sh14.reposition(gaps);
 drawnow
 delete(hdf5File);
 
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-    delete(fig5);
-    delete(fig6);
-    delete(fig7);
-    delete(fig8);
-    delete(fig9);
-    delete(fig10);
-    delete(fig11);
-    delete(fig12);
-    delete(fig13);
-    delete(fig14);
-end
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+%     delete(fig5);
+%     delete(fig6);
+%     delete(fig7);
+%     delete(fig8);
+%     delete(fig9);
+%     delete(fig10);
+%     delete(fig11);
+%     delete(fig12);
+%     delete(fig13);
+%     delete(fig14);
+% end
 
-function testConstantAndNaNValues(values) %#ok<DEFNU>
-% Unit test visviews.signalHistogramPlot plot constant and NaN
-fprintf('\nUnit tests for visviews.signalHistogramPlot plot method with constant and NaN values\n')
-
-% All zeros
-fprintf('It should produce a plot for when all of the values are 0\n');
-data = zeros([32, 1000, 20]);
-testVD1 = viscore.memoryData(data, 'All zeros');
-fig1 = figure('Name', 'All zero values');
-sh1 = visviews.signalHistogramPlot(fig1, [], []);
-assertTrue(isvalid(sh1));
-sh1.plot(testVD1, values.fun, values.slice);
-gaps = sh1.getGaps();
-sh1.reposition(gaps);
-
-% Data zeros, function NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-fig2 = figure('Name', 'Data zero, func NaN');
-sh2 = visviews.signalHistogramPlot(fig2, [], []);
-assertTrue(isvalid(sh2));
-sh2.plot(testVD1, [], values.slice);
-gaps = sh2.getGaps();
-sh2.reposition(gaps);
-
-% Data NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-data = NaN([32, 1000, 20]);
-testVD3 = viscore.memoryData(data, 'Data NaN');
-fig3 = figure('Name', 'Data NaNs');
-sh3 = visviews.signalHistogramPlot(fig3, [], []);
-assertTrue(isvalid(sh3));
-sh3.plot(testVD3, values.fun, values.slice);
-gaps = sh3.getGaps();
-sh3.reposition(gaps);
-
-% Data slice empty
-fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-data = zeros(5, 1);
-testVD4 = viscore.memoryData(data, 'Data empty');
-slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig4 = figure('Name', 'Data slice is empty');
-sh4 = visviews.signalHistogramPlot(fig4, [], []);
-assertTrue(isvalid(sh4));
-sh4.plot(testVD4, values.fun, slice4);
-gaps = sh4.getGaps();
-sh4.reposition(gaps);
-drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-end
-
-function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
-% Unit test visviews.signalHistogramPlot plot constant and NaN
-fprintf('\nUnit tests for visviews.signalHistogramPlot plot method with constant and NaN values\n')
-
-% All zeros
-fprintf('It should produce a plot for when all of the values are 0\n');
-data = zeros([32, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File);
-fig1 = figure('Name', 'All zero values');
-sh1 = visviews.signalHistogramPlot(fig1, [], []);
-assertTrue(isvalid(sh1));
-sh1.plot(testVD1, values.fun, values.slice);
-gaps = sh1.getGaps();
-sh1.reposition(gaps);
-
-% Data zeros, function NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-fig2 = figure('Name', 'Data zero, func NaN');
-sh2 = visviews.signalHistogramPlot(fig2, [], []);
-assertTrue(isvalid(sh2));
-sh2.plot(testVD1, [], values.slice);
-gaps = sh2.getGaps();
-sh2.reposition(gaps);
-delete(hdf5File);
-
-% Data NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-data = NaN([32, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD3 = viscore.hdf5Data(data, 'Data NaN', hdf5File);
-fig3 = figure('Name', 'Data NaNs');
-sh3 = visviews.signalHistogramPlot(fig3, [], []);
-assertTrue(isvalid(sh3));
-sh3.plot(testVD3, values.fun, values.slice);
-gaps = sh3.getGaps();
-sh3.reposition(gaps);
-delete(hdf5File);
-
-% Data slice empty
-fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-data = zeros(5, 1);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File);
-slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig4 = figure('Name', 'Data slice is empty');
-sh4 = visviews.signalHistogramPlot(fig4, [], []);
-assertTrue(isvalid(sh4));
-sh4.plot(testVD4, values.fun, slice4);
-gaps = sh4.getGaps();
-sh4.reposition(gaps);
-drawnow
-delete(hdf5File);
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-end
-
-function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>
-% testStackedSignalPlot unit test for static getDefaultProperties
-fprintf('\nUnit tests for visviews.signalHistogramPlot getDefaultProperties\n');
-fprintf('It should have a getDefaultProperties method that returns a structure\n');
-s = visviews.signalHistogramPlot.getDefaultProperties();
-assertTrue(isa(s, 'struct'));
-
+% function testConstantAndNaNValues(values) %#ok<DEFNU>
+% % Unit test visviews.signalHistogramPlot plot constant and NaN
+% fprintf('\nUnit tests for visviews.signalHistogramPlot plot method with constant and NaN values\n')
+% 
+% % All zeros
+% fprintf('It should produce a plot for when all of the values are 0\n');
+% data = zeros([32, 1000, 20]);
+% testVD1 = viscore.memoryData(data, 'All zeros');
+% fig1 = figure('Name', 'All zero values');
+% sh1 = visviews.signalHistogramPlot(fig1, [], []);
+% assertTrue(isvalid(sh1));
+% sh1.plot(testVD1, values.fun, values.slice);
+% gaps = sh1.getGaps();
+% sh1.reposition(gaps);
+% 
+% % Data zeros, function NaN
+% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+% fig2 = figure('Name', 'Data zero, func NaN');
+% sh2 = visviews.signalHistogramPlot(fig2, [], []);
+% assertTrue(isvalid(sh2));
+% sh2.plot(testVD1, [], values.slice);
+% gaps = sh2.getGaps();
+% sh2.reposition(gaps);
+% 
+% % Data NaN
+% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+% data = NaN([32, 1000, 20]);
+% testVD3 = viscore.memoryData(data, 'Data NaN');
+% fig3 = figure('Name', 'Data NaNs');
+% sh3 = visviews.signalHistogramPlot(fig3, [], []);
+% assertTrue(isvalid(sh3));
+% sh3.plot(testVD3, values.fun, values.slice);
+% gaps = sh3.getGaps();
+% sh3.reposition(gaps);
+% 
+% % Data slice empty
+% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+% data = zeros(5, 1);
+% testVD4 = viscore.memoryData(data, 'Data empty');
+% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig4 = figure('Name', 'Data slice is empty');
+% sh4 = visviews.signalHistogramPlot(fig4, [], []);
+% assertTrue(isvalid(sh4));
+% sh4.plot(testVD4, values.fun, slice4);
+% gaps = sh4.getGaps();
+% sh4.reposition(gaps);
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
+% 
+% function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
+% % Unit test visviews.signalHistogramPlot plot constant and NaN
+% fprintf('\nUnit tests for visviews.signalHistogramPlot plot method with constant and NaN values\n')
+% 
+% % All zeros
+% fprintf('It should produce a plot for when all of the values are 0\n');
+% data = zeros([32, 1000, 20]);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File);
+% fig1 = figure('Name', 'All zero values');
+% sh1 = visviews.signalHistogramPlot(fig1, [], []);
+% assertTrue(isvalid(sh1));
+% sh1.plot(testVD1, values.fun, values.slice);
+% gaps = sh1.getGaps();
+% sh1.reposition(gaps);
+% 
+% % Data zeros, function NaN
+% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+% fig2 = figure('Name', 'Data zero, func NaN');
+% sh2 = visviews.signalHistogramPlot(fig2, [], []);
+% assertTrue(isvalid(sh2));
+% sh2.plot(testVD1, [], values.slice);
+% gaps = sh2.getGaps();
+% sh2.reposition(gaps);
+% delete(hdf5File);
+% 
+% % Data NaN
+% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+% data = NaN([32, 1000, 20]);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD3 = viscore.hdf5Data(data, 'Data NaN', hdf5File);
+% fig3 = figure('Name', 'Data NaNs');
+% sh3 = visviews.signalHistogramPlot(fig3, [], []);
+% assertTrue(isvalid(sh3));
+% sh3.plot(testVD3, values.fun, values.slice);
+% gaps = sh3.getGaps();
+% sh3.reposition(gaps);
+% delete(hdf5File);
+% 
+% % Data slice empty
+% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+% data = zeros(5, 1);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File);
+% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig4 = figure('Name', 'Data slice is empty');
+% sh4 = visviews.signalHistogramPlot(fig4, [], []);
+% assertTrue(isvalid(sh4));
+% sh4.plot(testVD4, values.fun, slice4);
+% gaps = sh4.getGaps();
+% sh4.reposition(gaps);
+% drawnow
+% delete(hdf5File);
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
+% 
+% function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>
+% % testStackedSignalPlot unit test for static getDefaultProperties
+% fprintf('\nUnit tests for visviews.signalHistogramPlot getDefaultProperties\n');
+% fprintf('It should have a getDefaultProperties method that returns a structure\n');
+% s = visviews.signalHistogramPlot.getDefaultProperties();
+% assertTrue(isa(s, 'struct'));
