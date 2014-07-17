@@ -318,7 +318,7 @@ classdef functionObj < hgsetget & viscore.managedObj
                 obj.CurrentValues = obj.CurrentData.funEval(fh);
             elseif isa(obj.CurrentData, 'viscore.hdf5Data')
                  fn = obj.ManStruct.DisplayName;
-                 obj.CurrentValues = obj.CurrentData.funEval(fn, fh);
+                 obj.CurrentValues = obj.CurrentData.funEval(fh, fn);
             end
             obj.BlockMean = nanmean(obj.CurrentValues(:));
             obj.BlockStd = nanstd(obj.CurrentValues(:));

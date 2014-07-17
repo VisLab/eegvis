@@ -115,7 +115,7 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             obj.parseParameters(data, hdf5File);
         end % blockedData constructor
         
-        function values = funEval(obj, fn, fh)
+        function values = funEval(obj, fh, fn)
             try
                 % Get data from file if it exists
                 values = h5read(obj.HDF5File, ['/',fn,...
@@ -138,11 +138,10 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             % Return number of elements, samples and blocks in data
             dims = h5read(obj.HDF5File, '/dims');
             nElements = dims(1);
+            nSamples = obj.BlockSize;
             if length(dims) == 2
-                nSamples = dims(2);
                 nBlocks = ceil(dims(2) / obj.BlockSize);
             elseif length(dims) == 3
-                nSamples = dims(2) * dims(3);
                 nBlocks = ceil(dims(2) * dims(3) / obj.BlockSize);
             end
         end % getDataSize
@@ -154,9 +153,13 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             else
                 slices = [];
             end
-            [values, sValues] = viscore.dataSlice.getDataSlice(...
-                h5read(obj.HDF5File, '/data'), slices, [], []);
+            [values, sValues] = viscore.dataSlice.getHDF5Slice(...
+                obj, slices);
         end % getDataSlice
+        
+        function hdf5File = getHDF5File(obj)
+           hdf5File = obj.HDF5File; 
+        end % getHDF5File
         
         
         function [tMean, tStd, tLow, tHigh] = getTrimValues(obj, percent, data)
@@ -225,8 +228,15 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             end
         end % compareDataAndHDF5File
         
+        
         function computedBlocks = computeBlocks(obj, fh)
-            [numElements, numFrames, numBlocks] = getDataSize(obj);
+            dims = h5read(obj.HDF5File, '/dims');
+            if length(dims) == 2
+                numFrames = dims(2);
+            else
+                numFrames = dims(2) * dims(3);
+            end
+            [numElements, ~, numBlocks] = getDataSize(obj);
             computedBlocks = zeros(numElements, numBlocks);
             readFrames = 0;
             realBlockSize = min(obj.BlockSize, numFrames - readFrames);
