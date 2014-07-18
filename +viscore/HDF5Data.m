@@ -154,7 +154,7 @@ classdef hdf5Data < hgsetget & viscore.blockedData
                 slices = [];
             end
             [values, sValues] = viscore.dataSlice.getHDF5Slice(...
-                obj, slices);
+                obj, slices, [], []);
         end % getDataSlice
         
         function hdf5File = getHDF5File(obj)

@@ -245,8 +245,8 @@ fprintf('\nTesting getDataSlice static method of dataSlice\n');
 
 fprintf('It should take a data slice when slice is too short\n');
 data = random('normal', 0, 1, [32, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD1 = viscore.hdf5Data(data, 'too short', hdf5File);
+hdf5File1 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA1.hdf5');
+testVD1 = viscore.hdf5Data(data, 'random', hdf5File1);
 [dSlice, sStart, sSizes] = viscore.dataSlice.getHDF5Slice(testVD1, {':', ':'}, [], []);
 assertVectorsAlmostEqual(size(dSlice), [32, 1000, 20]);
 assertVectorsAlmostEqual(sStart, [1, 1, 1]);
@@ -273,27 +273,27 @@ assertVectorsAlmostEqual(dSlice(:), data(:));
 assertVectorsAlmostEqual(sStart, [1, 1, 1]);
 assertVectorsAlmostEqual(sSizes, [32, 1000, 20]);
 
-delete(hdf5File);
-
-fprintf('It should return original data for empty slice when data is 4D\n'); 
-data2 = random('normal', 0, 1, [32, 1000, 20, 36]);
-[dSlice2, sStart2, sSizes2] =  viscore.dataSlice.getDataSlice(data2, '');
-assertVectorsAlmostEqual(size(dSlice2), size(data2));
-assertVectorsAlmostEqual(dSlice2(:), data2(:));
-assertVectorsAlmostEqual(sStart2, [1, 1, 1, 1]);
-assertVectorsAlmostEqual(sSizes2, [32, 1000, 20, 36]);
-
-fprintf('It should handle slices in the middle of the data\n');
-[dSlice2, sStart2, sSizes2] = viscore.dataSlice.getDataSlice(data2, {':',  '3', ':'}, [], '');
-assertVectorsAlmostEqual(size(squeeze(dSlice2)), [32, 20, 36]);
-assertVectorsAlmostEqual(squeeze(dSlice2), squeeze(data2(:, 3, :, :)));
-fprintf('It should return slices unsqeezed\n');
-assertVectorsAlmostEqual(size(dSlice2), [32, 1, 20, 36]);
-assertVectorsAlmostEqual(sStart2, [1, 3, 1, 1]);
-assertVectorsAlmostEqual(sSizes2, [32, 1, 20, 36]);
+% fprintf('It should return original data for empty slice when data is 4D\n'); 
+% data2 = random('normal', 0, 1, [32, 1000, 20, 36]);
+% hdf5File2 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA2.hdf5');
+% testVD2 = viscore.hdf5Data(data2, 'random', hdf5File2);
+% [dSlice2, sStart2, sSizes2] =  viscore.dataSlice.getHDF5Slice(testVD2, '');
+% assertVectorsAlmostEqual(size(dSlice2), size(data2));
+% assertVectorsAlmostEqual(dSlice2(:), data2(:));
+% assertVectorsAlmostEqual(sStart2, [1, 1, 1, 1]);
+% assertVectorsAlmostEqual(sSizes2, [32, 1000, 20, 36]);
+% 
+% fprintf('It should handle slices in the middle of the data\n');
+% [dSlice2, sStart2, sSizes2] = viscore.dataSlice.getHDF5Slice(testVD2, {':',  '3', ':'}, [], '');
+% assertVectorsAlmostEqual(size(squeeze(dSlice2)), [32, 20, 36]);
+% assertVectorsAlmostEqual(squeeze(dSlice2), squeeze(data2(:, 3, :, :)));
+% fprintf('It should return slices unsqeezed\n');
+% assertVectorsAlmostEqual(size(dSlice2), [32, 1, 20, 36]);
+% assertVectorsAlmostEqual(sStart2, [1, 3, 1, 1]);
+% assertVectorsAlmostEqual(sSizes2, [32, 1, 20, 36]);
 
 fprintf('It should work when all parameters are non-empty\n');
-[dSlice, sStart, sSizes] =  viscore.dataSlice.getDataSlice(data, {':', ':', '5:8'}, 3, 'mean');
+[dSlice, sStart, sSizes] =  viscore.dataSlice.getHDF5Slice(testVD1, {':', ':', '5:8'}, 3, 'mean');
 assertVectorsAlmostEqual(size(dSlice), [32, 1000]);
 dNew = data(:, :, 5:8);
 dNew = mean(dNew, 3);
@@ -307,7 +307,9 @@ slice = viscore.dataSlice('Slices', {':', ':', '2:5'}, ...
 
 [slices, names, cDims] = slice.getParameters(3);
 data = random('normal', 0, 1, [32, 1000, 20]);
-[signals, start, sSizes] = viscore.dataSlice.getDataSlice(data, ...
+hdf5File3 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA3.hdf5');
+testVD3 = viscore.hdf5Data(data, 'random', hdf5File3);
+[signals, start, sSizes] = viscore.dataSlice.getHDF5Slice(testVD3, ...
                    slices, cDims, []);
 assertTrue(~isempty(names));
 assertTrue(~isempty(signals));
@@ -317,6 +319,10 @@ assertEqual(cols, 1000);
 assertEqual(dep, 4);
 assertEqual(start(3), 2);
 assertVectorsAlmostEqual(sSizes, [32, 1000, 4]);
+
+delete(hdf5File1);
+% delete(hdf5File2);
+delete(hdf5File3);
 
 
 % function testGetSliceEvaluation(values) %#ok<INUSD,DEFNU>

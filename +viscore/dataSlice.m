@@ -279,55 +279,47 @@ classdef dataSlice < hgsetget
             end
         end % getDataSlice
         
-        function [sData, sStart, sSizes] = getHDF5Slice(visData, slices, cDims, method) %#ok<INUSD>
+        function [sData, sStart, sSizes] = getHDF5Slice(visData, slices, cDims, method) 
             hdf5File = visData.getHDF5File();
-            sStart = [];
-            if isempty(hdf5File)
-                return;
-            end    
             [nElements, nSamples, nBlocks] = visData.getDataSize();
-            dims = [nElements, nSamples, nBlocks];
             [dSlice, sStart, sSizes] = ...
-                viscore.dataSlice.getSliceEvaluation(dims, slices);
-            if isempty(slices)
-                return;
-            elseif isempty(sStart)
-                sData = '';
-                return;
-            end
-            sliceIndecies = strsplit(dSlice, ',');
-            elements = str2num(sliceIndecies{1}); %#ok<ST2NM>
-            if isempty(elements)
-                elements = 1:nElements;
-            end
-            samples = str2num(sliceIndecies{2}); %#ok<ST2NM>
-            if isempty(samples)
-                samples = 1:nSamples;
-            end
-            blocks = str2num(sliceIndecies{3}); %#ok<ST2NM>
-            if isempty(blocks)
-                blocks = 1:nBlocks;
+                viscore.dataSlice.getSliceEvaluation([nElements, nSamples, nBlocks], slices);
+            elements = 1:nElements;
+            samples = 1:nSamples;
+            blocks = 1:nBlocks;
+            if ~isempty(slices)
+                sliceIndecies = strsplit(dSlice, ',');
+                if sliceIndecies{1} ~= ':'
+                    elements = str2num(sliceIndecies{1}); %#ok<ST2NM>
+                end
+                if sliceIndecies{2} ~= ':'
+                    samples = str2num(sliceIndecies{2}); %#ok<ST2NM>
+                end
+                if sliceIndecies{3} ~= ':'
+                    blocks = str2num(sliceIndecies{3}); %#ok<ST2NM>
+                end
             end
             sData = zeros(sSizes);
             originalDims = h5read(hdf5File, '/dims');
-            if length(originalDims) == 2
-                numFrames = originalDims(2);
-            else
+            numFrames = originalDims(2);
+            if length(originalDims) == 3
                 numFrames = originalDims(2) * originalDims(3);
             end
             realBlockSize = min(nSamples, abs(numFrames - nSamples * blocks(1)));
             for a = 1:length(blocks);
                 for b = 1:length(elements)
                     currentBlock = [h5read(hdf5File, '/data', ...
-                        [(nSamples * (blocks(a) - 1) + elements(b)) 1], ...
-                        [realBlockSize 1], [length(elements) 1])' , ...
+                        [(nSamples * (blocks(a) - 1) * nElements + elements(b)) 1], ...
+                        [realBlockSize 1], [nElements 1])' , ...
                         repmat(0, ...
                         [1, nSamples - realBlockSize])]; %#ok<RPMT0>
                     sData(b, :, a) = currentBlock(samples);
                 end
                 realBlockSize = min(nSamples, abs(numFrames - nSamples * blocks(a)));
+            end     
+            if ~isempty(slices) && ~isempty(cDims) && ~isempty(method)
+                sData = viscore.dataSlice.combineDims(sData, cDims, method);
             end
-            
         end
         
 
