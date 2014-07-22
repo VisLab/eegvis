@@ -13,11 +13,11 @@
 %
 % viscore.dataSlice('key1', 'value1', ...) specifies optional parameter
 %    name/value pairs.
-%    'NumDim'  Number of dimensions in the slice. The default is 3. If  
-%              'NumDim' is omitted and 'Slice' is given, the number of 
+%    'NumDim'  Number of dimensions in the slice. The default is 3. If
+%              'NumDim' is omitted and 'Slice' is given, the number of
 %              dimensions is the minimum of 3 and the length of the slice.
 %
-%    'CombineDim' Vector of dimension numbers to combine when processing 
+%    'CombineDim' Vector of dimension numbers to combine when processing
 %              the slice. The default is empty.
 %
 %    'CombineMethod' Funtion to apply to combine the dimensions to produce
@@ -26,8 +26,8 @@
 %               ignoring NaNs. Other valid values include 'median',
 %               'max' and 'min'.
 %
-%     'DimNames' Cell array of names of the values plotted along the 
-%               slice dimensions. The default names are {'Element', 
+%     'DimNames' Cell array of names of the values plotted along the
+%               slice dimensions. The default names are {'Element',
 %               'Sample', 'Block', 'Dim4', ...}.
 %     'Slices'   Cell array of strings specifying the indices of the
 %                subarray represented by the slice. For example
@@ -35,35 +35,35 @@
 %                by taking all rows, columns 4 and 5, and index 7 along
 %                dimension 3.
 %
-% A data slice does not itself contain data, but contains static methods for 
-% extracting data from an array based on the slice specification. 
-% For example, a viscore.dataSlice with specification {':', '4', ':'} 
-% extracts an unsqueezed subarray from a two-dimensional or three-dimensional 
-% array by setting the index in dimension two to 4, provided that 4 is a 
-% valid index for the array. Otherwise, the slice extracts an empty array. 
-% When presented with a one-dimensional array, this slice 
-% extracts a copy of the original array. When presented with a data array  
-% of dimension higher than three, this slice replaces the dimensions 
-% above three with ':' when evaluating. 
+% A data slice does not itself contain data, but contains static methods for
+% extracting data from an array based on the slice specification.
+% For example, a viscore.dataSlice with specification {':', '4', ':'}
+% extracts an unsqueezed subarray from a two-dimensional or three-dimensional
+% array by setting the index in dimension two to 4, provided that 4 is a
+% valid index for the array. Otherwise, the slice extracts an empty array.
+% When presented with a one-dimensional array, this slice
+% extracts a copy of the original array. When presented with a data array
+% of dimension higher than three, this slice replaces the dimensions
+% above three with ':' when evaluating.
 %
 % In linked visualizations, a data slice provides information about the
 % piece of the data that was clicked so that downstream visualizations
 % can react with an appropriate display.
 %
-% Example: 
+% Example:
 % Extract subarrays from various arrays
 %
-%    data1 = random('exp', 1, [30, 20, 10]); 
+%    data1 = random('exp', 1, [30, 20, 10]);
 %    subData1 = viscore.dataSlice.getDataSlice(data1, {':', '4', ':'}, [], '');
-%    data2 = random('exp', 1, [30, 20]); 
+%    data2 = random('exp', 1, [30, 20]);
 %    subData2 = viscore.dataSlice.getDataSlice(data2, {':', '4', ':'}, [], '');
-%    data3 = random('exp', 1, [30]); 
-%    subData3 = viscore.dataSlice.getDataSlice(data3, {':', '4', ':'}, [], ''); 
-%    data4 = random('exp', 1, [30, 20, 10, 8]); 
+%    data3 = random('exp', 1, [30]);
+%    subData3 = viscore.dataSlice.getDataSlice(data3, {':', '4', ':'}, [], '');
+%    data4 = random('exp', 1, [30, 20, 10, 8]);
 %    subData4 = viscore.dataSlice.getDataSlice(data4, {':', '4', ':'}, [], '');
 %
 % Class documentation:
-% Execute the following in the MATLAB command window to view the class 
+% Execute the following in the MATLAB command window to view the class
 % documentation for viscore.dataSlice:
 %
 %    doc viscore.dataSlice
@@ -102,7 +102,7 @@ classdef dataSlice < hgsetget
         Slices         % specification of slice suitable for eval
     end % public properties
     
-   properties(Constant = true)
+    properties(Constant = true)
         ValidMethods = ... % allowed methods for combining dimensions
             {'mean', 'median', 'max', 'min', 'sum'};
     end % constant properties
@@ -113,7 +113,7 @@ classdef dataSlice < hgsetget
             % Create the data splice specification
             obj.parseParameters(varargin{:});
         end % dataSlice constructor
-           
+        
         function [slices, names, cDims, cMethod] = getParameters(obj, n)
             % Return names and slices for this slice. If n is empty use slice dimensions
             cDims = obj.CombineDim;
@@ -154,10 +154,10 @@ classdef dataSlice < hgsetget
                 mSize = min(length(data.Slices), 3);
                 obj.Slices = data.Slices(1:mSize);
                 obj.NumDims = mSize;
-            else    
+            else
                 obj.Slices = viscore.dataSlice.createSlices(obj.NumDims, []);
             end
- 
+            
             % Find the number of combine dimensions
             if isempty(data.CombineDim)
                 obj.CombineDim = [];
@@ -167,7 +167,7 @@ classdef dataSlice < hgsetget
             
             % Set the combination method
             if (isempty(data.CombineMethod) || ...
-                sum(strcmpi(data.CombineMethod, obj.ValidMethods)) == 0)
+                    sum(strcmpi(data.CombineMethod, obj.ValidMethods)) == 0)
                 obj.CombineMethod = obj.ValidMethods{1};
             else
                 obj.CombineMethod = data.CombineMethod;
@@ -175,13 +175,13 @@ classdef dataSlice < hgsetget
             
             % Set the dimension names and slices for number of dimensions
             obj.DimNames = viscore.dataSlice.createNames(obj.NumDims, ...
-                                        {'Element', 'Sample', 'Block'});
+                {'Element', 'Sample', 'Block'});
             
             if isfield(data, 'DimNames') && ~isempty(data.DimNames)
                 mSize = min(length(data.DimNames), obj.NumDims);
                 obj.DimNames(1:mSize) = data.DimNames(1:mSize);
             end
-
+            
         end % parseParameters
         
     end % private methods
@@ -218,7 +218,7 @@ classdef dataSlice < hgsetget
             for k = 1:length(dims)
                 data = eval(eString);
             end
-           
+            
         end % combineDims
         
         function names = createNames(n, nameList)
@@ -231,7 +231,7 @@ classdef dataSlice < hgsetget
             end
         end % createNames
         
-         function slices = createSlices(n, sliceList)
+        function slices = createSlices(n, sliceList)
             % Create a list of slices of length n based on sliceList
             slices = cell(1, n);
             mSize = min(n, length(sliceList));
@@ -246,21 +246,21 @@ classdef dataSlice < hgsetget
             %
             % Input:
             %    data   array to take the subarray of
-            %    slices cell array of string slice specifications 
+            %    slices cell array of string slice specifications
             %           (e.g., {':', ':', '4'})
             %    cDims  if non empty specifies dimension of subarray to
             %           combine before returning
             %    method string specifying function to use in combining
             %           subarray dimensions. Possible values are
             %           'mean' (the default), 'median', 'max', or 'min.
-            %   
+            %
             % Output:
             %    sData   resulting subarray
             %    sStart  starting indices in original array
             %    sSizes  sizes of the slices before combination
             sData = data;
             sStart = [];
-            if isempty(data) 
+            if isempty(data)
                 return;
             end
             
@@ -272,18 +272,23 @@ classdef dataSlice < hgsetget
                 sData = '';
                 return;
             end
-
+            
             sData = eval(['data(' dSlice ')']);
             if ~isempty(cDims) && ~isempty(method)
                 sData = viscore.dataSlice.combineDims(sData, cDims, method);
             end
         end % getDataSlice
         
-        function [sData, sStart, sSizes] = getHDF5Slice(visData, slices, cDims, method) 
+        function [sData, sStart, sSizes] = getHDF5Slice(visData, slices, cDims, method)
+            % This only works for 3d blocked data
             hdf5File = visData.getHDF5File();
             [nElements, nSamples, nBlocks] = visData.getDataSize();
             [dSlice, sStart, sSizes] = ...
                 viscore.dataSlice.getSliceEvaluation([nElements, nSamples, nBlocks], slices);
+            if isempty(sStart)
+                sData = '';
+                return;
+            end
             elements = 1:nElements;
             samples = 1:nSamples;
             blocks = 1:nBlocks;
@@ -311,18 +316,18 @@ classdef dataSlice < hgsetget
                     currentBlock = [h5read(hdf5File, '/data', ...
                         [(nSamples * (blocks(a) - 1) * nElements + elements(b)) 1], ...
                         [realBlockSize 1], [nElements 1])' , ...
-                        repmat(0, ...
-                        [1, nSamples - realBlockSize])]; %#ok<RPMT0>
+                        repmat(visData.getPadValue, ...
+                        [1, nSamples - realBlockSize])];
                     sData(b, :, a) = currentBlock(samples);
                 end
                 realBlockSize = min(nSamples, abs(numFrames - nSamples * blocks(a)));
-            end     
+            end
             if ~isempty(slices) && ~isempty(cDims) && ~isempty(method)
                 sData = viscore.dataSlice.combineDims(sData, cDims, method);
             end
         end
         
-
+        
         function parser = getParser()
             % Create an inputparser for FileSelector
             parser = inputParser;
@@ -338,23 +343,23 @@ classdef dataSlice < hgsetget
                 @(x) validateattributes(x, {'cell'}, {}));
         end % getParser()
         
-                function [dSlice, sStart, sSizes] = getSlices(sizes, slices)
+        function [dSlice, sStart, sSizes] = getSlices(sizes, slices)
             nd = max(length(sizes), 3); % Always return slice starts at least 3
             sSizes = ones(1, nd);
             sSizes(1:length(sizes)) = sizes;
             [dSlice, sStart, sSizes] = ...
-                    viscore.dataSlice.getSliceEvaluation(sSizes, slices);
+                viscore.dataSlice.getSliceEvaluation(sSizes, slices);
         end % getSlices
         
         
-       function [evalSlice, startSlice, sizeSlice] = getSliceEvaluation(aSizes, slices)
-            % Returns evaluation string and vector of start values for slice 
+        function [evalSlice, startSlice, sizeSlice] = getSliceEvaluation(aSizes, slices)
+            % Returns evaluation string and vector of start values for slice
             %
             % Input:
             %    aSizes  vector containing sizes of an array to be sliced
-            %    slices  cell array of string slice specifications 
+            %    slices  cell array of string slice specifications
             %            (e.g., {':', ':', '4'})
-            %   
+            %
             % Output:
             %    evalSlice   string suitable for evaluating slice on array
             %                 with dimensions aSize
@@ -368,7 +373,7 @@ classdef dataSlice < hgsetget
             evalSlice = '';
             startSlice = [];
             sizeSlice = [];
-            if isempty(aSizes) 
+            if isempty(aSizes)
                 return;
             end
             nd = max(length(aSizes), 3); % Always return at least 3 slice starts
@@ -405,25 +410,25 @@ classdef dataSlice < hgsetget
         end % getSliceEvaluation
         
         function rString = rangeString(start, numValues)
-            % Return a range string of form 'a:b' based on start 
+            % Return a range string of form 'a:b' based on start
             if numValues == 1
                 rString = num2str(start);
             else
                 rString = [num2str(start) ':' ...
-                           num2str(start + numValues - 1)];
+                    num2str(start + numValues - 1)];
             end
         end % rangeString
         
         function sString = slicesToString(slices)
             % Return the string representation of slice indices
-             sString = '';
-             if isempty(slices) || ~iscell(slices)
-                 return;
-             end
-             for k = 1:length(slices) - 1
+            sString = '';
+            if isempty(slices) || ~iscell(slices)
+                return;
+            end
+            for k = 1:length(slices) - 1
                 sString = [sString  slices{k} ',']; %#ok<AGROW>
-             end
-             sString = [sString slices{end}];
+            end
+            sString = [sString slices{end}];
         end % slicesToString
     end % static methods
     

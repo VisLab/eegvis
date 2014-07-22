@@ -324,7 +324,6 @@ delete(hdf5File1);
 % delete(hdf5File2);
 delete(hdf5File3);
 
-
 % function testGetSliceEvaluation(values) %#ok<INUSD,DEFNU>
 % % Unit test for dataSlice getSliceEvaluation static method 
 % fprintf('\nTesting getSliceEvaluation static method of dataSlice\n');

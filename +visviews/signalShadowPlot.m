@@ -248,8 +248,14 @@ classdef signalShadowPlot < visviews.axesPanel  & visprops.configurable
             if obj.PlotWindow || obj.VisData.isEpoched()
                 cDims = [];
             end
-            [obj.Signals, sStart] = viscore.dataSlice.getDataSlice(visData.getData(), ...
-                slices, cDims, []);
+            if isa(visData, 'viscore.memoryData')
+                [obj.Signals, sStart] = viscore.dataSlice.getDataSlice(visData.getData(), ...
+                    slices, cDims, []);
+            else
+                [obj.Signals, sStart] = ...
+                    viscore.dataSlice.getHDF5Slice(visData, ...
+                    slices, cDims, []);
+            end
             if isempty(obj.Signals)
                 warning('signalShadowPlot:plotSlice', ...
                     'must have at least 2 samples to plot');

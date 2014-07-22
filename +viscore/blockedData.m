@@ -81,6 +81,11 @@ classdef (Abstract) blockedData < hgsetget
             oMean = obj.OriginalMean;
         end % getOriginalMean
         
+        function padValue = getPadValue(obj)
+            % Return the pad value of original data
+            padValue = obj.PadValue;
+        end % getOriginalMean
+        
         function oStd = getOriginalStd(obj)
             % Return the overall standard deviation of original data
             oStd = obj.OriginalStd;
