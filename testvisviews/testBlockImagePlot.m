@@ -16,49 +16,51 @@ hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG.hdf5');
 values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);
 values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', hdf5File, ...
-    'SampleRate', EEG.srate);
-values.deleteFigures = true;
+    'SampleRate', EEG.srate, 'Overwrite', true);
+values.random1 = random('exp', 1, [5, 1000, 4]);
+values.random2 = random('exp', 1, [1, 1000, 20]);
+values.deleteFigures = false;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
 
 
-function testNormalConstructor(values) %#ok<DEFNU>
-% testSignalPlot unit test for visviews.blockImagePlot constructor
-fprintf('\nUnit tests for visviews.blockImagePlot valid constructor\n');
+% function testNormalConstructor(values) %#ok<DEFNU>
+% % testSignalPlot unit test for visviews.blockImagePlot constructor
+% fprintf('\nUnit tests for visviews.blockImagePlot valid constructor\n');
+% 
+% fprintf('It should construct a valid block image plot when only parent passed')
+% fig = figure('Name', 'Empty plot');
+% ip = visviews.blockImagePlot(fig, [], []);
+% assertTrue(isvalid(ip));
+% drawnow
+% if values.deleteFigures
+%     delete(fig);
+% end
 
-fprintf('It should construct a valid block image plot when only parent passed')
-fig = figure('Name', 'Empty plot');
-ip = visviews.blockImagePlot(fig, [], []);
-assertTrue(isvalid(ip));
-drawnow
-if values.deleteFigures
-    delete(fig);
-end
-
-function testBadConstructor(values) %#ok<DEFNU>
-% Unit test for visviews.blockImagePlot bad constructor
-fprintf('\nUnit tests for visviews.blockImagePlot invalid constructor parameters\n');
-
-fprintf('It should throw an exception when no parameters are passed\n');
-f = @() visviews.blockImagePlot();
-assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
-
-fprintf('It should throw an exception when only one parameter is passed\n');
-fig = figure;
-f = @() visviews.blockImagePlot(fig);
-assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
-
-fprintf('It should throw an exception when only two parameters are passed\n');
-f = @() visviews.blockImagePlot(fig, []);
-assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
-
-fprintf('It should throw an exception when more than three parameters are passed\n');
-f = @() visviews.blockImagePlot(fig, [], [], []);
-assertExceptionThrown(f, 'MATLAB:maxrhs');
-if values.deleteFigures
-    delete(fig);
-end
+% function testBadConstructor(values) %#ok<DEFNU>
+% % Unit test for visviews.blockImagePlot bad constructor
+% fprintf('\nUnit tests for visviews.blockImagePlot invalid constructor parameters\n');
+% 
+% fprintf('It should throw an exception when no parameters are passed\n');
+% f = @() visviews.blockImagePlot();
+% assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
+% 
+% fprintf('It should throw an exception when only one parameter is passed\n');
+% fig = figure;
+% f = @() visviews.blockImagePlot(fig);
+% assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
+% 
+% fprintf('It should throw an exception when only two parameters are passed\n');
+% f = @() visviews.blockImagePlot(fig, []);
+% assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
+% 
+% fprintf('It should throw an exception when more than three parameters are passed\n');
+% f = @() visviews.blockImagePlot(fig, [], [], []);
+% assertExceptionThrown(f, 'MATLAB:maxrhs');
+% if values.deleteFigures
+%     delete(fig);
+% end
 
 function testPlot(values) %#ok<DEFNU>
 % Unit test for visviews.blockImagePlot plot
@@ -112,8 +114,7 @@ ip5.reposition(gaps);
 
 fprintf('It should produce a plot for identity slice for small data sets\n');
 % Generate some data to plot
-data = random('exp', 1, [5, 1000, 4]);
-testVD6 = viscore.memoryData(data, 'Rand1');
+testVD6 = viscore.memoryData(values.random1, 'Rand1');
 fig6 = figure('Name', 'Uneven  small group');
 ip6 = visviews.blockImagePlot(fig6, [], []);
 assertTrue(isvalid(ip6));
@@ -124,8 +125,7 @@ ip6.reposition(gaps);
 
 fprintf('It should produce a plot for identity slice with 1 element\n');
 % Generate some data to plot
-data = random('exp', 1, [1, 1000, 20]);
-testVD7 = viscore.memoryData(data, 'Rand1');
+testVD7 = viscore.memoryData(values.random2, 'Rand1');
 fig7 = figure('Name', 'One element grouped by 3');
 ip7 = visviews.blockImagePlot(fig1, [], []);
 assertTrue(isvalid(ip7));
@@ -197,9 +197,8 @@ ip5.reposition(gaps);
 
 fprintf('It should produce a plot for identity slice for small data sets\n');
 % Generate some data to plot
-data = random('exp', 1, [5, 1000, 4]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD6 = viscore.hdf5Data(data, 'Rand1', hdf5File);
+hdf5File6 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA6.hdf5');
+testVD6 = viscore.hdf5Data(values.random1, 'Rand1', hdf5File6, 'Overwrite', true);
 fig6 = figure('Name', 'Uneven  small group');
 ip6 = visviews.blockImagePlot(fig6, [], []);
 assertTrue(isvalid(ip6));
@@ -207,13 +206,11 @@ ip6.ClumpSize = 7;
 ip6.plot(testVD6, values.fun, values.slice);
 gaps = ip6.getGaps();
 ip6.reposition(gaps);
-delete(hdf5File)
 
 fprintf('It should produce a plot for identity slice with 1 element\n');
 % Generate some data to plot
-data = random('exp', 1, [1, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD7 = viscore.hdf5Data(data, 'Rand1', hdf5File);
+hdf5File7 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA7.hdf5');
+testVD7 = viscore.hdf5Data(values.random2, 'Rand1', hdf5File7, 'Overwrite', true);
 fig7 = figure('Name', 'One element grouped by 3');
 ip7 = visviews.blockImagePlot(fig1, [], []);
 assertTrue(isvalid(ip7));
@@ -221,7 +218,6 @@ ip7.ClumpSize = 3;
 ip7.plot(testVD7, values.fun, values.slice);
 gaps = ip7.getGaps();
 ip7.reposition(gaps);
-delete(hdf5File);
 
 drawnow
 if values.deleteFigures
@@ -234,462 +230,465 @@ if values.deleteFigures
     delete(fig7);
 end
 
-function testPlotSlice(values) %#ok<DEFNU>
-% Unit test visviews.blockImagePlot plot  with nonempy slice
-fprintf('\nUnit tests for visviews.blockImagePlot plot method with slice\n')
+delete(hdf5File6);
+delete(hdf5File7);
 
-fprintf('It should produce a plot for a slice of windows at beginning\n');
-fig1 = figure('Name', 'Slice of windows at beginning');
-ip1 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip1));
-slice1 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip1.plot(values.bData, values.fun, slice1);
-gaps = ip1.getGaps();
-ip1.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows in the middle\n');
-fig2 = figure('Name', 'Slice of windows in middle');
-ip2 = visviews.blockImagePlot(fig2, [], []);
-assertTrue(isvalid(ip2));
-slice2 = viscore.dataSlice('Slices', {':', ':', '4:9'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip2.plot(values.bData, values.fun, slice2);
-gaps = ip2.getGaps();
-ip2.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows that falls off the end\n');
-fig3 = figure('Name', 'Slice of windows off the end');
-ip3 = visviews.blockImagePlot(fig3, [], []);
-assertTrue(isvalid(ip3));
-slice3 = viscore.dataSlice('Slices', {':', ':', '15:21'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip3.plot(values.bData, values.fun, slice3);
-gaps = ip3.getGaps();
-ip3.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows at beginning (even)\n');
-fig4 = figure('Name', 'Slice of windows at beginning with clump factor 2');
-ip4 = visviews.blockImagePlot(fig4, [], []);
-assertTrue(isvalid(ip4));
-slice4 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip4.ClumpSize = 2;
-ip4.plot(values.bData, values.fun, slice4);
-gaps = ip4.getGaps();
-ip4.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows uneven at end\n');
-fig5 = figure('Name', 'Slice of windows at end with clump factor 3');
-ip5 = visviews.blockImagePlot(fig5, [], []);
-assertTrue(isvalid(ip5));
-slice5 = viscore.dataSlice('Slices', {':', ':', '14:20'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip5.ClumpSize = 3;
-ip5.plot(values.bData, values.fun, slice5);
-gaps = ip5.getGaps();
-ip5.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows in one clump\n');
-fig6 = figure('Name', 'Slice of 2 windows with clump factor 3');
-ip6 = visviews.blockImagePlot(fig6, [], []);
-assertTrue(isvalid(ip6));
-slice6 = viscore.dataSlice('Slices', {':', ':', '14:15'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip6.ClumpSize = 3;
-ip6.plot(values.bData, values.fun, slice6);
-gaps = ip6.getGaps();
-ip6.reposition(gaps);
-
-fprintf('It should produce a valid plot for one value\n');
-fig7 = figure('Name', 'One value');
-ip7 = visviews.blockImagePlot(fig7, [], []);
-assertTrue(isvalid(ip7));
-ip7.ClumpSize = 20;
-slice7 = viscore.dataSlice('Slices', {'3', ':', '2'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip7.plot(values.bData, values.fun, slice7);
-gaps = ip7.getGaps();
-ip7.reposition(gaps);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-    delete(fig5);
-    delete(fig6);
-    delete(fig7);
-end
-
-function testPlotSliceHDF5(values) %#ok<DEFNU>
-% Unit test visviews.blockImagePlot plot  with nonempy slice
-fprintf('\nUnit tests for visviews.blockImagePlot plot method with slice\n')
-
-fprintf('It should produce a plot for a slice of windows at beginning\n');
-fig1 = figure('Name', 'Slice of windows at beginning');
-ip1 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip1));
-slice1 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip1.plot(values.hdf5Data, values.fun, slice1);
-gaps = ip1.getGaps();
-ip1.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows in the middle\n');
-fig2 = figure('Name', 'Slice of windows in middle');
-ip2 = visviews.blockImagePlot(fig2, [], []);
-assertTrue(isvalid(ip2));
-slice2 = viscore.dataSlice('Slices', {':', ':', '4:9'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip2.plot(values.hdf5Data, values.fun, slice2);
-gaps = ip2.getGaps();
-ip2.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows that falls off the end\n');
-fig3 = figure('Name', 'Slice of windows off the end');
-ip3 = visviews.blockImagePlot(fig3, [], []);
-assertTrue(isvalid(ip3));
-slice3 = viscore.dataSlice('Slices', {':', ':', '15:21'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip3.plot(values.hdf5Data, values.fun, slice3);
-gaps = ip3.getGaps();
-ip3.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows at beginning (even)\n');
-fig4 = figure('Name', 'Slice of windows at beginning with clump factor 2');
-ip4 = visviews.blockImagePlot(fig4, [], []);
-assertTrue(isvalid(ip4));
-slice4 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip4.ClumpSize = 2;
-ip4.plot(values.hdf5Data, values.fun, slice4);
-gaps = ip4.getGaps();
-ip4.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows uneven at end\n');
-fig5 = figure('Name', 'Slice of windows at end with clump factor 3');
-ip5 = visviews.blockImagePlot(fig5, [], []);
-assertTrue(isvalid(ip5));
-slice5 = viscore.dataSlice('Slices', {':', ':', '14:20'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip5.ClumpSize = 3;
-ip5.plot(values.hdf5Data, values.fun, slice5);
-gaps = ip5.getGaps();
-ip5.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows in one clump\n');
-fig6 = figure('Name', 'Slice of 2 windows with clump factor 3');
-ip6 = visviews.blockImagePlot(fig6, [], []);
-assertTrue(isvalid(ip6));
-slice6 = viscore.dataSlice('Slices', {':', ':', '14:15'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip6.ClumpSize = 3;
-ip6.plot(values.hdf5Data, values.fun, slice6);
-gaps = ip6.getGaps();
-ip6.reposition(gaps);
-
-fprintf('It should produce a valid plot for one value\n');
-fig7 = figure('Name', 'One value');
-ip7 = visviews.blockImagePlot(fig7, [], []);
-assertTrue(isvalid(ip7));
-ip7.ClumpSize = 20;
-slice7 = viscore.dataSlice('Slices', {'3', ':', '2'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ip7.plot(values.hdf5Data, values.fun, slice7);
-gaps = ip7.getGaps();
-ip7.reposition(gaps);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-    delete(fig5);
-    delete(fig6);
-    delete(fig7);
-end
-
-function testConstantAndNaNValues(values) %#ok<DEFNU>
-% Unit test visviews.blockImagePlot plot constant and NaN
-fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and NaN values\n')
-
-% Set up the functions
-data = zeros([32, 1000, 20]);
-testVD1 = viscore.memoryData(data, 'All zeros');
-fprintf('It should produce a plot for when all of the values are 0\n');
-fig1 = figure('Name', 'All zero values');
-ip1 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip1));
-ip1.plot(testVD1, values.fun, values.slice);
-gaps = ip1.getGaps();
-ip1.reposition(gaps);
-
-fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-fig2 = figure('Name', 'Data zero, func NaN');
-ip2 = visviews.blockImagePlot(fig2, [], []);
-assertTrue(isvalid(ip2));
-ip2.plot(values.bData, [], values.slice);
-gaps = ip2.getGaps();
-ip2.reposition(gaps);
-
-fprintf('It should produce a plot for when data is NaNs, funcs NaNs (---see warning)\n');
-data3 = NaN([32, 1000, 20]);
-testVD3 = viscore.memoryData(data3, 'Data NaN');
-fig3 = figure('Name', 'Data NaNs');
-ip3 = visviews.blockImagePlot(fig3, [], []);
-assertTrue(isvalid(ip3));
-ip3.plot(testVD3, values.fun, values.slice);
-gaps = ip3.getGaps();
-ip3.reposition(gaps);
-drawnow
-
-% Data slice empty
-fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-data = zeros(5, 1);
-testVD4 = viscore.memoryData(data, 'Data empty');
-slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig4 = figure('Name', 'Data slice is empty');
-ip4 = visviews.blockImagePlot(fig4, [], []);
-assertTrue(isvalid(ip4));
-ip4.plot(testVD4, values.fun, slice4);
-gaps = ip4.getGaps();
-ip4.reposition(gaps);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-end
-
-function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
-% Unit test visviews.blockImagePlot plot constant and NaN
-fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and NaN values\n')
-
-% Set up the functions
-data = zeros([32, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File);
-fprintf('It should produce a plot for when all of the values are 0\n');
-fig1 = figure('Name', 'All zero values');
-ip1 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip1));
-ip1.plot(testVD1, values.fun, values.slice);
-gaps = ip1.getGaps();
-ip1.reposition(gaps);
-delete(hdf5File);
-
-fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-fig2 = figure('Name', 'Data zero, func NaN');
-ip2 = visviews.blockImagePlot(fig2, [], []);
-assertTrue(isvalid(ip2));
-ip2.plot(values.hdf5Data, [], values.slice);
-gaps = ip2.getGaps();
-ip2.reposition(gaps);
-
-fprintf('It should produce a plot for when data is NaNs, funcs NaNs (---see warning)\n');
-data3 = NaN([32, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD3 = viscore.hdf5Data(data3, 'Data NaN', hdf5File);
-fig3 = figure('Name', 'Data NaNs');
-ip3 = visviews.blockImagePlot(fig3, [], []);
-assertTrue(isvalid(ip3));
-ip3.plot(testVD3, values.fun, values.slice);
-gaps = ip3.getGaps();
-ip3.reposition(gaps);
-drawnow
-delete(hdf5File);
-
-% Data slice empty
-fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-data = zeros(5, 1);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File);
-slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig4 = figure('Name', 'Data slice is empty');
-ip4 = visviews.blockImagePlot(fig4, [], []);
-assertTrue(isvalid(ip4));
-ip4.plot(testVD4, values.fun, slice4);
-gaps = ip4.getGaps();
-ip4.reposition(gaps);
-delete(hdf5File);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-end
-
-function testSettingStructure(values) %#ok<DEFNU>
-% Unit test for visviews.blockImagePlot getDefaultProperties
-fprintf('\nUnit tests for visviews.blockImagePlot interaction with settings structure\n');
-
-fprintf('It should have a getDefaultProperties method that returns a structure\n');
-s = visviews.blockImagePlot.getDefaultProperties();
-assertTrue(isa(s, 'struct'));
-
-fprintf('It should allow a key in the instructor\n');
-fig1 = figure('Name', 'Test of the settings structure');
-ipKey = 'Block image';
-ip1 = visviews.blockImagePlot(fig1, [], ipKey);
-assertTrue(isvalid(ip1));
-pConf = ip1.getConfigObj();
-assertTrue(isa(pConf, 'visprops.configurableObj'));
-assertTrue(strcmp(ipKey, pConf.getObjectID()));
-
-fprintf('It should allow configuration and lookup by key\n')
-% Create and set the data manager
-pMan = viscore.dataManager();
-visprops.configurableObj.updateManager(pMan, {pConf});
-ip1.updateProperties(pMan);
-
-% Change the background color to blue through the property manager
-cObj = pMan.getObject(ipKey);
-assertTrue(isa(cObj, 'visprops.configurableObj'));
-s = cObj.getStructure();
-% s(1).Value = [0, 0, 1];
-cObj.setStructure(s);
-ip1.updateProperties(pMan);
-ip1.plot(values.bData, values.fun, values.slice);
-gaps = ip1.getGaps();
-ip1.reposition(gaps);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-end
-
-function testSettingStructureHDF5(values) %#ok<DEFNU>
-% Unit test for visviews.blockImagePlot getDefaultProperties
-fprintf('\nUnit tests for visviews.blockImagePlot interaction with settings structure\n');
-
-fprintf('It should have a getDefaultProperties method that returns a structure\n');
-s = visviews.blockImagePlot.getDefaultProperties();
-assertTrue(isa(s, 'struct'));
-
-fprintf('It should allow a key in the instructor\n');
-fig1 = figure('Name', 'Test of the settings structure');
-ipKey = 'Block image';
-ip1 = visviews.blockImagePlot(fig1, [], ipKey);
-assertTrue(isvalid(ip1));
-pConf = ip1.getConfigObj();
-assertTrue(isa(pConf, 'visprops.configurableObj'));
-assertTrue(strcmp(ipKey, pConf.getObjectID()));
-
-fprintf('It should allow configuration and lookup by key\n')
-% Create and set the data manager
-pMan = viscore.dataManager();
-visprops.configurableObj.updateManager(pMan, {pConf});
-ip1.updateProperties(pMan);
-
-% Change the background color to blue through the property manager
-cObj = pMan.getObject(ipKey);
-assertTrue(isa(cObj, 'visprops.configurableObj'));
-s = cObj.getStructure();
-% s(1).Value = [0, 0, 1];
-cObj.setStructure(s);
-ip1.updateProperties(pMan);
-ip1.plot(values.hdf5Data, values.fun, values.slice);
-gaps = ip1.getGaps();
-ip1.reposition(gaps);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-end
-
-function testBlockPtr(values) %#ok<DEFNU>
-% Unit test for visviews.blockImagePlot position of block pointer
-fprintf('\nUnit tests for visviews.blockImagePlot positioning of block pointer\n');
-
-fprintf('It should allow callbacks to be registers\n');
-fig1 = figure('Name', 'Clumps of one window');
-ip1 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip1));
-ip1.plot(values.bData, values.fun, values.slice);
-gaps = ip1.getGaps();
-ip1.reposition(gaps + 10);
-ip1.registerCallbacks([]);
-
-fprintf('It should move the position marker when incremented\n');
-pause on
-for k = 1:31
-    pause(0.25);
-    ip1.getClicked(k);
-end
-fprintf('It should move the marker to beginning when position is empty\n');
-pause(0.5);
-[ds1, f1, p1] = ip1.getClicked(-inf); %#ok<ASGLU>
-assertElementsAlmostEqual(1, p1);
-assertTrue(~isempty(ds1));
-
-fprintf('It should move the marker to beginning when position is -inf\n');
-pause(0.5);
-[ds2, f2, p2] = ip1.getClicked(inf); %#ok<ASGLU>
-assertElementsAlmostEqual(31, p2);
-assertTrue(~isempty(ds2));
-
-fprintf('It should move the marker to end when position is inf\n');
-pause(0.5);
-ip1.getClicked(inf);
-
-fprintf('It marker should not move when the position is empty\n');
-pause(0.5);
-ip1.getClicked(inf);
-pause off
-pause off
-if values.deleteFigures
-    delete(fig1);
-end
-
-function testBlockPtrHDF5(values) %#ok<DEFNU>
-% Unit test for visviews.blockImagePlot position of block pointer
-fprintf('\nUnit tests for visviews.blockImagePlot positioning of block pointer\n');
-
-fprintf('It should allow callbacks to be registers\n');
-fig1 = figure('Name', 'Clumps of one window');
-ip1 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip1));
-ip1.plot(values.hdf5Data, values.fun, values.slice);
-gaps = ip1.getGaps();
-ip1.reposition(gaps + 10);
-ip1.registerCallbacks([]);
-
-fprintf('It should move the position marker when incremented\n');
-pause on
-for k = 1:31
-    pause(0.25);
-    ip1.getClicked(k);
-end
-fprintf('It should move the marker to beginning when position is empty\n');
-pause(0.5);
-[ds1, f1, p1] = ip1.getClicked(-inf); %#ok<ASGLU>
-assertElementsAlmostEqual(1, p1);
-assertTrue(~isempty(ds1));
-
-fprintf('It should move the marker to beginning when position is -inf\n');
-pause(0.5);
-[ds2, f2, p2] = ip1.getClicked(inf); %#ok<ASGLU>
-assertElementsAlmostEqual(31, p2);
-assertTrue(~isempty(ds2));
-
-fprintf('It should move the marker to end when position is inf\n');
-pause(0.5);
-ip1.getClicked(inf);
-
-fprintf('It marker should not move when the position is empty\n');
-pause(0.5);
-ip1.getClicked(inf);
-pause off
-pause off
-if values.deleteFigures
-    delete(fig1);
-end
+% function testPlotSlice(values) %#ok<DEFNU>
+% % Unit test visviews.blockImagePlot plot  with nonempy slice
+% fprintf('\nUnit tests for visviews.blockImagePlot plot method with slice\n')
+% 
+% fprintf('It should produce a plot for a slice of windows at beginning\n');
+% fig1 = figure('Name', 'Slice of windows at beginning');
+% ip1 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip1));
+% slice1 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip1.plot(values.bData, values.fun, slice1);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows in the middle\n');
+% fig2 = figure('Name', 'Slice of windows in middle');
+% ip2 = visviews.blockImagePlot(fig2, [], []);
+% assertTrue(isvalid(ip2));
+% slice2 = viscore.dataSlice('Slices', {':', ':', '4:9'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip2.plot(values.bData, values.fun, slice2);
+% gaps = ip2.getGaps();
+% ip2.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows that falls off the end\n');
+% fig3 = figure('Name', 'Slice of windows off the end');
+% ip3 = visviews.blockImagePlot(fig3, [], []);
+% assertTrue(isvalid(ip3));
+% slice3 = viscore.dataSlice('Slices', {':', ':', '15:21'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip3.plot(values.bData, values.fun, slice3);
+% gaps = ip3.getGaps();
+% ip3.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows at beginning (even)\n');
+% fig4 = figure('Name', 'Slice of windows at beginning with clump factor 2');
+% ip4 = visviews.blockImagePlot(fig4, [], []);
+% assertTrue(isvalid(ip4));
+% slice4 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip4.ClumpSize = 2;
+% ip4.plot(values.bData, values.fun, slice4);
+% gaps = ip4.getGaps();
+% ip4.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows uneven at end\n');
+% fig5 = figure('Name', 'Slice of windows at end with clump factor 3');
+% ip5 = visviews.blockImagePlot(fig5, [], []);
+% assertTrue(isvalid(ip5));
+% slice5 = viscore.dataSlice('Slices', {':', ':', '14:20'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip5.ClumpSize = 3;
+% ip5.plot(values.bData, values.fun, slice5);
+% gaps = ip5.getGaps();
+% ip5.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows in one clump\n');
+% fig6 = figure('Name', 'Slice of 2 windows with clump factor 3');
+% ip6 = visviews.blockImagePlot(fig6, [], []);
+% assertTrue(isvalid(ip6));
+% slice6 = viscore.dataSlice('Slices', {':', ':', '14:15'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip6.ClumpSize = 3;
+% ip6.plot(values.bData, values.fun, slice6);
+% gaps = ip6.getGaps();
+% ip6.reposition(gaps);
+% 
+% fprintf('It should produce a valid plot for one value\n');
+% fig7 = figure('Name', 'One value');
+% ip7 = visviews.blockImagePlot(fig7, [], []);
+% assertTrue(isvalid(ip7));
+% ip7.ClumpSize = 20;
+% slice7 = viscore.dataSlice('Slices', {'3', ':', '2'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip7.plot(values.bData, values.fun, slice7);
+% gaps = ip7.getGaps();
+% ip7.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+%     delete(fig5);
+%     delete(fig6);
+%     delete(fig7);
+% end
+% 
+% function testPlotSliceHDF5(values) %#ok<DEFNU>
+% % Unit test visviews.blockImagePlot plot  with nonempy slice
+% fprintf('\nUnit tests for visviews.blockImagePlot plot method with slice\n')
+% 
+% fprintf('It should produce a plot for a slice of windows at beginning\n');
+% fig1 = figure('Name', 'Slice of windows at beginning');
+% ip1 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip1));
+% slice1 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip1.plot(values.hdf5Data, values.fun, slice1);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows in the middle\n');
+% fig2 = figure('Name', 'Slice of windows in middle');
+% ip2 = visviews.blockImagePlot(fig2, [], []);
+% assertTrue(isvalid(ip2));
+% slice2 = viscore.dataSlice('Slices', {':', ':', '4:9'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip2.plot(values.hdf5Data, values.fun, slice2);
+% gaps = ip2.getGaps();
+% ip2.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows that falls off the end\n');
+% fig3 = figure('Name', 'Slice of windows off the end');
+% ip3 = visviews.blockImagePlot(fig3, [], []);
+% assertTrue(isvalid(ip3));
+% slice3 = viscore.dataSlice('Slices', {':', ':', '15:21'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip3.plot(values.hdf5Data, values.fun, slice3);
+% gaps = ip3.getGaps();
+% ip3.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows at beginning (even)\n');
+% fig4 = figure('Name', 'Slice of windows at beginning with clump factor 2');
+% ip4 = visviews.blockImagePlot(fig4, [], []);
+% assertTrue(isvalid(ip4));
+% slice4 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip4.ClumpSize = 2;
+% ip4.plot(values.hdf5Data, values.fun, slice4);
+% gaps = ip4.getGaps();
+% ip4.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows uneven at end\n');
+% fig5 = figure('Name', 'Slice of windows at end with clump factor 3');
+% ip5 = visviews.blockImagePlot(fig5, [], []);
+% assertTrue(isvalid(ip5));
+% slice5 = viscore.dataSlice('Slices', {':', ':', '14:20'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip5.ClumpSize = 3;
+% ip5.plot(values.hdf5Data, values.fun, slice5);
+% gaps = ip5.getGaps();
+% ip5.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows in one clump\n');
+% fig6 = figure('Name', 'Slice of 2 windows with clump factor 3');
+% ip6 = visviews.blockImagePlot(fig6, [], []);
+% assertTrue(isvalid(ip6));
+% slice6 = viscore.dataSlice('Slices', {':', ':', '14:15'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip6.ClumpSize = 3;
+% ip6.plot(values.hdf5Data, values.fun, slice6);
+% gaps = ip6.getGaps();
+% ip6.reposition(gaps);
+% 
+% fprintf('It should produce a valid plot for one value\n');
+% fig7 = figure('Name', 'One value');
+% ip7 = visviews.blockImagePlot(fig7, [], []);
+% assertTrue(isvalid(ip7));
+% ip7.ClumpSize = 20;
+% slice7 = viscore.dataSlice('Slices', {'3', ':', '2'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ip7.plot(values.hdf5Data, values.fun, slice7);
+% gaps = ip7.getGaps();
+% ip7.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+%     delete(fig5);
+%     delete(fig6);
+%     delete(fig7);
+% end
+% 
+% function testConstantAndNaNValues(values) %#ok<DEFNU>
+% % Unit test visviews.blockImagePlot plot constant and NaN
+% fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and NaN values\n')
+% 
+% % Set up the functions
+% data = zeros([32, 1000, 20]);
+% testVD1 = viscore.memoryData(data, 'All zeros');
+% fprintf('It should produce a plot for when all of the values are 0\n');
+% fig1 = figure('Name', 'All zero values');
+% ip1 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip1));
+% ip1.plot(testVD1, values.fun, values.slice);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps);
+% 
+% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+% fig2 = figure('Name', 'Data zero, func NaN');
+% ip2 = visviews.blockImagePlot(fig2, [], []);
+% assertTrue(isvalid(ip2));
+% ip2.plot(values.bData, [], values.slice);
+% gaps = ip2.getGaps();
+% ip2.reposition(gaps);
+% 
+% fprintf('It should produce a plot for when data is NaNs, funcs NaNs (---see warning)\n');
+% data3 = NaN([32, 1000, 20]);
+% testVD3 = viscore.memoryData(data3, 'Data NaN');
+% fig3 = figure('Name', 'Data NaNs');
+% ip3 = visviews.blockImagePlot(fig3, [], []);
+% assertTrue(isvalid(ip3));
+% ip3.plot(testVD3, values.fun, values.slice);
+% gaps = ip3.getGaps();
+% ip3.reposition(gaps);
+% drawnow
+% 
+% % Data slice empty
+% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+% data = zeros(5, 1);
+% testVD4 = viscore.memoryData(data, 'Data empty');
+% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig4 = figure('Name', 'Data slice is empty');
+% ip4 = visviews.blockImagePlot(fig4, [], []);
+% assertTrue(isvalid(ip4));
+% ip4.plot(testVD4, values.fun, slice4);
+% gaps = ip4.getGaps();
+% ip4.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
+% 
+% function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
+% % Unit test visviews.blockImagePlot plot constant and NaN
+% fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and NaN values\n')
+% 
+% % Set up the functions
+% data = zeros([32, 1000, 20]);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File);
+% fprintf('It should produce a plot for when all of the values are 0\n');
+% fig1 = figure('Name', 'All zero values');
+% ip1 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip1));
+% ip1.plot(testVD1, values.fun, values.slice);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps);
+% delete(hdf5File);
+% 
+% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+% fig2 = figure('Name', 'Data zero, func NaN');
+% ip2 = visviews.blockImagePlot(fig2, [], []);
+% assertTrue(isvalid(ip2));
+% ip2.plot(values.hdf5Data, [], values.slice);
+% gaps = ip2.getGaps();
+% ip2.reposition(gaps);
+% 
+% fprintf('It should produce a plot for when data is NaNs, funcs NaNs (---see warning)\n');
+% data3 = NaN([32, 1000, 20]);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD3 = viscore.hdf5Data(data3, 'Data NaN', hdf5File);
+% fig3 = figure('Name', 'Data NaNs');
+% ip3 = visviews.blockImagePlot(fig3, [], []);
+% assertTrue(isvalid(ip3));
+% ip3.plot(testVD3, values.fun, values.slice);
+% gaps = ip3.getGaps();
+% ip3.reposition(gaps);
+% drawnow
+% delete(hdf5File);
+% 
+% % Data slice empty
+% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+% data = zeros(5, 1);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File);
+% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig4 = figure('Name', 'Data slice is empty');
+% ip4 = visviews.blockImagePlot(fig4, [], []);
+% assertTrue(isvalid(ip4));
+% ip4.plot(testVD4, values.fun, slice4);
+% gaps = ip4.getGaps();
+% ip4.reposition(gaps);
+% delete(hdf5File);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
+% 
+% function testSettingStructure(values) %#ok<DEFNU>
+% % Unit test for visviews.blockImagePlot getDefaultProperties
+% fprintf('\nUnit tests for visviews.blockImagePlot interaction with settings structure\n');
+% 
+% fprintf('It should have a getDefaultProperties method that returns a structure\n');
+% s = visviews.blockImagePlot.getDefaultProperties();
+% assertTrue(isa(s, 'struct'));
+% 
+% fprintf('It should allow a key in the instructor\n');
+% fig1 = figure('Name', 'Test of the settings structure');
+% ipKey = 'Block image';
+% ip1 = visviews.blockImagePlot(fig1, [], ipKey);
+% assertTrue(isvalid(ip1));
+% pConf = ip1.getConfigObj();
+% assertTrue(isa(pConf, 'visprops.configurableObj'));
+% assertTrue(strcmp(ipKey, pConf.getObjectID()));
+% 
+% fprintf('It should allow configuration and lookup by key\n')
+% % Create and set the data manager
+% pMan = viscore.dataManager();
+% visprops.configurableObj.updateManager(pMan, {pConf});
+% ip1.updateProperties(pMan);
+% 
+% % Change the background color to blue through the property manager
+% cObj = pMan.getObject(ipKey);
+% assertTrue(isa(cObj, 'visprops.configurableObj'));
+% s = cObj.getStructure();
+% % s(1).Value = [0, 0, 1];
+% cObj.setStructure(s);
+% ip1.updateProperties(pMan);
+% ip1.plot(values.bData, values.fun, values.slice);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+% end
+% 
+% function testSettingStructureHDF5(values) %#ok<DEFNU>
+% % Unit test for visviews.blockImagePlot getDefaultProperties
+% fprintf('\nUnit tests for visviews.blockImagePlot interaction with settings structure\n');
+% 
+% fprintf('It should have a getDefaultProperties method that returns a structure\n');
+% s = visviews.blockImagePlot.getDefaultProperties();
+% assertTrue(isa(s, 'struct'));
+% 
+% fprintf('It should allow a key in the instructor\n');
+% fig1 = figure('Name', 'Test of the settings structure');
+% ipKey = 'Block image';
+% ip1 = visviews.blockImagePlot(fig1, [], ipKey);
+% assertTrue(isvalid(ip1));
+% pConf = ip1.getConfigObj();
+% assertTrue(isa(pConf, 'visprops.configurableObj'));
+% assertTrue(strcmp(ipKey, pConf.getObjectID()));
+% 
+% fprintf('It should allow configuration and lookup by key\n')
+% % Create and set the data manager
+% pMan = viscore.dataManager();
+% visprops.configurableObj.updateManager(pMan, {pConf});
+% ip1.updateProperties(pMan);
+% 
+% % Change the background color to blue through the property manager
+% cObj = pMan.getObject(ipKey);
+% assertTrue(isa(cObj, 'visprops.configurableObj'));
+% s = cObj.getStructure();
+% % s(1).Value = [0, 0, 1];
+% cObj.setStructure(s);
+% ip1.updateProperties(pMan);
+% ip1.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+% end
+% 
+% function testBlockPtr(values) %#ok<DEFNU>
+% % Unit test for visviews.blockImagePlot position of block pointer
+% fprintf('\nUnit tests for visviews.blockImagePlot positioning of block pointer\n');
+% 
+% fprintf('It should allow callbacks to be registers\n');
+% fig1 = figure('Name', 'Clumps of one window');
+% ip1 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip1));
+% ip1.plot(values.bData, values.fun, values.slice);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps + 10);
+% ip1.registerCallbacks([]);
+% 
+% fprintf('It should move the position marker when incremented\n');
+% pause on
+% for k = 1:31
+%     pause(0.25);
+%     ip1.getClicked(k);
+% end
+% fprintf('It should move the marker to beginning when position is empty\n');
+% pause(0.5);
+% [ds1, f1, p1] = ip1.getClicked(-inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(1, p1);
+% assertTrue(~isempty(ds1));
+% 
+% fprintf('It should move the marker to beginning when position is -inf\n');
+% pause(0.5);
+% [ds2, f2, p2] = ip1.getClicked(inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(31, p2);
+% assertTrue(~isempty(ds2));
+% 
+% fprintf('It should move the marker to end when position is inf\n');
+% pause(0.5);
+% ip1.getClicked(inf);
+% 
+% fprintf('It marker should not move when the position is empty\n');
+% pause(0.5);
+% ip1.getClicked(inf);
+% pause off
+% pause off
+% if values.deleteFigures
+%     delete(fig1);
+% end
+% 
+% function testBlockPtrHDF5(values) %#ok<DEFNU>
+% % Unit test for visviews.blockImagePlot position of block pointer
+% fprintf('\nUnit tests for visviews.blockImagePlot positioning of block pointer\n');
+% 
+% fprintf('It should allow callbacks to be registers\n');
+% fig1 = figure('Name', 'Clumps of one window');
+% ip1 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip1));
+% ip1.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps + 10);
+% ip1.registerCallbacks([]);
+% 
+% fprintf('It should move the position marker when incremented\n');
+% pause on
+% for k = 1:31
+%     pause(0.25);
+%     ip1.getClicked(k);
+% end
+% fprintf('It should move the marker to beginning when position is empty\n');
+% pause(0.5);
+% [ds1, f1, p1] = ip1.getClicked(-inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(1, p1);
+% assertTrue(~isempty(ds1));
+% 
+% fprintf('It should move the marker to beginning when position is -inf\n');
+% pause(0.5);
+% [ds2, f2, p2] = ip1.getClicked(inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(31, p2);
+% assertTrue(~isempty(ds2));
+% 
+% fprintf('It should move the marker to end when position is inf\n');
+% pause(0.5);
+% ip1.getClicked(inf);
+% 
+% fprintf('It marker should not move when the position is empty\n');
+% pause(0.5);
+% ip1.getClicked(inf);
+% pause off
+% pause off
+% if values.deleteFigures
+%     delete(fig1);
+% end
