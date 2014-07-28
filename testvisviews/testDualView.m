@@ -419,52 +419,52 @@ function teardown(values) %#ok<INUSD,DEFNU>
 
 
 function testSpecializedPlot(values) %#ok<DEFNU>
-% Unit test for visviews.dualView specialized plots
-fprintf('\nUnit test for visviews.dualView specialized plots\n');
-fprintf('It should produce a valid plot when a blockScalpPlot is used with one function\n');
-pS = viewTestClass.getDefaultPlotsScalpShort();
-fS = viewTestClass.getOneEnabledFunction();
-assertEqual(length(pS), 8);
-testVD1 = viscore.memoryData(values.EEG.data, 'Shows block scalp plot', ...
-    'ElementLocations', values.EEG.chanlocs);
-bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS', 'Functions', fS);
-assertTrue(isvalid(bv1));
-drawnow
-
-fprintf('\nUnit test for visviews.dualView specialized plots\n');
-fprintf('It should produce a valid plot when a blockScalpPlot is used with defaults\n');
-pS = viewTestClass.getDefaultPlotsScalp();
-fS = viewTestClass.getDefaultFunctions();
-assertEqual(length(pS), 8);
-testVD2 = viscore.memoryData(values.EEG.data, 'Shows block scalp plot', ...
-    'ElementLocations', values.EEG.chanlocs);
-bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS', 'Functions', fS);
-assertTrue(isvalid(bv2));
-drawnow
-
-fprintf('It should produce a valid plot when only details are used\n');
-pS = viewTestClass.getDefaultPlotsDetailOnly();
-assertEqual(length(pS), 2);
-testVD3 = viscore.memoryData(values.EEG.data, 'Shows details only');
-bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
-assertTrue(isvalid(bv3));
-drawnow
-
-fprintf('It should produce a valid plot when only summaries are used\n');
-pS = viewTestClass.getDefaultPlotsSummaryOnly();
-assertEqual(length(pS), 3);
-testVD4 = viscore.memoryData(values.EEG.data, 'Shows summary only');
-bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
-assertTrue(isvalid(bv4));
-drawnow
-
-fprintf('It should produce a valid plot when two shadow plots are used\n');
-pS = viewTestClass.getDefaultPlotsTwoShadowPlots();
-assertEqual(length(pS), 6);
-testVD5 = viscore.memoryData(values.EEG.data, 'Shows two shadow plots');
-bv5 = visviews.dualView('VisData', testVD5, 'Plots', pS');
-assertTrue(isvalid(bv5));
-drawnow
+% % Unit test for visviews.dualView specialized plots
+% fprintf('\nUnit test for visviews.dualView specialized plots\n');
+% fprintf('It should produce a valid plot when a blockScalpPlot is used with one function\n');
+% pS = viewTestClass.getDefaultPlotsScalpShort();
+% fS = viewTestClass.getOneEnabledFunction();
+% assertEqual(length(pS), 8);
+% testVD1 = viscore.memoryData(values.EEG.data, 'Shows block scalp plot', ...
+%     'ElementLocations', values.EEG.chanlocs);
+% bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS', 'Functions', fS);
+% assertTrue(isvalid(bv1));
+% drawnow
+% 
+% fprintf('\nUnit test for visviews.dualView specialized plots\n');
+% fprintf('It should produce a valid plot when a blockScalpPlot is used with defaults\n');
+% pS = viewTestClass.getDefaultPlotsScalp();
+% fS = viewTestClass.getDefaultFunctions();
+% assertEqual(length(pS), 8);
+% testVD2 = viscore.memoryData(values.EEG.data, 'Shows block scalp plot', ...
+%     'ElementLocations', values.EEG.chanlocs);
+% bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS', 'Functions', fS);
+% assertTrue(isvalid(bv2));
+% drawnow
+% 
+% fprintf('It should produce a valid plot when only details are used\n');
+% pS = viewTestClass.getDefaultPlotsDetailOnly();
+% assertEqual(length(pS), 2);
+% testVD3 = viscore.memoryData(values.EEG.data, 'Shows details only');
+% bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
+% assertTrue(isvalid(bv3));
+% drawnow
+% 
+% fprintf('It should produce a valid plot when only summaries are used\n');
+% pS = viewTestClass.getDefaultPlotsSummaryOnly();
+% assertEqual(length(pS), 3);
+% testVD4 = viscore.memoryData(values.EEG.data, 'Shows summary only');
+% bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
+% assertTrue(isvalid(bv4));
+% drawnow
+% 
+% fprintf('It should produce a valid plot when two shadow plots are used\n');
+% pS = viewTestClass.getDefaultPlotsTwoShadowPlots();
+% assertEqual(length(pS), 6);
+% testVD5 = viscore.memoryData(values.EEG.data, 'Shows two shadow plots');
+% bv5 = visviews.dualView('VisData', testVD5, 'Plots', pS');
+% assertTrue(isvalid(bv5));
+% drawnow
 
 fprintf('It should produce a valid plot when one summary and two details are used\n');
 f = viewTestClass.getDefaultOneFunction();
@@ -488,57 +488,57 @@ end
 
 
 function testSpecializedPlotHDF5(values) %#ok<DEFNU>
-% Unit test for visviews.dualView specialized plots
-fprintf('\nUnit test for visviews.dualView specialized plots\n');
-fprintf('It should produce a valid plot when a blockScalpPlot is used with one function\n');
-pS = viewTestClass.getDefaultPlotsScalpShort();
-fS = viewTestClass.getOneEnabledFunction();
-assertEqual(length(pS), 8);
-hdf5File1 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA1.hdf5');
-testVD1 = viscore.hdf5Data(values.EEG.data, 'Shows block scalp plot', ...
-    hdf5File1, 'ElementLocations', values.EEG.chanlocs, 'Overwrite', true);
-bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS', 'Functions', fS);
-assertTrue(isvalid(bv1));
-drawnow
-
-fprintf('\nUnit test for visviews.dualView specialized plots\n');
-fprintf('It should produce a valid plot when a blockScalpPlot is used with defaults\n');
-pS = viewTestClass.getDefaultPlotsScalp();
-fS = viewTestClass.getDefaultFunctions();
-assertEqual(length(pS), 8);
-hdf5File2 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA2.hdf5');
-testVD2 = viscore.hdf5Data(values.EEG.data, 'Shows block scalp plot', ...
-    hdf5File2, 'ElementLocations', values.EEG.chanlocs, 'Overwrite', true);
-bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS', 'Functions', fS);
-assertTrue(isvalid(bv2));
-drawnow
-
-fprintf('It should produce a valid plot when only details are used\n');
-pS = viewTestClass.getDefaultPlotsDetailOnly();
-assertEqual(length(pS), 2);
-hdf5File3 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA3.hdf5');
-testVD3 = viscore.hdf5Data(values.EEG.data, 'Shows details only', hdf5File3, 'Overwrite', true);
-bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
-assertTrue(isvalid(bv3));
-drawnow
-
-fprintf('It should produce a valid plot when only summaries are used\n');
-pS = viewTestClass.getDefaultPlotsSummaryOnly();
-assertEqual(length(pS), 3);
-hdf5File4 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA4.hdf5');
-testVD4 = viscore.hdf5Data(values.EEG.data, 'Shows summary only', hdf5File4, 'Overwrite', true);
-bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
-assertTrue(isvalid(bv4));
-drawnow
-
-fprintf('It should produce a valid plot when two shadow plots are used\n');
-pS = viewTestClass.getDefaultPlotsTwoShadowPlots();
-assertEqual(length(pS), 6);
-hdf5File5 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA5.hdf5');
-testVD5 = viscore.hdf5Data(values.EEG.data, 'Shows two shadow plots', hdf5File5, 'Overwrite', true);
-bv5 = visviews.dualView('VisData', testVD5, 'Plots', pS');
-assertTrue(isvalid(bv5));
-drawnow
+% % Unit test for visviews.dualView specialized plots
+% fprintf('\nUnit test for visviews.dualView specialized plots\n');
+% fprintf('It should produce a valid plot when a blockScalpPlot is used with one function\n');
+% pS = viewTestClass.getDefaultPlotsScalpShort();
+% fS = viewTestClass.getOneEnabledFunction();
+% assertEqual(length(pS), 8);
+% hdf5File1 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA1.hdf5');
+% testVD1 = viscore.hdf5Data(values.EEG.data, 'Shows block scalp plot', ...
+%     hdf5File1, 'ElementLocations', values.EEG.chanlocs, 'Overwrite', true);
+% bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS', 'Functions', fS);
+% assertTrue(isvalid(bv1));
+% drawnow
+% 
+% fprintf('\nUnit test for visviews.dualView specialized plots\n');
+% fprintf('It should produce a valid plot when a blockScalpPlot is used with defaults\n');
+% pS = viewTestClass.getDefaultPlotsScalp();
+% fS = viewTestClass.getDefaultFunctions();
+% assertEqual(length(pS), 8);
+% hdf5File2 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA2.hdf5');
+% testVD2 = viscore.hdf5Data(values.EEG.data, 'Shows block scalp plot', ...
+%     hdf5File2, 'ElementLocations', values.EEG.chanlocs, 'Overwrite', true);
+% bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS', 'Functions', fS);
+% assertTrue(isvalid(bv2));
+% drawnow
+% 
+% fprintf('It should produce a valid plot when only details are used\n');
+% pS = viewTestClass.getDefaultPlotsDetailOnly();
+% assertEqual(length(pS), 2);
+% hdf5File3 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA3.hdf5');
+% testVD3 = viscore.hdf5Data(values.EEG.data, 'Shows details only', hdf5File3, 'Overwrite', true);
+% bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS');
+% assertTrue(isvalid(bv3));
+% drawnow
+% 
+% fprintf('It should produce a valid plot when only summaries are used\n');
+% pS = viewTestClass.getDefaultPlotsSummaryOnly();
+% assertEqual(length(pS), 3);
+% hdf5File4 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA4.hdf5');
+% testVD4 = viscore.hdf5Data(values.EEG.data, 'Shows summary only', hdf5File4, 'Overwrite', true);
+% bv4 = visviews.dualView('VisData', testVD4, 'Plots', pS');
+% assertTrue(isvalid(bv4));
+% drawnow
+% 
+% fprintf('It should produce a valid plot when two shadow plots are used\n');
+% pS = viewTestClass.getDefaultPlotsTwoShadowPlots();
+% assertEqual(length(pS), 6);
+% hdf5File5 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA5.hdf5');
+% testVD5 = viscore.hdf5Data(values.EEG.data, 'Shows two shadow plots', hdf5File5, 'Overwrite', true);
+% bv5 = visviews.dualView('VisData', testVD5, 'Plots', pS');
+% assertTrue(isvalid(bv5));
+% drawnow
 
 fprintf('It should produce a valid plot when one summary and two details are used\n');
 f = viewTestClass.getDefaultOneFunction();

@@ -310,8 +310,8 @@ classdef dataSlice < hgsetget
             if length(originalDims) == 3
                 numFrames = originalDims(2) * originalDims(3);
             end
-            realBlockSize = min(nSamples, abs(numFrames - nSamples * blocks(1)));
-            for a = 1:length(blocks);
+            for a = 1:length(blocks); 
+                realBlockSize = min(nSamples, abs(numFrames - nSamples * (blocks(a) - 1)));
                 for b = 1:length(elements)
                     currentBlock = [h5read(hdf5File, '/data', ...
                         [(nSamples * (blocks(a) - 1) * nElements + elements(b)) 1], ...
@@ -320,7 +320,6 @@ classdef dataSlice < hgsetget
                         [1, nSamples - realBlockSize])];
                     sData(b, :, a) = currentBlock(samples);
                 end
-                realBlockSize = min(nSamples, abs(numFrames - nSamples * blocks(a)));
             end
             if ~isempty(slices) && ~isempty(cDims) && ~isempty(method)
                 sData = viscore.dataSlice.combineDims(sData, cDims, method);

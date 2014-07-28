@@ -164,10 +164,13 @@ classdef hdf5Data < hgsetget & viscore.blockedData
         
         function [tMean, tStd, tLow, tHigh] = getTrimValues(obj, percent, data)
             % Return trim mean, trim std, trim low cutoff, trim high cutoff
+            % NEED TO REWRITE THIS
             if nargin == 3
                 myData = data(:);
             else
-                myData = h5read(obj.HDF5File, '/data');
+                myData = viscore.dataSlice.getHDF5Slice(...
+                obj, {':', ':', ':'}, [], []);
+                myData = myData(:);
             end
             if isempty(percent) || percent <= 0 || percent >= 100
                 tLow = min(myData);

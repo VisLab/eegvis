@@ -252,6 +252,15 @@ assertVectorsAlmostEqual(size(dSlice), [32, 1000, 20]);
 assertVectorsAlmostEqual(sStart, [1, 1, 1]);
 assertVectorsAlmostEqual(sSizes, [32, 1000, 20]);
 
+% fprintf('It should take a data slice when slice is too short\n');
+% data = random('normal', 0, 1, [32, 30504]);
+% hdf5File21 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA21.hdf5');
+% testVD1 = viscore.hdf5Data(data, 'random', hdf5File21);
+% [dSlice, sStart, sSizes] = viscore.dataSlice.getHDF5Slice(testVD1, {':', ':'}, [], []);
+% assertVectorsAlmostEqual(size(dSlice), [32, 1000, 20]);
+% assertVectorsAlmostEqual(sStart, [1, 1, 1]);
+% assertVectorsAlmostEqual(sSizes, [32, 1000, 20]);
+
 fprintf('It should take a data slice when slice is too long\n');
 [dSlice, sStart, sSizes] =  viscore.dataSlice.getHDF5Slice(testVD1, {':', ':', '4:5', ':'}, [], []);
 assertVectorsAlmostEqual(size(dSlice), [32, 1000, 2]);
