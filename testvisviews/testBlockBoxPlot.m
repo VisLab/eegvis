@@ -15,7 +15,7 @@ hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG.hdf5');
 values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);   
 values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', hdf5File, ...
-    'SampleRate', EEG.srate, 'Overwrite', true);
+    'SampleRate', EEG.srate);
 load('RANDOM.mat', 'randomblockboxplot1');
 values.random1 = randomblockboxplot1;
 values.deleteFigures = false;
@@ -87,7 +87,7 @@ function teardown(values) %#ok<INUSD,DEFNU>
 % assertTrue(strcmp(s{1}, '1:32'))
 % assertTrue(strcmp(s{2}, ':'))
 % assertTrue(strcmp(s{3}, '31'))
-% 
+
 % fprintf('It should produce a plot for empty slice\n');
 % fig2 = figure('Name', 'Empty slice');
 % bp2 = visviews.blockBoxPlot(fig2, [], []);
@@ -160,7 +160,7 @@ function teardown(values) %#ok<INUSD,DEFNU>
 % bp8.plot(bData8, values.fun, values.slice);
 % gaps = bp8.getGaps();
 % bp8.reposition(gaps);
-% 
+
 % drawnow
 % if values.deleteFigures
 %     delete(fig1);
@@ -172,7 +172,7 @@ function teardown(values) %#ok<INUSD,DEFNU>
 %     delete(fig7);
 %     delete(fig8);
 % end
-% 
+
 % function testPlotHDF5(values) %#ok<DEFNU>
 % % Unit test visviews.blockBoxPlot plot
 % fprintf('\nUnit tests for visviews.blockBoxPlot plot method\n')
@@ -199,7 +199,7 @@ function teardown(values) %#ok<INUSD,DEFNU>
 % assertTrue(strcmp(s{1}, '1:32'))
 % assertTrue(strcmp(s{2}, ':'))
 % assertTrue(strcmp(s{3}, '31'))
-% 
+
 % fprintf('It should produce a plot for empty slice\n');
 % fig2 = figure('Name', 'Empty slice');
 % bp2 = visviews.blockBoxPlot(fig2, [], []);
@@ -247,8 +247,8 @@ function teardown(values) %#ok<INUSD,DEFNU>
 % % Set up the data
 % data = repmat([1, 1, 1, 2, 2, 2, 3], [5, 1, 4]);
 % data = permute(data, [1, 3, 2]);
-% hdf5File6 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA6.hdf5');
-% testVD6 = viscore.hdf5Data(data, 'Specific values', hdf5File6, 'Overwrite', true);
+% hdf5File6 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testBoxPlotTestPlot6.hdf5');
+% testVD6 = viscore.hdf5Data(data, 'Specific values', hdf5File6);
 % fprintf('It should produce a plot for identity slice with uneven grouping\n');
 % fig6 = figure('Name', 'No grouping to compare with specific values');
 % bp6 = visviews.blockBoxPlot(fig6, [], []);
@@ -266,15 +266,15 @@ function teardown(values) %#ok<INUSD,DEFNU>
 % bp7.reposition(gaps);
 % 
 % fprintf('It should produce a plot for data with large standard deviation\n');
-% hdf5File8 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA8.hdf5');
-% bData8 = viscore.hdf5Data(values.random1, 'Random normal large std', hdf5File8, 'Overwrite', true);
+% hdf5File8 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testBoxPlotTestPlot8.hdf5');
+% bData8 = viscore.hdf5Data(values.random1, 'Random normal large std', hdf5File8);
 % fig8 = figure('Name', 'Data with large standard deviation');
 % bp8 = visviews.blockBoxPlot(fig8, [], []);
 % assertTrue(isvalid(bp8));
 % bp8.plot(bData8, values.fun, values.slice);
 % gaps = bp8.getGaps();
 % bp8.reposition(gaps);
-% 
+
 % drawnow
 % if values.deleteFigures
 %     delete(fig1);
@@ -285,10 +285,9 @@ function teardown(values) %#ok<INUSD,DEFNU>
 %     delete(fig6);
 %     delete(fig7);
 %     delete(fig8);
+%     delete(hdf5File6);
+%     delete(hdf5File8);
 % end
-
-% delete(hdf5File6);
-% delete(hdf5File8);
 
 function testPlotSlice(values) %#ok<DEFNU>
 % Unit test visviews.blockBoxPlot plot  with nonempy slice
