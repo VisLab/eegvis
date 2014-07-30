@@ -280,9 +280,15 @@ classdef dataSlice < hgsetget
         end % getDataSlice
         
         function [sData, sStart, sSizes] = getHDF5Slice(visData, slices, cDims, method)
-            % This only works for 3d blocked data
+            % This only works for 3d blocked and epoched data and NOT 2d
+            % data
             hdf5File = visData.getHDF5File();
+            originalDims = h5read(hdf5File, '/dims');
             [nElements, nSamples, nBlocks] = visData.getDataSize();
+%             if visData.isEpoched
+%                 temp = num2cell(originalDims);
+%                 [nElements, nSamples, nBlocks] = temp{:};
+%             end
             [dSlice, sStart, sSizes] = ...
                 viscore.dataSlice.getSliceEvaluation([nElements, nSamples, nBlocks], slices);
             if isempty(sStart)
@@ -305,7 +311,6 @@ classdef dataSlice < hgsetget
                 end
             end
             sData = zeros(sSizes);
-            originalDims = h5read(hdf5File, '/dims');
             numFrames = originalDims(2);
             if length(originalDims) == 3
                 numFrames = originalDims(2) * originalDims(3);
@@ -313,11 +318,14 @@ classdef dataSlice < hgsetget
             for a = 1:length(blocks); 
                 realBlockSize = min(nSamples, abs(numFrames - nSamples * (blocks(a) - 1)));
                 for b = 1:length(elements)
-                    currentBlock = [h5read(hdf5File, '/data', ...
+                    currentBlock = h5read(hdf5File, '/data', ...
                         [(nSamples * (blocks(a) - 1) * nElements + elements(b)) 1], ...
-                        [realBlockSize 1], [nElements 1])' , ...
+                        [realBlockSize 1], [nElements 1])';
+                    if ~visData.isEpoched
+                        currentBlock = [currentBlock, ...
                         repmat(visData.getPadValue, ...
-                        [1, nSamples - realBlockSize])];
+                        [1, nSamples - realBlockSize])]; %#ok<AGROW>
+                    end
                     sData(b, :, a) = currentBlock(samples);
                 end
             end

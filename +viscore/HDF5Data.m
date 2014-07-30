@@ -141,8 +141,13 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             nSamples = obj.BlockSize;
             if length(dims) == 2
                 nBlocks = ceil(dims(2) / obj.BlockSize);
-            elseif length(dims) == 3
-                nBlocks = ceil(dims(2) * dims(3) / obj.BlockSize);
+            else
+                if ~obj.isEpoched
+                    nBlocks = ceil(dims(2) * dims(3) / obj.BlockSize);
+                else
+                    nSamples = dims(2);
+                    nBlocks = dims(3);
+                end
             end
         end % getDataSize
         
@@ -202,6 +207,7 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             pdata = parser.Results;
             % Check the hdf5 file
             checkHDF5File(obj, pdata);
+            setBlocks(obj);
             obj.setEvents();
         end % parseParameters
         
@@ -239,10 +245,10 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             else
                 numFrames = dims(2) * dims(3);
             end
-            [numElements, ~, numBlocks] = getDataSize(obj);
+            [numElements, numSamples, numBlocks] = getDataSize(obj);
             computedBlocks = zeros(numElements, numBlocks);
             readFrames = 0;
-            realBlockSize = min(obj.BlockSize, numFrames - readFrames);
+            realBlockSize = min(numSamples, numFrames - readFrames);
             for a = 1:numBlocks
                 for b = 1:numElements
                     computedBlocks(b,a) = fh([h5read(obj.HDF5File, ...
@@ -250,12 +256,28 @@ classdef hdf5Data < hgsetget & viscore.blockedData
                         [(readFrames * numElements + b) 1], ...
                         [realBlockSize 1], [numElements 1])', ...
                         repmat(obj.PadValue, ...
-                        [1, obj.BlockSize - realBlockSize])]);
+                        [1, numSamples - realBlockSize])]);
                 end
                 readFrames = readFrames + realBlockSize;
                 realBlockSize = min(obj.BlockSize, numFrames - readFrames);
             end
         end % computeBlocks
+        
+        function [] = setBlocks(obj)
+            % Helper function to set epochs
+            if ~obj.Epoched
+                return;
+            end
+            dims = h5read(obj.HDF5File, '/dims');
+            obj.BlockSize = dims(obj.BlockDim);
+            if isempty(obj.BlockTimeScale)
+                obj.BlockTimeScale = (0:(obj.BlockSize - 1))./obj.SampleRate;
+            end
+            if isempty(obj.BlockStartTimes)
+                obj.BlockStartTimes = obj.BlockSize*...
+                    (0:(dims(3) - 1))./obj.SampleRate;
+            end
+        end % setBlocks
         
         function setEvents(obj)
             % Helper function to set events

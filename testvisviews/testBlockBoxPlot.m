@@ -289,129 +289,129 @@ function teardown(values) %#ok<INUSD,DEFNU>
 %     delete(hdf5File8);
 % end
 
-function testPlotSlice(values) %#ok<DEFNU>
-% Unit test visviews.blockBoxPlot plot  with nonempy slice
-fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice\n')
-
-fig1 = figure('Name', 'Slice of windows at beginning');
-bp1 = visviews.blockBoxPlot(fig1, [], []);
-assertTrue(isvalid(bp1));
-slice1 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp1.plot(values.bData, values.fun, slice1);
-gaps = bp1.getGaps();
-bp1.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows in the middle\n');
-fig2 = figure('Name', 'Slice of windows in middle');
-bp2 = visviews.blockBoxPlot(fig2, [], []);
-assertTrue(isvalid(bp2));
-slice2 = viscore.dataSlice('Slices', {':', ':', '4:9'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp2.plot(values.bData, values.fun, slice2);
-gaps = bp2.getGaps();
-bp2.reposition(gaps);
-
-fprintf('It should produce a plot for single point\n');
-fig3 = figure('Name', 'Elements 14 and Window 4');
-bp3 = visviews.blockBoxPlot(fig3, [], []);
-assertTrue(isvalid(bp3));
-slice3 = viscore.dataSlice('Slices', {'14', ':', '4'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp3.plot(values.bData, values.fun, slice3);
-gaps = bp3.getGaps();
-bp3.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows that falls off the end\n');
-fig4 = figure('Name', 'Slice of windows off the end');
-bp4 = visviews.blockBoxPlot(fig4, [], []);
-assertTrue(isvalid(bp4));
-slice4 = viscore.dataSlice('Slices', {':', ':', '27:32'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp4.plot(values.bData, values.fun, slice4);
-gaps = bp4.getGaps();
-bp4.reposition(gaps);
-
-fprintf('It should produce a plot for subset of elements and a slice of windows that falls off the end\n');
-fig5 = figure('Name', 'Elements 14:18 with slice of windows off the end');
-bp5 = visviews.blockBoxPlot(fig5, [], []);
-assertTrue(isvalid(bp5));
-slice5 = viscore.dataSlice('Slices', {'14:18', ':', '27:32'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp5.plot(values.bData, values.fun, slice5);
-gaps = bp5.getGaps();
-bp5.reposition(gaps);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-    delete(fig5);
-end
-
-function testPlotSliceHDF5(values) %#ok<DEFNU>
-% Unit test visviews.blockBoxPlot plot  with nonempy slice
-fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice\n')
-
-fig1 = figure('Name', 'Slice of windows at beginning');
-bp1 = visviews.blockBoxPlot(fig1, [], []);
-assertTrue(isvalid(bp1));
-slice1 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp1.plot(values.hdf5Data, values.fun, slice1);
-gaps = bp1.getGaps();
-bp1.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows in the middle\n');
-fig2 = figure('Name', 'Slice of windows in middle');
-bp2 = visviews.blockBoxPlot(fig2, [], []);
-assertTrue(isvalid(bp2));
-slice2 = viscore.dataSlice('Slices', {':', ':', '4:9'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp2.plot(values.hdf5Data, values.fun, slice2);
-gaps = bp2.getGaps();
-bp2.reposition(gaps);
-
-fprintf('It should produce a plot for single point\n');
-fig3 = figure('Name', 'Elements 14 and Window 4');
-bp3 = visviews.blockBoxPlot(fig3, [], []);
-assertTrue(isvalid(bp3));
-slice3 = viscore.dataSlice('Slices', {'14', ':', '4'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp3.plot(values.hdf5Data, values.fun, slice3);
-gaps = bp3.getGaps();
-bp3.reposition(gaps);
-
-fprintf('It should produce a plot for a slice of windows that falls off the end\n');
-fig4 = figure('Name', 'Slice of windows off the end');
-bp4 = visviews.blockBoxPlot(fig4, [], []);
-assertTrue(isvalid(bp4));
-slice4 = viscore.dataSlice('Slices', {':', ':', '27:32'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp4.plot(values.hdf5Data, values.fun, slice4);
-gaps = bp4.getGaps();
-bp4.reposition(gaps);
-
-fprintf('It should produce a plot for subset of elements and a slice of windows that falls off the end\n');
-fig5 = figure('Name', 'Elements 14:18 with slice of windows off the end');
-bp5 = visviews.blockBoxPlot(fig5, [], []);
-assertTrue(isvalid(bp5));
-slice5 = viscore.dataSlice('Slices', {'14:18', ':', '27:32'}, ...
-         'DimNames', {'Channel', 'Sample', 'Window'});
-bp5.plot(values.hdf5Data, values.fun, slice5);
-gaps = bp5.getGaps();
-bp5.reposition(gaps);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-    delete(fig5);
-end
+% function testPlotSlice(values) %#ok<DEFNU>
+% % Unit test visviews.blockBoxPlot plot  with nonempy slice
+% fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice\n')
+% 
+% fig1 = figure('Name', 'Slice of windows at beginning');
+% bp1 = visviews.blockBoxPlot(fig1, [], []);
+% assertTrue(isvalid(bp1));
+% slice1 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp1.plot(values.bData, values.fun, slice1);
+% gaps = bp1.getGaps();
+% bp1.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows in the middle\n');
+% fig2 = figure('Name', 'Slice of windows in middle');
+% bp2 = visviews.blockBoxPlot(fig2, [], []);
+% assertTrue(isvalid(bp2));
+% slice2 = viscore.dataSlice('Slices', {':', ':', '4:9'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp2.plot(values.bData, values.fun, slice2);
+% gaps = bp2.getGaps();
+% bp2.reposition(gaps);
+% 
+% fprintf('It should produce a plot for single point\n');
+% fig3 = figure('Name', 'Elements 14 and Window 4');
+% bp3 = visviews.blockBoxPlot(fig3, [], []);
+% assertTrue(isvalid(bp3));
+% slice3 = viscore.dataSlice('Slices', {'14', ':', '4'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp3.plot(values.bData, values.fun, slice3);
+% gaps = bp3.getGaps();
+% bp3.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows that falls off the end\n');
+% fig4 = figure('Name', 'Slice of windows off the end');
+% bp4 = visviews.blockBoxPlot(fig4, [], []);
+% assertTrue(isvalid(bp4));
+% slice4 = viscore.dataSlice('Slices', {':', ':', '27:32'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp4.plot(values.bData, values.fun, slice4);
+% gaps = bp4.getGaps();
+% bp4.reposition(gaps);
+% 
+% fprintf('It should produce a plot for subset of elements and a slice of windows that falls off the end\n');
+% fig5 = figure('Name', 'Elements 14:18 with slice of windows off the end');
+% bp5 = visviews.blockBoxPlot(fig5, [], []);
+% assertTrue(isvalid(bp5));
+% slice5 = viscore.dataSlice('Slices', {'14:18', ':', '27:32'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp5.plot(values.bData, values.fun, slice5);
+% gaps = bp5.getGaps();
+% bp5.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+%     delete(fig5);
+% end
+% 
+% function testPlotSliceHDF5(values) %#ok<DEFNU>
+% % Unit test visviews.blockBoxPlot plot  with nonempy slice
+% fprintf('\nUnit tests for visviews.blockBoxPlot plot method with slice\n')
+% 
+% fig1 = figure('Name', 'Slice of windows at beginning');
+% bp1 = visviews.blockBoxPlot(fig1, [], []);
+% assertTrue(isvalid(bp1));
+% slice1 = viscore.dataSlice('Slices', {':', ':', '1:10'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp1.plot(values.hdf5Data, values.fun, slice1);
+% gaps = bp1.getGaps();
+% bp1.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows in the middle\n');
+% fig2 = figure('Name', 'Slice of windows in middle');
+% bp2 = visviews.blockBoxPlot(fig2, [], []);
+% assertTrue(isvalid(bp2));
+% slice2 = viscore.dataSlice('Slices', {':', ':', '4:9'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp2.plot(values.hdf5Data, values.fun, slice2);
+% gaps = bp2.getGaps();
+% bp2.reposition(gaps);
+% 
+% fprintf('It should produce a plot for single point\n');
+% fig3 = figure('Name', 'Elements 14 and Window 4');
+% bp3 = visviews.blockBoxPlot(fig3, [], []);
+% assertTrue(isvalid(bp3));
+% slice3 = viscore.dataSlice('Slices', {'14', ':', '4'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp3.plot(values.hdf5Data, values.fun, slice3);
+% gaps = bp3.getGaps();
+% bp3.reposition(gaps);
+% 
+% fprintf('It should produce a plot for a slice of windows that falls off the end\n');
+% fig4 = figure('Name', 'Slice of windows off the end');
+% bp4 = visviews.blockBoxPlot(fig4, [], []);
+% assertTrue(isvalid(bp4));
+% slice4 = viscore.dataSlice('Slices', {':', ':', '27:32'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp4.plot(values.hdf5Data, values.fun, slice4);
+% gaps = bp4.getGaps();
+% bp4.reposition(gaps);
+% 
+% fprintf('It should produce a plot for subset of elements and a slice of windows that falls off the end\n');
+% fig5 = figure('Name', 'Elements 14:18 with slice of windows off the end');
+% bp5 = visviews.blockBoxPlot(fig5, [], []);
+% assertTrue(isvalid(bp5));
+% slice5 = viscore.dataSlice('Slices', {'14:18', ':', '27:32'}, ...
+%          'DimNames', {'Channel', 'Sample', 'Window'});
+% bp5.plot(values.hdf5Data, values.fun, slice5);
+% gaps = bp5.getGaps();
+% bp5.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+%     delete(fig5);
+% end
 % 
 % 
 % 
@@ -831,15 +831,14 @@ end
 % % All zeros
 % fprintf('It should produce a plot for when all of the values are 0 (---see warning)\n');
 % data = zeros([32, 1000, 20]);
-% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-% testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File);
+% hdf5File1 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testBlockBoxPlottestConstantAndNaNValues1.hdf5');
+% testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File1);
 % fig1 = figure('Name', 'All zero values');
 % bp1 = visviews.blockBoxPlot(fig1, [], []);
 % assertTrue(isvalid(bp1));
 % bp1.plot(testVD1, values.fun, values.slice);
 % gaps = bp1.getGaps();
 % bp1.reposition(gaps);
-% delete(hdf5File);
 % 
 % % Data zeros, function NaN
 % fprintf('It should produce a plot for when data is zero, funcs empty (---see warning)\n');
@@ -853,21 +852,20 @@ end
 % % Data NaN
 % fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
 % data = NaN([32, 1000, 20]);
-% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-% testVD3 = viscore.hdf5Data(data, 'Data NaN', hdf5File);
+% hdf5File3 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testBlockBoxPlottestConstantAndNaNValues3.hdf5');
+% testVD3 = viscore.hdf5Data(data, 'Data NaN', hdf5File3);
 % fig3 = figure('Name', 'Data NaNs');
 % bp3 = visviews.blockBoxPlot(fig3, [], []);
 % assertTrue(isvalid(bp3));
 % bp3.plot(testVD3, values.fun, values.slice);
 % gaps = bp3.getGaps();
 % bp3.reposition(gaps);
-% delete(hdf5File);
 % 
 % % Data slice empty
 % fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
 % data = zeros(5, 1);
-% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-% testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File);
+% hdf5File4 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testBlockBoxPlottestConstantAndNaNValues4.hdf5');
+% testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File4);
 % slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
 %     'DimNames', {'Channel', 'Sample', 'Window'});
 % fig4 = figure('Name', 'Data slice is empty');
@@ -876,7 +874,7 @@ end
 % bp4.plot(testVD4, values.fun, slice4);
 % gaps = bp4.getGaps();
 % bp4.reposition(gaps);
-% delete(hdf5File);
+% 
 % 
 % drawnow
 % if values.deleteFigures
@@ -884,92 +882,95 @@ end
 %     delete(fig2);
 %     delete(fig3);
 %     delete(fig4);
+%     delete(hdf5File1);
+%     delete(hdf5File3);
+%     delete(hdf5File4);
 % end
 % 
-% function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>
-% % Unit test for visviews.blockBoxPlot getDefaultProperties
-% fprintf('\nUnit tests for visviews.blockBoxPlot getDefaultProperties\n');
-% 
-% fprintf('It should have a getDefaultProperties method that returns a structure\n');
-% s = visviews.blockBoxPlot.getDefaultProperties();
-% assertTrue(isa(s, 'struct'));
-% 
-% function testBlockPtr(values) %#ok<DEFNU>
-% % Unit test for visviews.blockBoxPlot position of block pointer
-% fprintf('\nUnit tests for visviews.blockBoxPlot positioning of block pointer\n');
-% 
-% fprintf('It should allow callbacks to be registers\n');
-% fig1 = figure('Name', 'Clumps of one window');
-% bp1 = visviews.blockBoxPlot(fig1, [], []);
-% assertTrue(isvalid(bp1));
-% bp1.plot(values.bData, values.fun, values.slice);
-% gaps = bp1.getGaps();
-% bp1.reposition(gaps + 10);
-% bp1.registerCallbacks([]);
-% 
-% fprintf('It should move the position marker when incremented\n');
-% pause on
-% for k = 1:31
-%     pause(0.25);
-%     bp1.getClicked(k);
-% end
-% fprintf('It should move the marker to beginning when position is -inf\n');
-% pause(0.5);
-% [ds1, f1, p1] = bp1.getClicked(-inf); %#ok<ASGLU>
-% assertElementsAlmostEqual(1, p1);
-% assertTrue(~isempty(ds1));
-% 
-% fprintf('It should move the marker to end when position is inf\n');
-% pause(0.5);
-% [ds2, f2, p2] = bp1.getClicked(inf); %#ok<ASGLU>
-% assertElementsAlmostEqual(31, p2);
-% assertTrue(~isempty(ds2));
-% 
-% fprintf('It marker should not move when the position is empty\n');
-% pause(0.5);
-% bp1.getClicked(inf);
-% pause off
-% 
-% if values.deleteFigures
-%     delete(fig1);
-% end
-% 
-% function testBlockPtrHDF5(values) %#ok<DEFNU>
-% % Unit test for visviews.blockBoxPlot position of block pointer
-% fprintf('\nUnit tests for visviews.blockBoxPlot positioning of block pointer\n');
-% 
-% fprintf('It should allow callbacks to be registers\n');
-% fig1 = figure('Name', 'Clumps of one window');
-% bp1 = visviews.blockBoxPlot(fig1, [], []);
-% assertTrue(isvalid(bp1));
-% bp1.plot(values.hdf5Data, values.fun, values.slice);
-% gaps = bp1.getGaps();
-% bp1.reposition(gaps + 10);
-% bp1.registerCallbacks([]);
-% 
-% fprintf('It should move the position marker when incremented\n');
-% pause on
-% for k = 1:31
-%     pause(0.25);
-%     bp1.getClicked(k);
-% end
-% fprintf('It should move the marker to beginning when position is -inf\n');
-% pause(0.5);
-% [ds1, f1, p1] = bp1.getClicked(-inf); %#ok<ASGLU>
-% assertElementsAlmostEqual(1, p1);
-% assertTrue(~isempty(ds1));
-% 
-% fprintf('It should move the marker to end when position is inf\n');
-% pause(0.5);
-% [ds2, f2, p2] = bp1.getClicked(inf); %#ok<ASGLU>
-% assertElementsAlmostEqual(31, p2);
-% assertTrue(~isempty(ds2));
-% 
-% fprintf('It marker should not move when the position is empty\n');
-% pause(0.5);
-% bp1.getClicked(inf);
-% pause off
-% 
-% if values.deleteFigures
-%     delete(fig1);
-% end
+function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>
+% Unit test for visviews.blockBoxPlot getDefaultProperties
+fprintf('\nUnit tests for visviews.blockBoxPlot getDefaultProperties\n');
+
+fprintf('It should have a getDefaultProperties method that returns a structure\n');
+s = visviews.blockBoxPlot.getDefaultProperties();
+assertTrue(isa(s, 'struct'));
+
+function testBlockPtr(values) %#ok<DEFNU>
+% Unit test for visviews.blockBoxPlot position of block pointer
+fprintf('\nUnit tests for visviews.blockBoxPlot positioning of block pointer\n');
+
+fprintf('It should allow callbacks to be registers\n');
+fig1 = figure('Name', 'Clumps of one window');
+bp1 = visviews.blockBoxPlot(fig1, [], []);
+assertTrue(isvalid(bp1));
+bp1.plot(values.bData, values.fun, values.slice);
+gaps = bp1.getGaps();
+bp1.reposition(gaps + 10);
+bp1.registerCallbacks([]);
+
+fprintf('It should move the position marker when incremented\n');
+pause on
+for k = 1:31
+    pause(0.25);
+    bp1.getClicked(k);
+end
+fprintf('It should move the marker to beginning when position is -inf\n');
+pause(0.5);
+[ds1, f1, p1] = bp1.getClicked(-inf); %#ok<ASGLU>
+assertElementsAlmostEqual(1, p1);
+assertTrue(~isempty(ds1));
+
+fprintf('It should move the marker to end when position is inf\n');
+pause(0.5);
+[ds2, f2, p2] = bp1.getClicked(inf); %#ok<ASGLU>
+assertElementsAlmostEqual(31, p2);
+assertTrue(~isempty(ds2));
+
+fprintf('It marker should not move when the position is empty\n');
+pause(0.5);
+bp1.getClicked(inf);
+pause off
+
+if values.deleteFigures
+    delete(fig1);
+end
+
+function testBlockPtrHDF5(values) %#ok<DEFNU>
+% Unit test for visviews.blockBoxPlot position of block pointer
+fprintf('\nUnit tests for visviews.blockBoxPlot positioning of block pointer\n');
+
+fprintf('It should allow callbacks to be registers\n');
+fig1 = figure('Name', 'Clumps of one window');
+bp1 = visviews.blockBoxPlot(fig1, [], []);
+assertTrue(isvalid(bp1));
+bp1.plot(values.hdf5Data, values.fun, values.slice);
+gaps = bp1.getGaps();
+bp1.reposition(gaps + 10);
+bp1.registerCallbacks([]);
+
+fprintf('It should move the position marker when incremented\n');
+pause on
+for k = 1:31
+    pause(0.25);
+    bp1.getClicked(k);
+end
+fprintf('It should move the marker to beginning when position is -inf\n');
+pause(0.5);
+[ds1, f1, p1] = bp1.getClicked(-inf); %#ok<ASGLU>
+assertElementsAlmostEqual(1, p1);
+assertTrue(~isempty(ds1));
+
+fprintf('It should move the marker to end when position is inf\n');
+pause(0.5);
+[ds2, f2, p2] = bp1.getClicked(inf); %#ok<ASGLU>
+assertElementsAlmostEqual(31, p2);
+assertTrue(~isempty(ds2));
+
+fprintf('It marker should not move when the position is empty\n');
+pause(0.5);
+bp1.getClicked(inf);
+pause off
+
+if values.deleteFigures
+    delete(fig1);
+end

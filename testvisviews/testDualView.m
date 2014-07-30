@@ -23,226 +23,226 @@ values.deleteFigures = false;
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
 
-function testNormalConstructor(values) %#ok<DEFNU>
-% Unit test for normal dualView normal constructor
-fprintf('\nUnit test for visviews.dualView normal constructor\n');
-
-fprintf('It should produce an empty plot when constructor has no arguments\n')
-bv0 = visviews.dualView();
-drawnow
-assertTrue(isvalid(bv0));
-
-fprintf('It should plot data when blockedData is in the constructor\n')
-
-testVD1 = viscore.memoryData(values.random, 'Testing data passed in constructor');
-bv1 = visviews.dualView('VisData', testVD1);
-drawnow
-assertTrue(isvalid(bv1));
-keys = bv1.getSourceMapKeys();
-fprintf('\nSources:\n');
-for k = 1:length(keys)
-    visviews.clickable.printStructure(bv1.getSourceMap(keys{k}));
-end
-fprintf('\nUnmapped sources:\n')
-uKeys = bv1.getUnmappedKeys();
-for k = 1:length(uKeys)
-    fprintf('%s: \n', uKeys{k} );
-    kvalues = bv1.getUnmapped(uKeys{k});
-    for j = 1:length(kvalues)
-        s = bv1.getSourceMap(kvalues{j});
-        visviews.clickable.printStructure(s);
-    end
-end
-
-fprintf('It should produce a valid plot when a Plots argument with linked summary is passed\n');
-pS = viewTestClass.getDefaultPlotsLinkedSummary();
-assertEqual(length(pS), 4);
-load chanlocs.mat;
-testVD2 = viscore.memoryData(values.random, 'Testing data and plots passed in constructor', ...
-    'ElementLocations', chanlocs);
-bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS);
-drawnow
-assertTrue(isvalid(bv2));
-keys = bv2.getSourceMapKeys();
-fprintf('\nSources:\n');
-for k = 1:length(keys)
-    visviews.clickable.printStructure(bv2.getSourceMap(keys{k}));
-end
-fprintf('\nUnmapped sources:\n')
-uKeys = bv2.getUnmappedKeys();
-for k = 1:length(uKeys)
-    fprintf('%s: \n', uKeys{k} );
-    kvalues = bv2.getUnmapped(uKeys{k});
-    for j = 1:length(kvalues)
-        s = bv2.getSourceMap(kvalues{j});
-        visviews.clickable.printStructure(s);
-    end
-end
-
-fprintf('It should produce a valid plot when a Plots argument with unlinked summary is passed\n');
-pS = viewTestClass.getDefaultPlotsUnlinkedSummary();
-assertEqual(length(pS), 4);
-testVD3 = viscore.memoryData(values.random, 'Testing with unlinked summary plots passed in constructor');
-bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS);
-drawnow
-assertTrue(isvalid(bv3));
-keys = bv3.getSourceMapKeys();
-fprintf('\nSources:\n');
-for k = 1:length(keys)
-    visviews.clickable.printStructure(bv3.getSourceMap(keys{k}));
-end
-fprintf('\nUnmapped sources:\n')
-uKeys = bv3.getUnmappedKeys();
-for k = 1:length(uKeys)
-    fprintf('%s: \n', uKeys{k} );
-    kvalues = bv3.getUnmapped(uKeys{k});
-    for j = 1:length(kvalues)
-        s = bv3.getSourceMap(kvalues{j});
-        visviews.clickable.printStructure(s);
-    end
-end
-
-fprintf('It should create a graph when the Functions parameter is passed to constructor\n');
-f = visviews.dualView.getDefaultFunctions();
-testVD4 = viscore.memoryData(values.EEG.data, 'Testing data and function structure passed in constructor');
-bv4 = visviews.dualView('VisData', testVD4, 'Functions', f);
-drawnow
-assertTrue(isvalid(bv4));
-
-f = visviews.dualView.getDefaultFunctions();
-fMan = viscore.dataManager();
-fMan.putObjects(visfuncs.functionObj.createObjects('visfuncs.functionObj', f));
-testVD5 = viscore.memoryData(values.EEG.data, 'Testing data and function manager passed in constructor');
-bv5 = visviews.dualView('VisData', testVD5, 'Functions', fMan);
-drawnow
-assertTrue(isvalid(bv5));
-f = visviews.dualView.getDefaultFunctions();
-fns = visfuncs.functionObj.createObjects('visfuncs.functionObj', f);
-testVD6 = viscore.memoryData(values.EEG.data, 'Testing data and list of function objects passed in constructor');
-bv6 = visviews.dualView('VisData', testVD6, 'Functions', fns);
-drawnow
-assertTrue(isvalid(bv6));
-if values.deleteFigures
-    delete(bv0);
-    delete(bv1);
-    delete(bv2);
-    delete(bv3);
-    delete(bv4);
-    delete(bv5);
-    delete(bv6);
-end
-
-function testNormalConstructorHDF5(values) %#ok<DEFNU>
-% Unit test for normal dualView normal constructor
-fprintf('\nUnit test for visviews.dualView normal constructor\n');
-
-fprintf('It should produce an empty plot when constructor has no arguments\n')
-bv0 = visviews.dualView();
-drawnow
-assertTrue(isvalid(bv0));
-
-fprintf('It should plot data when blockedData is in the constructor\n')
-
-hdf5File1 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testDualViewNormalConstructor1.hdf5');
-
-testVD1 = viscore.hdf5Data(values.random, 'Testing data passed in constructor', hdf5File1);
-bv1 = visviews.dualView('VisData', testVD1);
-drawnow
-assertTrue(isvalid(bv1));
-keys = bv1.getSourceMapKeys();
-fprintf('\nSources:\n');
-for k = 1:length(keys)
-    visviews.clickable.printStructure(bv1.getSourceMap(keys{k}));
-end
-fprintf('\nUnmapped sources:\n')
-uKeys = bv1.getUnmappedKeys();
-for k = 1:length(uKeys)
-    fprintf('%s: \n', uKeys{k} );
-    kvalues = bv1.getUnmapped(uKeys{k});
-    for j = 1:length(kvalues)
-        s = bv1.getSourceMap(kvalues{j});
-        visviews.clickable.printStructure(s);
-    end
-end
-
-fprintf('It should produce a valid plot when a Plots argument with linked summary is passed\n');
-pS = viewTestClass.getDefaultPlotsLinkedSummary();
-assertEqual(length(pS), 4);
-load chanlocs.mat;
-testVD2 = viscore.hdf5Data(values.random, 'Testing data and plots passed in constructor', ...
-    hdf5File1, 'ElementLocations', chanlocs);
-bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS);
-drawnow
-assertTrue(isvalid(bv2));
-keys = bv2.getSourceMapKeys();
-fprintf('\nSources:\n');
-for k = 1:length(keys)
-    visviews.clickable.printStructure(bv2.getSourceMap(keys{k}));
-end
-fprintf('\nUnmapped sources:\n')
-uKeys = bv2.getUnmappedKeys();
-for k = 1:length(uKeys)
-    fprintf('%s: \n', uKeys{k} );
-    kvalues = bv2.getUnmapped(uKeys{k});
-    for j = 1:length(kvalues)
-        s = bv2.getSourceMap(kvalues{j});
-        visviews.clickable.printStructure(s);
-    end
-end
-
-fprintf('It should produce a valid plot when a Plots argument with unlinked summary is passed\n');
-pS = viewTestClass.getDefaultPlotsUnlinkedSummary();
-assertEqual(length(pS), 4);
-testVD3 = viscore.hdf5Data(values.random, 'Testing with unlinked summary plots passed in constructor', hdf5File1);
-bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS);
-drawnow
-assertTrue(isvalid(bv3));
-keys = bv3.getSourceMapKeys();
-fprintf('\nSources:\n');
-for k = 1:length(keys)
-    visviews.clickable.printStructure(bv3.getSourceMap(keys{k}));
-end
-fprintf('\nUnmapped sources:\n')
-uKeys = bv3.getUnmappedKeys();
-for k = 1:length(uKeys)
-    fprintf('%s: \n', uKeys{k} );
-    kvalues = bv3.getUnmapped(uKeys{k});
-    for j = 1:length(kvalues)
-        s = bv3.getSourceMap(kvalues{j});
-        visviews.clickable.printStructure(s);
-    end
-end
-
-fprintf('It should create a graph when the Functions parameter is passed to constructor\n');
-f = visviews.dualView.getDefaultFunctions();
-testVD4 = viscore.hdf5Data(values.EEG.data, 'Testing data and function structure passed in constructor', values.hdf5File);
-bv4 = visviews.dualView('VisData', testVD4, 'Functions', f);
-drawnow
-assertTrue(isvalid(bv4));
-
-f = visviews.dualView.getDefaultFunctions();
-fMan = viscore.dataManager();
-fMan.putObjects(visfuncs.functionObj.createObjects('visfuncs.functionObj', f));
-testVD5 = viscore.hdf5Data(values.EEG.data, 'Testing data and function manager passed in constructor', values.hdf5File);
-bv5 = visviews.dualView('VisData', testVD5, 'Functions', fMan);
-drawnow
-assertTrue(isvalid(bv5));
-f = visviews.dualView.getDefaultFunctions();
-fns = visfuncs.functionObj.createObjects('visfuncs.functionObj', f);
-testVD6 = viscore.hdf5Data(values.EEG.data, 'Testing data and list of function objects passed in constructor', values.hdf5File);
-bv6 = visviews.dualView('VisData', testVD6, 'Functions', fns);
-drawnow
-assertTrue(isvalid(bv6));
-if values.deleteFigures
-    delete(bv0);
-    delete(bv1);
-    delete(bv2);
-    delete(bv3);
-    delete(bv4);
-    delete(bv5);
-    delete(bv6);
-    delete(hdf5File1);
-end
+% function testNormalConstructor(values) %#ok<DEFNU>
+% % Unit test for normal dualView normal constructor
+% fprintf('\nUnit test for visviews.dualView normal constructor\n');
+% 
+% fprintf('It should produce an empty plot when constructor has no arguments\n')
+% bv0 = visviews.dualView();
+% drawnow
+% assertTrue(isvalid(bv0));
+% 
+% fprintf('It should plot data when blockedData is in the constructor\n')
+% 
+% testVD1 = viscore.memoryData(values.random, 'Testing data passed in constructor');
+% bv1 = visviews.dualView('VisData', testVD1);
+% drawnow
+% assertTrue(isvalid(bv1));
+% keys = bv1.getSourceMapKeys();
+% fprintf('\nSources:\n');
+% for k = 1:length(keys)
+%     visviews.clickable.printStructure(bv1.getSourceMap(keys{k}));
+% end
+% fprintf('\nUnmapped sources:\n')
+% uKeys = bv1.getUnmappedKeys();
+% for k = 1:length(uKeys)
+%     fprintf('%s: \n', uKeys{k} );
+%     kvalues = bv1.getUnmapped(uKeys{k});
+%     for j = 1:length(kvalues)
+%         s = bv1.getSourceMap(kvalues{j});
+%         visviews.clickable.printStructure(s);
+%     end
+% end
+% 
+% fprintf('It should produce a valid plot when a Plots argument with linked summary is passed\n');
+% pS = viewTestClass.getDefaultPlotsLinkedSummary();
+% assertEqual(length(pS), 4);
+% load chanlocs.mat;
+% testVD2 = viscore.memoryData(values.random, 'Testing data and plots passed in constructor', ...
+%     'ElementLocations', chanlocs);
+% bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS);
+% drawnow
+% assertTrue(isvalid(bv2));
+% keys = bv2.getSourceMapKeys();
+% fprintf('\nSources:\n');
+% for k = 1:length(keys)
+%     visviews.clickable.printStructure(bv2.getSourceMap(keys{k}));
+% end
+% fprintf('\nUnmapped sources:\n')
+% uKeys = bv2.getUnmappedKeys();
+% for k = 1:length(uKeys)
+%     fprintf('%s: \n', uKeys{k} );
+%     kvalues = bv2.getUnmapped(uKeys{k});
+%     for j = 1:length(kvalues)
+%         s = bv2.getSourceMap(kvalues{j});
+%         visviews.clickable.printStructure(s);
+%     end
+% end
+% 
+% fprintf('It should produce a valid plot when a Plots argument with unlinked summary is passed\n');
+% pS = viewTestClass.getDefaultPlotsUnlinkedSummary();
+% assertEqual(length(pS), 4);
+% testVD3 = viscore.memoryData(values.random, 'Testing with unlinked summary plots passed in constructor');
+% bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS);
+% drawnow
+% assertTrue(isvalid(bv3));
+% keys = bv3.getSourceMapKeys();
+% fprintf('\nSources:\n');
+% for k = 1:length(keys)
+%     visviews.clickable.printStructure(bv3.getSourceMap(keys{k}));
+% end
+% fprintf('\nUnmapped sources:\n')
+% uKeys = bv3.getUnmappedKeys();
+% for k = 1:length(uKeys)
+%     fprintf('%s: \n', uKeys{k} );
+%     kvalues = bv3.getUnmapped(uKeys{k});
+%     for j = 1:length(kvalues)
+%         s = bv3.getSourceMap(kvalues{j});
+%         visviews.clickable.printStructure(s);
+%     end
+% end
+% 
+% fprintf('It should create a graph when the Functions parameter is passed to constructor\n');
+% f = visviews.dualView.getDefaultFunctions();
+% testVD4 = viscore.memoryData(values.EEG.data, 'Testing data and function structure passed in constructor');
+% bv4 = visviews.dualView('VisData', testVD4, 'Functions', f);
+% drawnow
+% assertTrue(isvalid(bv4));
+% 
+% f = visviews.dualView.getDefaultFunctions();
+% fMan = viscore.dataManager();
+% fMan.putObjects(visfuncs.functionObj.createObjects('visfuncs.functionObj', f));
+% testVD5 = viscore.memoryData(values.EEG.data, 'Testing data and function manager passed in constructor');
+% bv5 = visviews.dualView('VisData', testVD5, 'Functions', fMan);
+% drawnow
+% assertTrue(isvalid(bv5));
+% f = visviews.dualView.getDefaultFunctions();
+% fns = visfuncs.functionObj.createObjects('visfuncs.functionObj', f);
+% testVD6 = viscore.memoryData(values.EEG.data, 'Testing data and list of function objects passed in constructor');
+% bv6 = visviews.dualView('VisData', testVD6, 'Functions', fns);
+% drawnow
+% assertTrue(isvalid(bv6));
+% if values.deleteFigures
+%     delete(bv0);
+%     delete(bv1);
+%     delete(bv2);
+%     delete(bv3);
+%     delete(bv4);
+%     delete(bv5);
+%     delete(bv6);
+% end
+% 
+% function testNormalConstructorHDF5(values) %#ok<DEFNU>
+% % Unit test for normal dualView normal constructor
+% fprintf('\nUnit test for visviews.dualView normal constructor\n');
+% 
+% fprintf('It should produce an empty plot when constructor has no arguments\n')
+% bv0 = visviews.dualView();
+% drawnow
+% assertTrue(isvalid(bv0));
+% 
+% fprintf('It should plot data when blockedData is in the constructor\n')
+% 
+% hdf5File1 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testDualViewNormalConstructor1.hdf5');
+% 
+% testVD1 = viscore.hdf5Data(values.random, 'Testing data passed in constructor', hdf5File1);
+% bv1 = visviews.dualView('VisData', testVD1);
+% drawnow
+% assertTrue(isvalid(bv1));
+% keys = bv1.getSourceMapKeys();
+% fprintf('\nSources:\n');
+% for k = 1:length(keys)
+%     visviews.clickable.printStructure(bv1.getSourceMap(keys{k}));
+% end
+% fprintf('\nUnmapped sources:\n')
+% uKeys = bv1.getUnmappedKeys();
+% for k = 1:length(uKeys)
+%     fprintf('%s: \n', uKeys{k} );
+%     kvalues = bv1.getUnmapped(uKeys{k});
+%     for j = 1:length(kvalues)
+%         s = bv1.getSourceMap(kvalues{j});
+%         visviews.clickable.printStructure(s);
+%     end
+% end
+% 
+% fprintf('It should produce a valid plot when a Plots argument with linked summary is passed\n');
+% pS = viewTestClass.getDefaultPlotsLinkedSummary();
+% assertEqual(length(pS), 4);
+% load chanlocs.mat;
+% testVD2 = viscore.hdf5Data(values.random, 'Testing data and plots passed in constructor', ...
+%     hdf5File1, 'ElementLocations', chanlocs);
+% bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS);
+% drawnow
+% assertTrue(isvalid(bv2));
+% keys = bv2.getSourceMapKeys();
+% fprintf('\nSources:\n');
+% for k = 1:length(keys)
+%     visviews.clickable.printStructure(bv2.getSourceMap(keys{k}));
+% end
+% fprintf('\nUnmapped sources:\n')
+% uKeys = bv2.getUnmappedKeys();
+% for k = 1:length(uKeys)
+%     fprintf('%s: \n', uKeys{k} );
+%     kvalues = bv2.getUnmapped(uKeys{k});
+%     for j = 1:length(kvalues)
+%         s = bv2.getSourceMap(kvalues{j});
+%         visviews.clickable.printStructure(s);
+%     end
+% end
+% 
+% fprintf('It should produce a valid plot when a Plots argument with unlinked summary is passed\n');
+% pS = viewTestClass.getDefaultPlotsUnlinkedSummary();
+% assertEqual(length(pS), 4);
+% testVD3 = viscore.hdf5Data(values.random, 'Testing with unlinked summary plots passed in constructor', hdf5File1);
+% bv3 = visviews.dualView('VisData', testVD3, 'Plots', pS);
+% drawnow
+% assertTrue(isvalid(bv3));
+% keys = bv3.getSourceMapKeys();
+% fprintf('\nSources:\n');
+% for k = 1:length(keys)
+%     visviews.clickable.printStructure(bv3.getSourceMap(keys{k}));
+% end
+% fprintf('\nUnmapped sources:\n')
+% uKeys = bv3.getUnmappedKeys();
+% for k = 1:length(uKeys)
+%     fprintf('%s: \n', uKeys{k} );
+%     kvalues = bv3.getUnmapped(uKeys{k});
+%     for j = 1:length(kvalues)
+%         s = bv3.getSourceMap(kvalues{j});
+%         visviews.clickable.printStructure(s);
+%     end
+% end
+% 
+% fprintf('It should create a graph when the Functions parameter is passed to constructor\n');
+% f = visviews.dualView.getDefaultFunctions();
+% testVD4 = viscore.hdf5Data(values.EEG.data, 'Testing data and function structure passed in constructor', values.hdf5File);
+% bv4 = visviews.dualView('VisData', testVD4, 'Functions', f);
+% drawnow
+% assertTrue(isvalid(bv4));
+% 
+% f = visviews.dualView.getDefaultFunctions();
+% fMan = viscore.dataManager();
+% fMan.putObjects(visfuncs.functionObj.createObjects('visfuncs.functionObj', f));
+% testVD5 = viscore.hdf5Data(values.EEG.data, 'Testing data and function manager passed in constructor', values.hdf5File);
+% bv5 = visviews.dualView('VisData', testVD5, 'Functions', fMan);
+% drawnow
+% assertTrue(isvalid(bv5));
+% f = visviews.dualView.getDefaultFunctions();
+% fns = visfuncs.functionObj.createObjects('visfuncs.functionObj', f);
+% testVD6 = viscore.hdf5Data(values.EEG.data, 'Testing data and list of function objects passed in constructor', values.hdf5File);
+% bv6 = visviews.dualView('VisData', testVD6, 'Functions', fns);
+% drawnow
+% assertTrue(isvalid(bv6));
+% if values.deleteFigures
+%     delete(bv0);
+%     delete(bv1);
+%     delete(bv2);
+%     delete(bv3);
+%     delete(bv4);
+%     delete(bv5);
+%     delete(bv6);
+%     delete(hdf5File1);
+% end
 
 % function testLinkageBoxPlot(values) %#ok<DEFNU>
 % % Unit test for normal dualView normal constructor
@@ -637,7 +637,7 @@ end
 
 
 % 
-% function testEventPlots(values) %#ok<DEFNU>
+function testEventPlots(values) %#ok<DEFNU>
 % %Unit test for event plots
 % fprintf('\nUnit test for visviews.dualView for event plots\n');
 % fprintf('It should produce a valid figure when events are displayed\n');
@@ -666,8 +666,8 @@ end
 %    delete(bv1)
 %    delete(bv2)
 % end
-% 
-% function testEventPlotsHDF5(values) %#ok<DEFNU>
+
+function testEventPlotsHDF5(values) %#ok<DEFNU>
 % %Unit test for event plots
 % fprintf('\nUnit test for visviews.dualView for event plots\n');
 % fprintf('It should produce a valid figure when events are displayed\n');
@@ -679,18 +679,18 @@ end
 % bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
 % assertTrue(isvalid(bv1));
 % drawnow
-% 
-% fprintf('It should produce a valid figure for epoched data\n');
-% pS = viewTestClass.getDefaultPlotsWithEvents();
-% assertEqual(length(pS), 10);
-% [events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
-% testVD2 = viscore.hdf5Data(values.EEGEpoch.data, 'Epoched', values.hdf5EpochFile, 'Events', events, ...
-%      'ElementLocations', values.EEGEpoch.chanlocs, ...
-%     'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
-%     'BlockTimeScale', escales, 'Epoched', true);
-% bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
-% assertTrue(isvalid(bv2));
-% drawnow
+
+fprintf('It should produce a valid figure for epoched data\n');
+pS = viewTestClass.getDefaultPlotsWithEvents();
+assertEqual(length(pS), 10);
+[events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
+testVD2 = viscore.hdf5Data(values.EEGEpoch.data, 'Epoched', values.hdf5EpochFile, 'Events', events, ...
+     'ElementLocations', values.EEGEpoch.chanlocs, ...
+    'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
+    'BlockTimeScale', escales, 'Epoched', true, 'Overwrite', true);
+bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
+assertTrue(isvalid(bv2));
+drawnow
 % 
 % if values.deleteFigures
 %    delete(bv1)

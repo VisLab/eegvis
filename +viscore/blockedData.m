@@ -71,6 +71,11 @@ classdef (Abstract) blockedData < hgsetget
             elocs = obj.ElementLocations;
         end % getElementLocations
         
+        function epoched = getEpoched(obj)
+            % Return if the data is epoched
+            epoched = obj.Epoched;
+        end % getEpoched
+        
         function events = getEvents(obj)
             % Return the blockedEvents object containing events for this data
             events = obj.Events;
