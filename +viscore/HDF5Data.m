@@ -248,8 +248,8 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             [numElements, numSamples, numBlocks] = getDataSize(obj);
             computedBlocks = zeros(numElements, numBlocks);
             readFrames = 0;
-            realBlockSize = min(numSamples, numFrames - readFrames);
             for a = 1:numBlocks
+                realBlockSize = min(numSamples, numFrames - readFrames);
                 for b = 1:numElements
                     computedBlocks(b,a) = fh([h5read(obj.HDF5File, ...
                         '/data', ...
@@ -259,7 +259,6 @@ classdef hdf5Data < hgsetget & viscore.blockedData
                         [1, numSamples - realBlockSize])]);
                 end
                 readFrames = readFrames + realBlockSize;
-                realBlockSize = min(obj.BlockSize, numFrames - readFrames);
             end
         end % computeBlocks
         

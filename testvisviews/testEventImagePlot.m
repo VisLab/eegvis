@@ -16,7 +16,7 @@ values.random = random('exp', 2, [32, 1000, 20]);
 values.hdf5EpochFile = regexprep(which('EEGEpoch.mat'), 'EEGEpoch.mat$', 'EEGEpoch.hdf5');
 load('EEGEpoch.mat'); 
 values.EEGEpoch = EEGEpoch;
-values.deleteFigures = true;
+values.deleteFigures = false;
 
 function teardown(values) %#ok<INUSD,DEFNU>
 % Function executed after each test
