@@ -163,7 +163,7 @@ classdef hdf5Data < hgsetget & viscore.blockedData
         end % getDataSlice
         
         function hdf5File = getHDF5File(obj)
-           hdf5File = obj.HDF5File; 
+            hdf5File = obj.HDF5File;
         end % getHDF5File
         
         
@@ -174,7 +174,7 @@ classdef hdf5Data < hgsetget & viscore.blockedData
                 myData = data(:);
             else
                 myData = viscore.dataSlice.getHDF5Slice(...
-                obj, {':', ':', ':'}, [], []);
+                    obj, {':', ':', ':'}, [], []);
                 myData = myData(:);
             end
             if isempty(percent) || percent <= 0 || percent >= 100

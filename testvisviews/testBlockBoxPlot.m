@@ -12,10 +12,19 @@ values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
         'DimNames', {'Channel', 'Sample', 'Window'});
 load('EEG.mat'); 
 hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG.hdf5');
+hdf5AllZerosFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'AllZeros.hdf5');
+hdf5NaNFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'NaN.hdf5');
+hdf5EmptySliceFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EmptySlice.hdf5');
 values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);   
 values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', hdf5File, ...
     'SampleRate', EEG.srate);
+values.hdf5AllZerosData = viscore.hdf5Data(zeros([32, 1000, 20]), ...
+    'All zeros', hdf5AllZerosFile);
+values.hdf5NaNData = viscore.hdf5Data(NaN([32, 1000, 20]),'Data NaN', ...
+    hdf5NaNFile);
+values.hdf5EmptySliceData = viscore.hdf5Data(zeros(5, 1), 'Data empty', ...
+    hdf5EmptySliceFile);
 load('RANDOM.mat', 'randomblockboxplot1');
 values.random1 = randomblockboxplot1;
 values.deleteFigures = false;
@@ -768,209 +777,200 @@ function teardown(values) %#ok<INUSD,DEFNU>
 %  delete(fig1)
 % end
 % 
-% function testConstantAndNaNValues(values) %#ok<DEFNU>
-% % Unit test visviews.blockBoxPlot plot constant and NaN
-% fprintf('\nUnit tests for visviews.blockBoxPlot plot method with constant and NaN values\n')
-% 
-% % All zeros
-% fprintf('It should produce a plot for when all of the values are 0 (---see warning)\n');
-% data = zeros([32, 1000, 20]);
-% testVD1 = viscore.memoryData(data, 'All zeros');
-% fig1 = figure('Name', 'All zero values');
-% bp1 = visviews.blockBoxPlot(fig1, [], []);
-% assertTrue(isvalid(bp1));
-% bp1.plot(testVD1, values.fun, values.slice);
-% gaps = bp1.getGaps();
-% bp1.reposition(gaps);
-% 
-% % Data zeros, function NaN
-% fprintf('It should produce a plot for when data is zero, funcs empty (---see warning)\n');
-% fig2 = figure('Name', 'Data zero, func NaN');
-% bp2 = visviews.blockBoxPlot(fig2, [], []);
-% assertTrue(isvalid(bp2));
-% bp2.plot(testVD1, [], values.slice);
-% gaps = bp2.getGaps();
-% bp2.reposition(gaps);
-% 
-% % Data NaN
-% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-% data = NaN([32, 1000, 20]);
-% testVD3 = viscore.memoryData(data, 'Data NaN');
-% fig3 = figure('Name', 'Data NaNs');
-% bp3 = visviews.blockBoxPlot(fig3, [], []);
-% assertTrue(isvalid(bp3));
-% bp3.plot(testVD3, values.fun, values.slice);
-% gaps = bp3.getGaps();
-% bp3.reposition(gaps);
-% 
-% % Data slice empty
-% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-% data = zeros(5, 1);
-% testVD4 = viscore.memoryData(data, 'Data empty');
-% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% fig4 = figure('Name', 'Data slice is empty');
-% bp4 = visviews.blockBoxPlot(fig4, [], []);
-% assertTrue(isvalid(bp4));
-% bp4.plot(testVD4, values.fun, slice4);
-% gaps = bp4.getGaps();
-% bp4.reposition(gaps);
-% 
-% drawnow
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-% end
-% 
-% function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
-% % Unit test visviews.blockBoxPlot plot constant and NaN
-% fprintf('\nUnit tests for visviews.blockBoxPlot plot method with constant and NaN values\n')
-% 
-% % All zeros
-% fprintf('It should produce a plot for when all of the values are 0 (---see warning)\n');
-% data = zeros([32, 1000, 20]);
-% hdf5File1 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testBlockBoxPlottestConstantAndNaNValues1.hdf5');
-% testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File1);
-% fig1 = figure('Name', 'All zero values');
-% bp1 = visviews.blockBoxPlot(fig1, [], []);
-% assertTrue(isvalid(bp1));
-% bp1.plot(testVD1, values.fun, values.slice);
-% gaps = bp1.getGaps();
-% bp1.reposition(gaps);
-% 
-% % Data zeros, function NaN
-% fprintf('It should produce a plot for when data is zero, funcs empty (---see warning)\n');
-% fig2 = figure('Name', 'Data zero, func NaN');
-% bp2 = visviews.blockBoxPlot(fig2, [], []);
-% assertTrue(isvalid(bp2));
-% bp2.plot(testVD1, [], values.slice);
-% gaps = bp2.getGaps();
-% bp2.reposition(gaps);
-% 
-% % Data NaN
-% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-% data = NaN([32, 1000, 20]);
-% hdf5File3 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testBlockBoxPlottestConstantAndNaNValues3.hdf5');
-% testVD3 = viscore.hdf5Data(data, 'Data NaN', hdf5File3);
-% fig3 = figure('Name', 'Data NaNs');
-% bp3 = visviews.blockBoxPlot(fig3, [], []);
-% assertTrue(isvalid(bp3));
-% bp3.plot(testVD3, values.fun, values.slice);
-% gaps = bp3.getGaps();
-% bp3.reposition(gaps);
-% 
-% % Data slice empty
-% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-% data = zeros(5, 1);
-% hdf5File4 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testBlockBoxPlottestConstantAndNaNValues4.hdf5');
-% testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File4);
-% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% fig4 = figure('Name', 'Data slice is empty');
-% bp4 = visviews.blockBoxPlot(fig4, [], []);
-% assertTrue(isvalid(bp4));
-% bp4.plot(testVD4, values.fun, slice4);
-% gaps = bp4.getGaps();
-% bp4.reposition(gaps);
-% 
-% 
-% drawnow
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-%     delete(hdf5File1);
-%     delete(hdf5File3);
-%     delete(hdf5File4);
-% end
-% 
-function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>
-% Unit test for visviews.blockBoxPlot getDefaultProperties
-fprintf('\nUnit tests for visviews.blockBoxPlot getDefaultProperties\n');
+function testConstantAndNaNValues(values) %#ok<DEFNU>
+% Unit test visviews.blockBoxPlot plot constant and NaN
+fprintf('\nUnit tests for visviews.blockBoxPlot plot method with constant and NaN values\n')
 
-fprintf('It should have a getDefaultProperties method that returns a structure\n');
-s = visviews.blockBoxPlot.getDefaultProperties();
-assertTrue(isa(s, 'struct'));
-
-function testBlockPtr(values) %#ok<DEFNU>
-% Unit test for visviews.blockBoxPlot position of block pointer
-fprintf('\nUnit tests for visviews.blockBoxPlot positioning of block pointer\n');
-
-fprintf('It should allow callbacks to be registers\n');
-fig1 = figure('Name', 'Clumps of one window');
+% All zeros
+fprintf('It should produce a plot for when all of the values are 0 (---see warning)\n');
+data = zeros([32, 1000, 20]);
+testVD1 = viscore.memoryData(data, 'All zeros');
+fig1 = figure('Name', 'All zero values');
 bp1 = visviews.blockBoxPlot(fig1, [], []);
 assertTrue(isvalid(bp1));
-bp1.plot(values.bData, values.fun, values.slice);
+bp1.plot(testVD1, values.fun, values.slice);
 gaps = bp1.getGaps();
-bp1.reposition(gaps + 10);
-bp1.registerCallbacks([]);
+bp1.reposition(gaps);
 
-fprintf('It should move the position marker when incremented\n');
-pause on
-for k = 1:31
-    pause(0.25);
-    bp1.getClicked(k);
-end
-fprintf('It should move the marker to beginning when position is -inf\n');
-pause(0.5);
-[ds1, f1, p1] = bp1.getClicked(-inf); %#ok<ASGLU>
-assertElementsAlmostEqual(1, p1);
-assertTrue(~isempty(ds1));
+% Data zeros, function NaN
+fprintf('It should produce a plot for when data is zero, funcs empty (---see warning)\n');
+fig2 = figure('Name', 'Data zero, func NaN');
+bp2 = visviews.blockBoxPlot(fig2, [], []);
+assertTrue(isvalid(bp2));
+bp2.plot(testVD1, [], values.slice);
+gaps = bp2.getGaps();
+bp2.reposition(gaps);
 
-fprintf('It should move the marker to end when position is inf\n');
-pause(0.5);
-[ds2, f2, p2] = bp1.getClicked(inf); %#ok<ASGLU>
-assertElementsAlmostEqual(31, p2);
-assertTrue(~isempty(ds2));
+% Data NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+data = NaN([32, 1000, 20]);
+testVD3 = viscore.memoryData(data, 'Data NaN');
+fig3 = figure('Name', 'Data NaNs');
+bp3 = visviews.blockBoxPlot(fig3, [], []);
+assertTrue(isvalid(bp3));
+bp3.plot(testVD3, values.fun, values.slice);
+gaps = bp3.getGaps();
+bp3.reposition(gaps);
 
-fprintf('It marker should not move when the position is empty\n');
-pause(0.5);
-bp1.getClicked(inf);
-pause off
+% Data slice empty
+fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+data = zeros(5, 1);
+testVD4 = viscore.memoryData(data, 'Data empty');
+slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+fig4 = figure('Name', 'Data slice is empty');
+bp4 = visviews.blockBoxPlot(fig4, [], []);
+assertTrue(isvalid(bp4));
+bp4.plot(testVD4, values.fun, slice4);
+gaps = bp4.getGaps();
+bp4.reposition(gaps);
 
+drawnow
 if values.deleteFigures
     delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
 end
 
-function testBlockPtrHDF5(values) %#ok<DEFNU>
-% Unit test for visviews.blockBoxPlot position of block pointer
-fprintf('\nUnit tests for visviews.blockBoxPlot positioning of block pointer\n');
+function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
+% Unit test visviews.blockBoxPlot plot constant and NaN
+fprintf('\nUnit tests for visviews.blockBoxPlot plot method with constant and NaN values\n')
 
-fprintf('It should allow callbacks to be registers\n');
-fig1 = figure('Name', 'Clumps of one window');
+% All zeros
+fprintf('It should produce a plot for when all of the values are 0 (---see warning)\n');
+fig1 = figure('Name', 'All zero values');
 bp1 = visviews.blockBoxPlot(fig1, [], []);
 assertTrue(isvalid(bp1));
-bp1.plot(values.hdf5Data, values.fun, values.slice);
+bp1.plot(values.hdf5AllZerosData, values.fun, values.slice);
 gaps = bp1.getGaps();
-bp1.reposition(gaps + 10);
-bp1.registerCallbacks([]);
+bp1.reposition(gaps);
 
-fprintf('It should move the position marker when incremented\n');
-pause on
-for k = 1:31
-    pause(0.25);
-    bp1.getClicked(k);
-end
-fprintf('It should move the marker to beginning when position is -inf\n');
-pause(0.5);
-[ds1, f1, p1] = bp1.getClicked(-inf); %#ok<ASGLU>
-assertElementsAlmostEqual(1, p1);
-assertTrue(~isempty(ds1));
+% Data zeros, function NaN
+fprintf('It should produce a plot for when data is zero, funcs empty (---see warning)\n');
+fig2 = figure('Name', 'Data zero, func NaN');
+bp2 = visviews.blockBoxPlot(fig2, [], []);
+assertTrue(isvalid(bp2));
+bp2.plot(values.hdf5AllZerosData, [], values.slice);
+gaps = bp2.getGaps();
+bp2.reposition(gaps);
 
-fprintf('It should move the marker to end when position is inf\n');
-pause(0.5);
-[ds2, f2, p2] = bp1.getClicked(inf); %#ok<ASGLU>
-assertElementsAlmostEqual(31, p2);
-assertTrue(~isempty(ds2));
+% Data NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+fig3 = figure('Name', 'Data NaNs');
+bp3 = visviews.blockBoxPlot(fig3, [], []);
+assertTrue(isvalid(bp3));
+bp3.plot(values.hdf5NaNData, values.fun, values.slice);
+gaps = bp3.getGaps();
+bp3.reposition(gaps);
 
-fprintf('It marker should not move when the position is empty\n');
-pause(0.5);
-bp1.getClicked(inf);
-pause off
+% Data slice empty
+fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+fig4 = figure('Name', 'Data slice is empty');
+bp4 = visviews.blockBoxPlot(fig4, [], []);
+assertTrue(isvalid(bp4));
+bp4.plot(values.hdf5EmptySliceData, values.fun, slice4);
+gaps = bp4.getGaps();
+bp4.reposition(gaps);
 
+
+drawnow
 if values.deleteFigures
     delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+    delete(hdf5File1);
+    delete(hdf5File3);
+    delete(hdf5File4);
 end
+% 
+% function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>
+% % Unit test for visviews.blockBoxPlot getDefaultProperties
+% fprintf('\nUnit tests for visviews.blockBoxPlot getDefaultProperties\n');
+% 
+% fprintf('It should have a getDefaultProperties method that returns a structure\n');
+% s = visviews.blockBoxPlot.getDefaultProperties();
+% assertTrue(isa(s, 'struct'));
+% 
+% function testBlockPtr(values) %#ok<DEFNU>
+% % Unit test for visviews.blockBoxPlot position of block pointer
+% fprintf('\nUnit tests for visviews.blockBoxPlot positioning of block pointer\n');
+% 
+% fprintf('It should allow callbacks to be registers\n');
+% fig1 = figure('Name', 'Clumps of one window');
+% bp1 = visviews.blockBoxPlot(fig1, [], []);
+% assertTrue(isvalid(bp1));
+% bp1.plot(values.bData, values.fun, values.slice);
+% gaps = bp1.getGaps();
+% bp1.reposition(gaps + 10);
+% bp1.registerCallbacks([]);
+% 
+% fprintf('It should move the position marker when incremented\n');
+% pause on
+% for k = 1:31
+%     pause(0.25);
+%     bp1.getClicked(k);
+% end
+% fprintf('It should move the marker to beginning when position is -inf\n');
+% pause(0.5);
+% [ds1, f1, p1] = bp1.getClicked(-inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(1, p1);
+% assertTrue(~isempty(ds1));
+% 
+% fprintf('It should move the marker to end when position is inf\n');
+% pause(0.5);
+% [ds2, f2, p2] = bp1.getClicked(inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(31, p2);
+% assertTrue(~isempty(ds2));
+% 
+% fprintf('It marker should not move when the position is empty\n');
+% pause(0.5);
+% bp1.getClicked(inf);
+% pause off
+% 
+% if values.deleteFigures
+%     delete(fig1);
+% end
+% 
+% function testBlockPtrHDF5(values) %#ok<DEFNU>
+% % Unit test for visviews.blockBoxPlot position of block pointer
+% fprintf('\nUnit tests for visviews.blockBoxPlot positioning of block pointer\n');
+% 
+% fprintf('It should allow callbacks to be registers\n');
+% fig1 = figure('Name', 'Clumps of one window');
+% bp1 = visviews.blockBoxPlot(fig1, [], []);
+% assertTrue(isvalid(bp1));
+% bp1.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = bp1.getGaps();
+% bp1.reposition(gaps + 10);
+% bp1.registerCallbacks([]);
+% 
+% fprintf('It should move the position marker when incremented\n');
+% pause on
+% for k = 1:31
+%     pause(0.25);
+%     bp1.getClicked(k);
+% end
+% fprintf('It should move the marker to beginning when position is -inf\n');
+% pause(0.5);
+% [ds1, f1, p1] = bp1.getClicked(-inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(1, p1);
+% assertTrue(~isempty(ds1));
+% 
+% fprintf('It should move the marker to end when position is inf\n');
+% pause(0.5);
+% [ds2, f2, p2] = bp1.getClicked(inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(31, p2);
+% assertTrue(~isempty(ds2));
+% 
+% fprintf('It marker should not move when the position is empty\n');
+% pause(0.5);
+% bp1.getClicked(inf);
+% pause off
+% 
+% if values.deleteFigures
+%     delete(fig1);
+% end

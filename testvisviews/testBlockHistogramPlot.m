@@ -13,10 +13,19 @@ values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
         'DimNames', {'Channel', 'Sample', 'Window'});
 load('EEG.mat'); 
 hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG.hdf5');
+hdf5AllZerosFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'AllZeros.hdf5');
+hdf5NaNFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'NaN.hdf5');
+hdf5EmptySliceFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EmptySlice.hdf5');
 values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);    
 values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', hdf5File, ...
     'SampleRate', EEG.srate);
+values.hdf5AllZerosData = viscore.hdf5Data(zeros([32, 1000, 20]), ...
+    'All zeros', hdf5AllZerosFile);
+values.hdf5NaNData = viscore.hdf5Data(NaN([32, 1000, 20]),'Data NaN', ...
+    hdf5NaNFile);
+values.hdf5EmptySliceData = viscore.hdf5Data(zeros(5, 1), 'Data empty', ...
+    hdf5EmptySliceFile);
 values.deleteFigures = false;
 
 function teardown(values) %#ok<INUSD,DEFNU>
@@ -230,13 +239,10 @@ fprintf('\nUnit tests for visviews.blockHistogramPlot plot method with constant 
 
 % All zeros
 fprintf('It should produce a plot for when all of the values are 0 (---see warning)\n');
-data = zeros([32, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File);
 fig1 = figure('Name', 'All zero values');
 hp1 = visviews.blockHistogramPlot(fig1, [], []);
 assertTrue(isvalid(hp1));
-hp1.plot(testVD1, values.fun, values.slice);
+hp1.plot(values.hdf5AllZerosData, values.fun, values.slice);
 gaps = hp1.getGaps();
 hp1.reposition(gaps);
 
@@ -245,40 +251,31 @@ fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warn
 fig2 = figure('Name', 'Data zero, func NaN');
 hp2 = visviews.blockHistogramPlot(fig2, [], []);
 assertTrue(isvalid(hp2));
-hp2.plot(testVD1, [], values.slice);
+hp2.plot(values.hdf5AllZerosData, [], values.slice);
 gaps = hp2.getGaps();
 hp2.reposition(gaps);
-delete(hdf5File);
 
 % Data NaN
 fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-data = NaN([32, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD3 = viscore.hdf5Data(data, 'Data NaN', hdf5File);
 fig3 = figure('Name', 'Data NaNs');
 hp3 = visviews.blockHistogramPlot(fig3, [], []);
 assertTrue(isvalid(hp3));
-hp3.plot(testVD3, values.fun, values.slice);
+hp3.plot(values.hdf5NaNData, values.fun, values.slice);
 gaps = hp3.getGaps();
 hp3.reposition(gaps);
 drawnow
-delete(hdf5File);
 
 % Data slice empty
 fprintf('It should produce a plot for when data slice is empty (---see warning)\n');
-data = zeros(5, 1);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File);
 slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 fig4 = figure('Name', 'Data slice is empty');
 hp4 = visviews.blockHistogramPlot(fig4, [], []);
 assertTrue(isvalid(hp4));
-hp4.plot(testVD4, values.fun, slice4);
+hp4.plot(values.hdf5EmptySliceData, values.fun, slice4);
 gaps = hp4.getGaps();
 hp4.reposition(gaps);
 drawnow
-delete(hdf5File);
 if values.deleteFigures
     delete(fig1);
     delete(fig2);

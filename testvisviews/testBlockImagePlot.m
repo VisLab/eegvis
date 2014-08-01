@@ -13,10 +13,19 @@ values.slice = viscore.dataSlice('Slices', {':', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 load('EEG.mat');
 hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG.hdf5');
+hdf5AllZerosFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'AllZeros.hdf5');
+hdf5NaNFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'NaN.hdf5');
+hdf5EmptySliceFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EmptySlice.hdf5');
 values.bData = viscore.memoryData(EEG.data, 'EEG', ...
     'SampleRate', EEG.srate);
 values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', hdf5File, ...
-    'SampleRate', EEG.srate, 'Overwrite', true);
+    'SampleRate', EEG.srate);
+values.hdf5AllZerosData = viscore.hdf5Data(zeros([32, 1000, 20]), ...
+    'All zeros', hdf5AllZerosFile);
+values.hdf5NaNData = viscore.hdf5Data(NaN([32, 1000, 20]),'Data NaN', ...
+    hdf5NaNFile);
+values.hdf5EmptySliceData = viscore.hdf5Data(zeros(5, 1), 'Data empty', ...
+    hdf5EmptySliceFile);
 values.random1 = random('exp', 1, [5, 1000, 4]);
 values.random2 = random('exp', 1, [1, 1000, 20]);
 values.deleteFigures = false;
@@ -62,176 +71,173 @@ function teardown(values) %#ok<INUSD,DEFNU>
 %     delete(fig);
 % end
 
-function testPlot(values) %#ok<DEFNU>
-% Unit test for visviews.blockImagePlot plot
-fprintf('\nUnit tests for visviews.blockImagePlot plot method\n')
-
-fprintf('It should produce a plot for identity slice\n');
-fig1 = figure('Name', 'Clumps of one window');
-ip1 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip1));
-ip1.plot(values.bData, values.fun, values.slice);
-gaps = ip1.getGaps();
-ip1.reposition(gaps);
-
-fprintf('It should allow callbacks to be registered\n')
-ip1.registerCallbacks(ip1);
-
-fprintf('It should produce a plot for empty slice\n');
-fig2 = figure('Name', 'Empty slice');
-ip2 = visviews.blockImagePlot(fig2, [], []);
-assertTrue(isvalid(ip2));
-ip2.plot(values.bData, values.fun, []);
-gaps = ip2.getGaps();
-ip2.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice with groupings of 2\n');
-fig3 = figure('Name', 'Grouping of 2');
-ip3 = visviews.blockImagePlot(fig3, [], []);
-assertTrue(isvalid(ip3));
-ip3.ClumpSize = 2;
-ip3.plot(values.bData, values.fun, values.slice);
-gaps = ip3.getGaps();
-ip3.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice with 1 group\n');
-fig4 = figure('Name', 'Group of one');
-ip4 = visviews.blockImagePlot(fig4, [], []);
-assertTrue(isvalid(ip4));
-ip4.ClumpSize = 31;
-ip4.plot(values.bData, values.fun, values.slice);
-gaps = ip4.getGaps();
-ip4.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice with uneven grouping\n');
-fig5 = figure('Name', 'Uneven grouping');
-ip5 = visviews.blockImagePlot(fig5, [], []);
-assertTrue(isvalid(ip5));
-ip5.ClumpSize = 3;
-ip5.plot(values.bData, values.fun, values.slice);
-gaps = ip5.getGaps();
-ip5.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice for small data sets\n');
-% Generate some data to plot
-testVD6 = viscore.memoryData(values.random1, 'Rand1');
-fig6 = figure('Name', 'Uneven  small group');
-ip6 = visviews.blockImagePlot(fig6, [], []);
-assertTrue(isvalid(ip6));
-ip6.ClumpSize = 7;
-ip6.plot(testVD6, values.fun, values.slice);
-gaps = ip6.getGaps();
-ip6.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice with 1 element\n');
-% Generate some data to plot
-testVD7 = viscore.memoryData(values.random2, 'Rand1');
-fig7 = figure('Name', 'One element grouped by 3');
-ip7 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip7));
-ip7.ClumpSize = 3;
-ip7.plot(testVD7, values.fun, values.slice);
-gaps = ip7.getGaps();
-ip7.reposition(gaps);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-    delete(fig5);
-    delete(fig6);
-    delete(fig7);
-end
-
-function testPlotHDF5(values) %#ok<DEFNU>
-% Unit test for visviews.blockImagePlot plot
-fprintf('\nUnit tests for visviews.blockImagePlot plot method with hdf5 data\n')
-
-fprintf('It should produce a plot for identity slice\n');
-fig1 = figure('Name', 'Clumps of one window');
-ip1 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip1));
-ip1.plot(values.hdf5Data, values.fun, values.slice);
-gaps = ip1.getGaps();
-ip1.reposition(gaps);
-
-fprintf('It should allow callbacks to be registered\n')
-ip1.registerCallbacks(ip1);
-
-fprintf('It should produce a plot for empty slice\n');
-fig2 = figure('Name', 'Empty slice');
-ip2 = visviews.blockImagePlot(fig2, [], []);
-assertTrue(isvalid(ip2));
-ip2.plot(values.hdf5Data, values.fun, []);
-gaps = ip2.getGaps();
-ip2.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice with groupings of 2\n');
-fig3 = figure('Name', 'Grouping of 2');
-ip3 = visviews.blockImagePlot(fig3, [], []);
-assertTrue(isvalid(ip3));
-ip3.ClumpSize = 2;
-ip3.plot(values.hdf5Data, values.fun, values.slice);
-gaps = ip3.getGaps();
-ip3.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice with 1 group\n');
-fig4 = figure('Name', 'Group of one');
-ip4 = visviews.blockImagePlot(fig4, [], []);
-assertTrue(isvalid(ip4));
-ip4.ClumpSize = 31;
-ip4.plot(values.hdf5Data, values.fun, values.slice);
-gaps = ip4.getGaps();
-ip4.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice with uneven grouping\n');
-fig5 = figure('Name', 'Uneven grouping');
-ip5 = visviews.blockImagePlot(fig5, [], []);
-assertTrue(isvalid(ip5));
-ip5.ClumpSize = 3;
-ip5.plot(values.hdf5Data, values.fun, values.slice);
-gaps = ip5.getGaps();
-ip5.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice for small data sets\n');
-% Generate some data to plot
-hdf5File6 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA6.hdf5');
-testVD6 = viscore.hdf5Data(values.random1, 'Rand1', hdf5File6, 'Overwrite', true);
-fig6 = figure('Name', 'Uneven  small group');
-ip6 = visviews.blockImagePlot(fig6, [], []);
-assertTrue(isvalid(ip6));
-ip6.ClumpSize = 7;
-ip6.plot(testVD6, values.fun, values.slice);
-gaps = ip6.getGaps();
-ip6.reposition(gaps);
-
-fprintf('It should produce a plot for identity slice with 1 element\n');
-% Generate some data to plot
-hdf5File7 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA7.hdf5');
-testVD7 = viscore.hdf5Data(values.random2, 'Rand1', hdf5File7, 'Overwrite', true);
-fig7 = figure('Name', 'One element grouped by 3');
-ip7 = visviews.blockImagePlot(fig1, [], []);
-assertTrue(isvalid(ip7));
-ip7.ClumpSize = 3;
-ip7.plot(testVD7, values.fun, values.slice);
-gaps = ip7.getGaps();
-ip7.reposition(gaps);
-
-drawnow
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-    delete(fig5);
-    delete(fig6);
-    delete(fig7);
-end
-
-delete(hdf5File6);
-delete(hdf5File7);
+% function testPlot(values) %#ok<DEFNU>
+% % Unit test for visviews.blockImagePlot plot
+% fprintf('\nUnit tests for visviews.blockImagePlot plot method\n')
+% 
+% fprintf('It should produce a plot for identity slice\n');
+% fig1 = figure('Name', 'Clumps of one window');
+% ip1 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip1));
+% ip1.plot(values.bData, values.fun, values.slice);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps);
+% 
+% fprintf('It should allow callbacks to be registered\n')
+% ip1.registerCallbacks(ip1);
+% 
+% fprintf('It should produce a plot for empty slice\n');
+% fig2 = figure('Name', 'Empty slice');
+% ip2 = visviews.blockImagePlot(fig2, [], []);
+% assertTrue(isvalid(ip2));
+% ip2.plot(values.bData, values.fun, []);
+% gaps = ip2.getGaps();
+% ip2.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice with groupings of 2\n');
+% fig3 = figure('Name', 'Grouping of 2');
+% ip3 = visviews.blockImagePlot(fig3, [], []);
+% assertTrue(isvalid(ip3));
+% ip3.ClumpSize = 2;
+% ip3.plot(values.bData, values.fun, values.slice);
+% gaps = ip3.getGaps();
+% ip3.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice with 1 group\n');
+% fig4 = figure('Name', 'Group of one');
+% ip4 = visviews.blockImagePlot(fig4, [], []);
+% assertTrue(isvalid(ip4));
+% ip4.ClumpSize = 31;
+% ip4.plot(values.bData, values.fun, values.slice);
+% gaps = ip4.getGaps();
+% ip4.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice with uneven grouping\n');
+% fig5 = figure('Name', 'Uneven grouping');
+% ip5 = visviews.blockImagePlot(fig5, [], []);
+% assertTrue(isvalid(ip5));
+% ip5.ClumpSize = 3;
+% ip5.plot(values.bData, values.fun, values.slice);
+% gaps = ip5.getGaps();
+% ip5.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice for small data sets\n');
+% % Generate some data to plot
+% testVD6 = viscore.memoryData(values.random1, 'Rand1');
+% fig6 = figure('Name', 'Uneven  small group');
+% ip6 = visviews.blockImagePlot(fig6, [], []);
+% assertTrue(isvalid(ip6));
+% ip6.ClumpSize = 7;
+% ip6.plot(testVD6, values.fun, values.slice);
+% gaps = ip6.getGaps();
+% ip6.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice with 1 element\n');
+% % Generate some data to plot
+% testVD7 = viscore.memoryData(values.random2, 'Rand1');
+% fig7 = figure('Name', 'One element grouped by 3');
+% ip7 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip7));
+% ip7.ClumpSize = 3;
+% ip7.plot(testVD7, values.fun, values.slice);
+% gaps = ip7.getGaps();
+% ip7.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+%     delete(fig5);
+%     delete(fig6);
+%     delete(fig7);
+% end
+% 
+% function testPlotHDF5(values) %#ok<DEFNU>
+% % Unit test for visviews.blockImagePlot plot
+% fprintf('\nUnit tests for visviews.blockImagePlot plot method with hdf5 data\n')
+% 
+% fprintf('It should produce a plot for identity slice\n');
+% fig1 = figure('Name', 'Clumps of one window');
+% ip1 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip1));
+% ip1.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = ip1.getGaps();
+% ip1.reposition(gaps);
+% 
+% fprintf('It should allow callbacks to be registered\n')
+% ip1.registerCallbacks(ip1);
+% 
+% fprintf('It should produce a plot for empty slice\n');
+% fig2 = figure('Name', 'Empty slice');
+% ip2 = visviews.blockImagePlot(fig2, [], []);
+% assertTrue(isvalid(ip2));
+% ip2.plot(values.hdf5Data, values.fun, []);
+% gaps = ip2.getGaps();
+% ip2.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice with groupings of 2\n');
+% fig3 = figure('Name', 'Grouping of 2');
+% ip3 = visviews.blockImagePlot(fig3, [], []);
+% assertTrue(isvalid(ip3));
+% ip3.ClumpSize = 2;
+% ip3.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = ip3.getGaps();
+% ip3.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice with 1 group\n');
+% fig4 = figure('Name', 'Group of one');
+% ip4 = visviews.blockImagePlot(fig4, [], []);
+% assertTrue(isvalid(ip4));
+% ip4.ClumpSize = 31;
+% ip4.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = ip4.getGaps();
+% ip4.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice with uneven grouping\n');
+% fig5 = figure('Name', 'Uneven grouping');
+% ip5 = visviews.blockImagePlot(fig5, [], []);
+% assertTrue(isvalid(ip5));
+% ip5.ClumpSize = 3;
+% ip5.plot(values.hdf5Data, values.fun, values.slice);
+% gaps = ip5.getGaps();
+% ip5.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice for small data sets\n');
+% % Generate some data to plot
+% hdf5File6 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA6.hdf5');
+% testVD6 = viscore.hdf5Data(values.random1, 'Rand1', hdf5File6, 'Overwrite', true);
+% fig6 = figure('Name', 'Uneven  small group');
+% ip6 = visviews.blockImagePlot(fig6, [], []);
+% assertTrue(isvalid(ip6));
+% ip6.ClumpSize = 7;
+% ip6.plot(testVD6, values.fun, values.slice);
+% gaps = ip6.getGaps();
+% ip6.reposition(gaps);
+% 
+% fprintf('It should produce a plot for identity slice with 1 element\n');
+% % Generate some data to plot
+% hdf5File7 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA7.hdf5');
+% testVD7 = viscore.hdf5Data(values.random2, 'Rand1', hdf5File7, 'Overwrite', true);
+% fig7 = figure('Name', 'One element grouped by 3');
+% ip7 = visviews.blockImagePlot(fig1, [], []);
+% assertTrue(isvalid(ip7));
+% ip7.ClumpSize = 3;
+% ip7.plot(testVD7, values.fun, values.slice);
+% gaps = ip7.getGaps();
+% ip7.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+%     delete(fig5);
+%     delete(fig6);
+%     delete(fig7);
+% end
 
 % function testPlotSlice(values) %#ok<DEFNU>
 % % Unit test visviews.blockImagePlot plot  with nonempy slice
@@ -411,121 +417,109 @@ delete(hdf5File7);
 %     delete(fig7);
 % end
 % 
-% function testConstantAndNaNValues(values) %#ok<DEFNU>
-% % Unit test visviews.blockImagePlot plot constant and NaN
-% fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and NaN values\n')
-% 
-% % Set up the functions
-% data = zeros([32, 1000, 20]);
-% testVD1 = viscore.memoryData(data, 'All zeros');
-% fprintf('It should produce a plot for when all of the values are 0\n');
-% fig1 = figure('Name', 'All zero values');
-% ip1 = visviews.blockImagePlot(fig1, [], []);
-% assertTrue(isvalid(ip1));
-% ip1.plot(testVD1, values.fun, values.slice);
-% gaps = ip1.getGaps();
-% ip1.reposition(gaps);
-% 
-% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-% fig2 = figure('Name', 'Data zero, func NaN');
-% ip2 = visviews.blockImagePlot(fig2, [], []);
-% assertTrue(isvalid(ip2));
-% ip2.plot(values.bData, [], values.slice);
-% gaps = ip2.getGaps();
-% ip2.reposition(gaps);
-% 
-% fprintf('It should produce a plot for when data is NaNs, funcs NaNs (---see warning)\n');
-% data3 = NaN([32, 1000, 20]);
-% testVD3 = viscore.memoryData(data3, 'Data NaN');
-% fig3 = figure('Name', 'Data NaNs');
-% ip3 = visviews.blockImagePlot(fig3, [], []);
-% assertTrue(isvalid(ip3));
-% ip3.plot(testVD3, values.fun, values.slice);
-% gaps = ip3.getGaps();
-% ip3.reposition(gaps);
-% drawnow
-% 
-% % Data slice empty
-% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-% data = zeros(5, 1);
-% testVD4 = viscore.memoryData(data, 'Data empty');
-% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% fig4 = figure('Name', 'Data slice is empty');
-% ip4 = visviews.blockImagePlot(fig4, [], []);
-% assertTrue(isvalid(ip4));
-% ip4.plot(testVD4, values.fun, slice4);
-% gaps = ip4.getGaps();
-% ip4.reposition(gaps);
-% 
-% drawnow
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-% end
-% 
-% function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
-% % Unit test visviews.blockImagePlot plot constant and NaN
-% fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and NaN values\n')
-% 
-% % Set up the functions
-% data = zeros([32, 1000, 20]);
-% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-% testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File);
-% fprintf('It should produce a plot for when all of the values are 0\n');
-% fig1 = figure('Name', 'All zero values');
-% ip1 = visviews.blockImagePlot(fig1, [], []);
-% assertTrue(isvalid(ip1));
-% ip1.plot(testVD1, values.fun, values.slice);
-% gaps = ip1.getGaps();
-% ip1.reposition(gaps);
-% delete(hdf5File);
-% 
-% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-% fig2 = figure('Name', 'Data zero, func NaN');
-% ip2 = visviews.blockImagePlot(fig2, [], []);
-% assertTrue(isvalid(ip2));
-% ip2.plot(values.hdf5Data, [], values.slice);
-% gaps = ip2.getGaps();
-% ip2.reposition(gaps);
-% 
-% fprintf('It should produce a plot for when data is NaNs, funcs NaNs (---see warning)\n');
-% data3 = NaN([32, 1000, 20]);
-% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-% testVD3 = viscore.hdf5Data(data3, 'Data NaN', hdf5File);
-% fig3 = figure('Name', 'Data NaNs');
-% ip3 = visviews.blockImagePlot(fig3, [], []);
-% assertTrue(isvalid(ip3));
-% ip3.plot(testVD3, values.fun, values.slice);
-% gaps = ip3.getGaps();
-% ip3.reposition(gaps);
-% drawnow
-% delete(hdf5File);
-% 
-% % Data slice empty
-% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-% data = zeros(5, 1);
-% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-% testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File);
-% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% fig4 = figure('Name', 'Data slice is empty');
-% ip4 = visviews.blockImagePlot(fig4, [], []);
-% assertTrue(isvalid(ip4));
-% ip4.plot(testVD4, values.fun, slice4);
-% gaps = ip4.getGaps();
-% ip4.reposition(gaps);
-% delete(hdf5File);
-% 
-% drawnow
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-% end
+function testConstantAndNaNValues(values) %#ok<DEFNU>
+% Unit test visviews.blockImagePlot plot constant and NaN
+fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and NaN values\n')
+
+% Set up the functions
+data = zeros([32, 1000, 20]);
+testVD1 = viscore.memoryData(data, 'All zeros');
+fprintf('It should produce a plot for when all of the values are 0\n');
+fig1 = figure('Name', 'All zero values');
+ip1 = visviews.blockImagePlot(fig1, [], []);
+assertTrue(isvalid(ip1));
+ip1.plot(testVD1, values.fun, values.slice);
+gaps = ip1.getGaps();
+ip1.reposition(gaps);
+
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+fig2 = figure('Name', 'Data zero, func NaN');
+ip2 = visviews.blockImagePlot(fig2, [], []);
+assertTrue(isvalid(ip2));
+ip2.plot(values.bData, [], values.slice);
+gaps = ip2.getGaps();
+ip2.reposition(gaps);
+
+fprintf('It should produce a plot for when data is NaNs, funcs NaNs (---see warning)\n');
+data3 = NaN([32, 1000, 20]);
+testVD3 = viscore.memoryData(data3, 'Data NaN');
+fig3 = figure('Name', 'Data NaNs');
+ip3 = visviews.blockImagePlot(fig3, [], []);
+assertTrue(isvalid(ip3));
+ip3.plot(testVD3, values.fun, values.slice);
+gaps = ip3.getGaps();
+ip3.reposition(gaps);
+drawnow
+
+% Data slice empty
+fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+data = zeros(5, 1);
+testVD4 = viscore.memoryData(data, 'Data empty');
+slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+fig4 = figure('Name', 'Data slice is empty');
+ip4 = visviews.blockImagePlot(fig4, [], []);
+assertTrue(isvalid(ip4));
+ip4.plot(testVD4, values.fun, slice4);
+gaps = ip4.getGaps();
+ip4.reposition(gaps);
+
+drawnow
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+end
+
+function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
+% Unit test visviews.blockImagePlot plot constant and NaN
+fprintf('\nUnit tests for visviews.blockImagePlot plot method with constant and NaN values\n')
+
+% Set up the functions
+fprintf('It should produce a plot for when all of the values are 0\n');
+fig1 = figure('Name', 'All zero values');
+ip1 = visviews.blockImagePlot(fig1, [], []);
+assertTrue(isvalid(ip1));
+ip1.plot(values.hdf5AllZerosData, values.fun, values.slice);
+gaps = ip1.getGaps();
+ip1.reposition(gaps);
+
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+fig2 = figure('Name', 'Data zero, func NaN');
+ip2 = visviews.blockImagePlot(fig2, [], []);
+assertTrue(isvalid(ip2));
+ip2.plot(values.hdf5AllZerosData, [], values.slice);
+gaps = ip2.getGaps();
+ip2.reposition(gaps);
+
+fprintf('It should produce a plot for when data is NaNs, funcs NaNs (---see warning)\n');
+fig3 = figure('Name', 'Data NaNs');
+ip3 = visviews.blockImagePlot(fig3, [], []);
+assertTrue(isvalid(ip3));
+ip3.plot(values.hdf5NaNData, values.fun, values.slice);
+gaps = ip3.getGaps();
+ip3.reposition(gaps);
+drawnow
+
+% Data slice empty
+fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+fig4 = figure('Name', 'Data slice is empty');
+ip4 = visviews.blockImagePlot(fig4, [], []);
+assertTrue(isvalid(ip4));
+ip4.plot(values.hdf5EmptySliceData, values.fun, slice4);
+gaps = ip4.getGaps();
+ip4.reposition(gaps);
+
+drawnow
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+end
 % 
 % function testSettingStructure(values) %#ok<DEFNU>
 % % Unit test for visviews.blockImagePlot getDefaultProperties
