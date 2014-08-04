@@ -6,6 +6,20 @@ function values = setup %#ok<DEFNU>
 load('EEG.mat');
 values.EEG = EEG;
 values.hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG.hdf5');
+hdf5AllZerosFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'AllZeros.hdf5');
+hdf5NaNFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'NaN.hdf5');
+hdf5EmptySliceFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EmptySlice.hdf5');
+load('EEG.mat'); 
+values.bData = viscore.memoryData(EEG.data, 'EEG', ...
+    'SampleRate', EEG.srate);
+values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', hdf5File, ...
+    'SampleRate', EEG.srate);
+values.hdf5AllZerosData = viscore.hdf5Data(zeros([32, 1000, 20]), ...
+    'All zeros', hdf5AllZerosFile);
+values.hdf5NaNData = viscore.hdf5Data(NaN([32, 1000, 20]),'Data NaN', ...
+    hdf5NaNFile);
+values.hdf5EmptySliceData = viscore.hdf5Data(zeros(5, 1), 'Data empty', ...
+    hdf5EmptySliceFile);
 tEvents = EEG.event;
 types = {tEvents.type}';
 % Convert to seconds since beginning
@@ -544,96 +558,86 @@ function teardown(values) %#ok<INUSD,DEFNU>
 %     delete(bv6);
 % end
 
-% 
-% function testConstantAndNaNValues(values) %#ok<DEFNU>
-% % Unit test visviews.dualView constant and NaN
-% fprintf('\nUnit tests for visviews.dualView with constant and NaN values\n')
-% 
-% % All zeros
-% fprintf('It should produce a plot for when all of the values are 0\n');
-% testVD1 = viscore.memoryData(values.EEG.data, 'All zeros');
-% bv1 = visviews.dualView('VisData', testVD1);
-% assertTrue(isvalid(bv1));
-% drawnow
-% 
-% % Data zeros, function NaN
-% fprintf('It should produce a plot for when data is zero, funcs NaNs --warnings\n');
-% data = zeros([32, 1000, 20]);
-% testVD2 = viscore.memoryData(data, 'Data zeros, func NaN');
-% bv2 =  visviews.dualView('VisData', testVD2);
-% assertTrue(isvalid(bv2));
-% drawnow
-% 
-% % Data NaN
-% fprintf('It should produce a plot for when data NaNs, funcs NaNs --warnings\n');
-% data = NaN([32, 1000, 20]);
-% testVD3 = viscore.memoryData(data, 'Data NaN');
-% bv3 =  visviews.dualView('VisData', testVD3);
-% assertTrue(isvalid(bv3));
-% drawnow
-% 
-% % Data slice empty
-% fprintf('It should produce empty axes when data slice is empty --warnings\n');
-% data = zeros(5, 1);
-% testVD4 = viscore.memoryData(data, 'Data empty');
-% bv4 =  visviews.dualView('VisData', testVD4);
-% assertTrue(isvalid(bv4));
-% drawnow
-% 
-% if values.deleteFigures
-%     delete(bv1);
-%     delete(bv2);
-%     delete(bv3);
-%     delete(bv4);
-% end
-% 
-% function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
-% % Unit test visviews.dualView constant and NaN
-% fprintf('\nUnit tests for visviews.dualView with constant and NaN values\n')
-% 
-% % All zeros
-% fprintf('It should produce a plot for when all of the values are 0\n');
-% testVD1 = viscore.hdf5Data(values.EEG.data, 'All zeros', values.hdf5File);
-% bv1 = visviews.dualView('VisData', testVD1);
-% assertTrue(isvalid(bv1));
-% drawnow
-% 
-% % Data zeros, function NaN
-% fprintf('It should produce a plot for when data is zero, funcs NaNs --warnings\n');
-% data = zeros([32, 1000, 20]);
-% hdf5File2 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testDualViewConstantAndNaNValues2.hdf5');
-% testVD2 = viscore.hdf5Data(data, 'Data zeros, func NaN', hdf5File2);
-% bv2 =  visviews.dualView('VisData', testVD2);
-% assertTrue(isvalid(bv2));
-% drawnow
-% 
-% % Data NaN
-% fprintf('It should produce a plot for when data NaNs, funcs NaNs --warnings\n');
-% data = NaN([32, 1000, 20]);
-% hdf5File3 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testDualViewConstantAndNaNValues3.hdf5');
-% testVD3 = viscore.hdf5Data(data, 'Data NaN', hdf5File3);
-% bv3 =  visviews.dualView('VisData', testVD3);
-% assertTrue(isvalid(bv3));
-% drawnow
-% 
-% % Data slice empty
-% fprintf('It should produce empty axes when data slice is empty --warnings\n');
-% data = zeros(5, 1);
-% hdf5File4 = regexprep(which('EEG.mat'), 'EEG.mat$', 'testDualViewConstantAndNaNValues4.hdf5');
-% testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File4);
-% bv4 =  visviews.dualView('VisData', testVD4);
-% assertTrue(isvalid(bv4));
-% drawnow
-% 
-% if values.deleteFigures
-%     delete(bv1);
-%     delete(bv2);
-%     delete(bv3);
-%     delete(bv4);
-%     delete(hdf5File2);
-%     delete(hdf5File3);
-%     delete(hdf5File4);
-% end
+
+function testConstantAndNaNValues(values) %#ok<DEFNU>
+% Unit test visviews.dualView constant and NaN
+fprintf('\nUnit tests for visviews.dualView with constant and NaN values\n')
+
+% All zeros
+fprintf('It should produce a plot for when all of the values are 0\n');
+testVD1 = viscore.memoryData(values.EEG.data, 'All zeros');
+bv1 = visviews.dualView('VisData', testVD1);
+assertTrue(isvalid(bv1));
+drawnow
+
+% Data zeros, function NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs --warnings\n');
+data = zeros([32, 1000, 20]);
+testVD2 = viscore.memoryData(data, 'Data zeros, func NaN');
+bv2 =  visviews.dualView('VisData', testVD2);
+assertTrue(isvalid(bv2));
+drawnow
+
+% Data NaN
+fprintf('It should produce a plot for when data NaNs, funcs NaNs --warnings\n');
+data = NaN([32, 1000, 20]);
+testVD3 = viscore.memoryData(data, 'Data NaN');
+bv3 =  visviews.dualView('VisData', testVD3);
+assertTrue(isvalid(bv3));
+drawnow
+
+% Data slice empty
+fprintf('It should produce empty axes when data slice is empty --warnings\n');
+data = zeros(5, 1);
+testVD4 = viscore.memoryData(data, 'Data empty');
+bv4 =  visviews.dualView('VisData', testVD4);
+assertTrue(isvalid(bv4));
+drawnow
+
+if values.deleteFigures
+    delete(bv1);
+    delete(bv2);
+    delete(bv3);
+    delete(bv4);
+end
+
+function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
+% Unit test visviews.dualView constant and NaN
+fprintf('\nUnit tests for visviews.dualView with constant and NaN values\n')
+
+% All zeros
+fprintf('It should produce a plot for when all of the values are 0\n');
+bv1 = visviews.dualView('VisData', values.hdf5AllZerosData);
+assertTrue(isvalid(bv1));
+drawnow
+
+% Data zeros, function NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs --warnings\n');
+bv2 =  visviews.dualView('VisData', values.hdf5AllZerosData);
+assertTrue(isvalid(bv2));
+drawnow
+
+% Data NaN
+fprintf('It should produce a plot for when data NaNs, funcs NaNs --warnings\n');
+bv3 =  visviews.dualView('VisData', values.hdf5NaNData);
+assertTrue(isvalid(bv3));
+drawnow
+
+% Data slice empty
+fprintf('It should produce empty axes when data slice is empty --warnings\n');
+bv4 =  visviews.dualView('VisData', values.hdf5EmptySliceData);
+assertTrue(isvalid(bv4));
+drawnow
+
+if values.deleteFigures
+    delete(bv1);
+    delete(bv2);
+    delete(bv3);
+    delete(bv4);
+    delete(hdf5File2);
+    delete(hdf5File3);
+    delete(hdf5File4);
+end
 
 
 % 
