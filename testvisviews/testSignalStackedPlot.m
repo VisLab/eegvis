@@ -51,7 +51,7 @@ values.slice = viscore.dataSlice('Slices', {':', ':', '1'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 values.deleteFigures = true;
 
-function teardown(values) %#ok<DEFNU>
+% function teardown(values) %#ok<DEFNU>
 % Function executed after each test
 % delete(values.hdf5SmoothFile);
 
@@ -102,10 +102,13 @@ function testPlot(values) %#ok<DEFNU>
 fprintf('\nUnit tests for visviews.signalStackedPlot plot method\n')
 
 fprintf('It should produce a plot for a normal slice along dim 3\n');
+load('EEG.mat'); 
+bData = viscore.memoryData(EEG.data, 'EEG', ...
+    'SampleRate', EEG.srate);  
 fig1 = figure('Name', 'Normal plot slice along dimension 3');
 sp1 = visviews.signalStackedPlot(fig1, [], []);
 assertTrue(isvalid(sp1));
-sp1.plot(values.bData, values.fun, values.slice);
+sp1.plot(bData, values.fun, values.slice);
 gaps = sp1.getGaps();
 sp1.reposition(gaps);
 
@@ -115,7 +118,7 @@ sp2 = visviews.signalStackedPlot(fig2, [], []);
 assertTrue(isvalid(sp2));
 slice2 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sp2.plot(values.bData, values.fun, slice2);
+sp2.plot(bData, values.fun, slice2);
 gaps = sp2.getGaps();
 sp2.reposition(gaps);
 
@@ -125,7 +128,7 @@ sp3 = visviews.signalStackedPlot(fig3, [], []);
 assertTrue(isvalid(sp3));
 slice3 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp3.plot(values.bData, values.fun, slice3);
+sp3.plot(bData, values.fun, slice3);
 gaps = sp3.getGaps();
 sp3.reposition(gaps);
 
@@ -135,15 +138,22 @@ sp4 = visviews.signalStackedPlot(fig4, [], []);
 assertTrue(isvalid(sp4));
 slice4 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp4.plot(values.bData, values.fun, slice4);
+sp4.plot(bData, values.fun, slice4);
 gaps = sp4.getGaps();
 sp4.reposition(gaps);
 
 fprintf('It should produce a plot of epoched data for a normal slice along dim 3\n');
+load('EEGEpoch.mat');
+[values.event, values.startTimes, values.timeScale] = ...
+           viscore.blockedEvents.getEEGTimes(EEGEpoch);
+bDataEpoched = viscore.memoryData(EEGEpoch.data, 'EEGEpoch', ...
+    'SampleRate', EEGEpoch.srate, 'Epoched', true, ...
+    'Events', values.event, 'BlockStartTimes', values.startTimes, ...
+    'BlockTimeScale', values.timeScale);
 assertTrue(values.bDataEpoched.isEpoched())
 fig5 = figure('Name', 'Plot when EEG data is epoched along dim 3');
 sp5 = visviews.signalStackedPlot(fig5, [], []);
-sp5.plot(values.bDataEpoched, values.fun, values.slice);
+sp5.plot(bDataEpoched, values.fun, values.slice);
 gaps = sp5.getGaps();
 sp5.reposition(gaps);
 
@@ -153,7 +163,7 @@ sp6 = visviews.signalStackedPlot(fig6, [], []);
 assertTrue(isvalid(sp6));
 slice6 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sp6.plot(values.bDataEpoched, values.fun, slice6);
+sp6.plot(bDataEpoched, values.fun, slice6);
 gaps = sp6.getGaps();
 sp6.reposition(gaps);
 
@@ -163,7 +173,7 @@ sp7 = visviews.signalStackedPlot(fig7, [], []);
 assertTrue(isvalid(sp7));
 slice7 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp7.plot(values.bDataEpoched, values.fun, slice7);
+sp7.plot(bDataEpoched, values.fun, slice7);
 gaps = sp7.getGaps();
 sp7.reposition(gaps);
 
@@ -173,29 +183,30 @@ sp8 = visviews.signalStackedPlot(fig8, [], []);
 assertTrue(isvalid(sp8));
 slice8 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp8.plot(values.bDataEpoched, values.fun, slice8);
+sp8.plot(bDataEpoched, values.fun, slice8);
 gaps = sp8.getGaps();
 sp8.reposition(gaps);
 
 fprintf('It should plot smooth signals\n');
+load('DataSmooth.mat');
+bDataSmooth =  viscore.memoryData(dataSmooth, 'Smooth');
 fig9 = figure('Name', 'Plot with smoothed signals');
 sp9 = visviews.signalStackedPlot(fig9, [], []);
 assertTrue(isvalid(sp9));
 sp9.SignalScale = 3.0;
-sp9.plot(values.bDataSmooth, values.fun, values.slice);
+sp9.plot(bDataSmooth, values.fun, values.slice);
 gaps = sp9.getGaps();
 sp9.reposition(gaps);
 
 fprintf('It should plot smooth signals with a trim percent\n');
+load('DataSmoothTrim.mat');
 fig10 = figure('Name', 'Plot with smoothed signals with out of range signal');
 sp10 = visviews.signalStackedPlot(fig10, [], []);
 assertTrue(isvalid(sp10));
-data10 = values.bDataSmooth.getData();
-data10(2,:) = 100*data10(6, :);
-testVD10 = viscore.memoryData(data10, 'Large Cosine');
+bDataSmoothTrim = viscore.memoryData(dataSmoothTrim, 'Large Cosine');
 sp10.SignalScale = 3.0;
 sp10.TrimPercent = 5;
-sp10.plot(testVD10, values.fun, values.slice);
+sp10.plot(bDataSmoothTrim, values.fun, values.slice);
 gaps = sp10.getGaps();
 sp10.reposition(gaps);
 
@@ -205,7 +216,7 @@ sp11 = visviews.signalStackedPlot(fig11, [], []);
 assertTrue(isvalid(sp11));
 slice11 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
-sp11.plot(values.bDataSmooth, values.fun, slice11);
+sp11.plot(bDataSmooth, values.fun, slice11);
 gaps = sp11.getGaps();
 sp11.reposition(gaps);
 
@@ -215,22 +226,20 @@ sp12 = visviews.signalStackedPlot(fig12, [], []);
 assertTrue(isvalid(sp12));
 slice12 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
-sp12.plot(values.bDataEpoched, values.fun, slice12);
+sp12.plot(bDataEpoched, values.fun, slice12);
 gaps = sp12.getGaps();
 sp12.reposition(gaps);
 
 fprintf('It should produce a single window plot for a clump of epoched windows sliced along dim 3 \n');
+load('DataSmoothSingleWindow.mat');
+bDataSmoothSingleWindow =  viscore.memoryData(dataSmoothSingleWindow, 'Sinusoidal', ...
+    'Epoched', true, 'SampleRate', 256);
 fig13 = figure('Name', 'Plot clump for slice along dimension 3, epoched (epoch 5 and 7 are big)');
 sp13 = visviews.signalStackedPlot(fig13, [], []);
 assertTrue(isvalid(sp13));
-bigData = values.bDataSmooth.getData;
-bigData(:, :, 5) = 3*bigData(:, :, 5);
-bigData(:, :, 7) = 3.5*bigData(:, :, 7);
-testVD13 = viscore.memoryData(bigData, 'Sinusoidal', ...
-    'Epoched', true, 'SampleRate', 256);
 slice13 = viscore.dataSlice('Slices', {':', ':', '4:8'}, ...
     'DimNames', {'Channel', 'Sample', 'Epoch'}, 'CombineDim', 3);
-sp13.plot(testVD13, values.fun, slice13);
+sp13.plot(bDataSmoothSingleWindow, values.fun, slice13);
 gaps = sp13.getGaps();
 sp13.reposition(gaps);
 
@@ -240,7 +249,7 @@ sp14 = visviews.signalStackedPlot(fig14, [], []);
 assertTrue(isvalid(sp4));
 slice14 = viscore.dataSlice('Slices', {'30:32', ':', ':'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 1);
-sp14.plot(testVD13, values.fun, slice14);
+sp14.plot(bDataSmoothSingleWindow, values.fun, slice14);
 gaps = sp14.getGaps();
 sp14.reposition(gaps);
 drawnow
@@ -251,38 +260,42 @@ fig15 = figure('Name', 'Plot did''t change percentages');
 sp15 = visviews.signalStackedPlot(fig15, [], []);
 assertTrue(isvalid(sp15));
 sp15.TrimPercent = 200;
-sp15.plot(values.bData, values.fun, values.slice);
+sp15.plot(bData, values.fun, values.slice);
 gaps = sp15.getGaps();
 sp15.reposition(gaps);
 assertElementsAlmostEqual(200, sp15.TrimPercent);
 
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-%     delete(fig5);
-%     delete(fig6);
-%     delete(fig7);
-%     delete(fig8);
-%     delete(fig9);
-%     delete(fig10);
-%     delete(fig11);
-%     delete(fig12);
-%     delete(fig13);
-%     delete(fig14);
-%     delete(fig15);
-% end
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+    delete(fig5);
+    delete(fig6);
+    delete(fig7);
+    delete(fig8);
+    delete(fig9);
+    delete(fig10);
+    delete(fig11);
+    delete(fig12);
+    delete(fig13);
+    delete(fig14);
+    delete(fig15);
+end
 
 function testPlotHDF5(values) %#ok<DEFNU>
 %test signalStackedPlot plot
 fprintf('\nUnit tests for visviews.signalStackedPlot plot method\n')
 
 fprintf('It should produce a plot for a normal slice along dim 3\n');
+eegFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG.hdf5');
+load('EEG.mat');
+hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', eegFile, ...
+    'SampleRate', EEG.srate);
 fig1 = figure('Name', 'Normal plot slice along dimension 3');
 sp1 = visviews.signalStackedPlot(fig1, [], []);
 assertTrue(isvalid(sp1));
-sp1.plot(values.hdf5Data, values.fun, values.slice);
+sp1.plot(hdf5Data, values.fun, values.slice);
 gaps = sp1.getGaps();
 sp1.reposition(gaps);
 
@@ -292,7 +305,7 @@ sp2 = visviews.signalStackedPlot(fig2, [], []);
 assertTrue(isvalid(sp2));
 slice2 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sp2.plot(values.hdf5Data, values.fun, slice2);
+sp2.plot(hdf5Data, values.fun, slice2);
 gaps = sp2.getGaps();
 sp2.reposition(gaps);
 
@@ -302,7 +315,7 @@ sp3 = visviews.signalStackedPlot(fig3, [], []);
 assertTrue(isvalid(sp3));
 slice3 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp3.plot(values.hdf5Data, values.fun, slice3);
+sp3.plot(hdf5Data, values.fun, slice3);
 gaps = sp3.getGaps();
 sp3.reposition(gaps);
 
@@ -312,47 +325,55 @@ sp4 = visviews.signalStackedPlot(fig4, [], []);
 assertTrue(isvalid(sp4));
 slice4 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp4.plot(values.hdf5Data, values.fun, slice4);
+sp4.plot(hdf5Data, values.fun, slice4);
 gaps = sp4.getGaps();
 sp4.reposition(gaps);
 
-% fprintf('It should produce a plot of epoched data for a normal slice along dim 3\n');
-% assertTrue(values.bDataEpoched.isEpoched())
-% fig5 = figure('Name', 'Plot when EEG data is epoched along dim 3');
-% sp5 = visviews.signalStackedPlot(fig5, [], []);
-% sp5.plot(values.hdf5DataEpoched, values.fun, values.slice);
-% gaps = sp5.getGaps();
-% sp5.reposition(gaps);
+fprintf('It should produce a plot of epoched data for a normal slice along dim 3\n');
+load('EEGEpoch.mat');
+eegEpochFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEGEpoch.hdf5');
+[values.event, values.startTimes, values.timeScale] = ...
+           viscore.blockedEvents.getEEGTimes(EEGEpoch);
+hdf5DataEpoched = viscore.hdf5Data(EEGEpoch.data, 'EEGEpoch', eegEpochFile, ...
+    'SampleRate', EEGEpoch.srate, 'Epoched', true, ...
+    'Events', values.event, 'BlockStartTimes', values.startTimes, ...
+    'BlockTimeScale', values.timeScale);
+assertTrue(values.bDataEpoched.isEpoched())
+fig5 = figure('Name', 'Plot when EEG data is epoched along dim 3');
+sp5 = visviews.signalStackedPlot(fig5, [], []);
+sp5.plot(values.hdf5DataEpoched, values.fun, values.slice);
+gaps = sp5.getGaps();
+sp5.reposition(gaps);
 
-% fprintf('It should produce a plot multiple window slice along dimension 3\n');
-% fig6 = figure('Name', 'Epoched data, multiple windows - combine dim 3');
-% sp6 = visviews.signalStackedPlot(fig6, [], []);
-% assertTrue(isvalid(sp6));
-% slice6 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% sp6.plot(values.hdf5DataEpoched, values.fun, slice6);
-% gaps = sp6.getGaps();
-% sp6.reposition(gaps);
-% 
-% fprintf('It should produce a plot for EEG epoched data with combineDim 1\n');
-% fig7 = figure('Name', 'Single element epoched - combine dim 1');
-% sp7 = visviews.signalStackedPlot(fig7, [], []);
-% assertTrue(isvalid(sp7));
-% slice7 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'}); 
-% sp7.plot(values.hdf5DataEpoched, values.fun, slice7);
-% gaps = sp7.getGaps();
-% sp7.reposition(gaps);
-% 
-% fprintf('It should produce a plot for EEG epoched data with multiple elements combineDim 1\n');
-% fig8 = figure('Name', 'Multiple elements epoched - combine dim 1');
-% sp8 = visviews.signalStackedPlot(fig8, [], []);
-% assertTrue(isvalid(sp8));
-% slice8 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'}); 
-% sp8.plot(values.hdf5DataEpoched, values.fun, slice8);
-% gaps = sp8.getGaps();
-% sp8.reposition(gaps);
+fprintf('It should produce a plot multiple window slice along dimension 3\n');
+fig6 = figure('Name', 'Epoched data, multiple windows - combine dim 3');
+sp6 = visviews.signalStackedPlot(fig6, [], []);
+assertTrue(isvalid(sp6));
+slice6 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sp6.plot(values.hdf5DataEpoched, values.fun, slice6);
+gaps = sp6.getGaps();
+sp6.reposition(gaps);
+
+fprintf('It should produce a plot for EEG epoched data with combineDim 1\n');
+fig7 = figure('Name', 'Single element epoched - combine dim 1');
+sp7 = visviews.signalStackedPlot(fig7, [], []);
+assertTrue(isvalid(sp7));
+slice7 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
+    'DimNames', {'Channel', 'Sample', 'Window'}); 
+sp7.plot(values.hdf5DataEpoched, values.fun, slice7);
+gaps = sp7.getGaps();
+sp7.reposition(gaps);
+
+fprintf('It should produce a plot for EEG epoched data with multiple elements combineDim 1\n');
+fig8 = figure('Name', 'Multiple elements epoched - combine dim 1');
+sp8 = visviews.signalStackedPlot(fig8, [], []);
+assertTrue(isvalid(sp8));
+slice8 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
+    'DimNames', {'Channel', 'Sample', 'Window'}); 
+sp8.plot(values.hdf5DataEpoched, values.fun, slice8);
+gaps = sp8.getGaps();
+sp8.reposition(gaps);
 
 fprintf('It should plot smooth signals\n');
 fig9 = figure('Name', 'Plot with smoothed signals');

@@ -634,67 +634,64 @@ if values.deleteFigures
     delete(bv2);
     delete(bv3);
     delete(bv4);
-    delete(hdf5File2);
-    delete(hdf5File3);
-    delete(hdf5File4);
 end
 
 
 % 
-function testEventPlots(values) %#ok<DEFNU>
+% function testEventPlots(values) %#ok<DEFNU>
 % %Unit test for event plots
-fprintf('\nUnit test for visviews.dualView for event plots\n');
-fprintf('It should produce a valid figure when events are displayed\n');
-pS = viewTestClass.getDefaultPlotsWithEvents();
-assertEqual(length(pS), 10);
-testVD1 = viscore.memoryData(values.EEG.data, 'EEGLABsample', ...
-    'Events', values.event, 'ElementLocations', values.EEG.chanlocs, ...
-    'BlockSize', 1000, 'SampleRate', values.EEG.srate);
-bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
-assertTrue(isvalid(bv1));
-drawnow
-
-fprintf('It should produce a valid figure for epoched data\n');
-pS = viewTestClass.getDefaultPlotsWithEvents();
-assertEqual(length(pS), 10);
-[events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
-testVD2 = viscore.memoryData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
-     'ElementLocations', values.EEGEpoch.chanlocs, ...
-    'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
-    'BlockTimeScale', escales, 'Epoched', true);
-bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
-assertTrue(isvalid(bv2));
-drawnow
+% fprintf('\nUnit test for visviews.dualView for event plots\n');
+% fprintf('It should produce a valid figure when events are displayed\n');
+% pS = viewTestClass.getDefaultPlotsWithEvents();
+% assertEqual(length(pS), 10);
+% testVD1 = viscore.memoryData(values.EEG.data, 'EEGLABsample', ...
+%     'Events', values.event, 'ElementLocations', values.EEG.chanlocs, ...
+%     'BlockSize', 1000, 'SampleRate', values.EEG.srate);
+% bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
+% assertTrue(isvalid(bv1));
+% drawnow
+% 
+% fprintf('It should produce a valid figure for epoched data\n');
+% pS = viewTestClass.getDefaultPlotsWithEvents();
+% assertEqual(length(pS), 10);
+% [events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
+% testVD2 = viscore.memoryData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
+%      'ElementLocations', values.EEGEpoch.chanlocs, ...
+%     'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
+%     'BlockTimeScale', escales, 'Epoched', true);
+% bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
+% assertTrue(isvalid(bv2));
+% drawnow
 % 
 % if values.deleteFigures
 %    delete(bv1)
 %    delete(bv2)
 % end
 
-function testEventPlotsHDF5(values) %#ok<DEFNU>
-%Unit test for event plots
-fprintf('\nUnit test for visviews.dualView for event plots\n');
-fprintf('It should produce a valid figure when events are displayed\n');
-pS = viewTestClass.getDefaultPlotsWithEvents();
-assertEqual(length(pS), 10);
-testVD1 = viscore.hdf5Data(values.EEG.data, 'EEGLABsample', values.hdf5File, ...
-    'Events', values.event, 'ElementLocations', values.EEG.chanlocs, ...
-    'BlockSize', 1000, 'SampleRate', values.EEG.srate);
-bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
-assertTrue(isvalid(bv1));
-drawnow
-
-fprintf('It should produce a valid figure for epoched data\n');
-pS = viewTestClass.getDefaultPlotsWithEvents();
-assertEqual(length(pS), 10);
-[events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
-testVD2 = viscore.hdf5Data(values.EEGEpoch.data, 'Epoched', values.hdf5EpochFile, 'Events', events, ...
-     'ElementLocations', values.EEGEpoch.chanlocs, ...
-    'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
-    'BlockTimeScale', escales, 'Epoched', true);
-bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
-assertTrue(isvalid(bv2));
-drawnow
+% function testEventPlotsHDF5(values) %#ok<DEFNU>
+% %Unit test for event plots
+% fprintf('\nUnit test for visviews.dualView for event plots\n');
+% fprintf('It should produce a valid figure when events are displayed\n');
+% pS = viewTestClass.getDefaultPlotsWithEvents();
+% assertEqual(length(pS), 10);
+% testVD1 = viscore.hdf5Data(values.EEG.data, 'EEGLABsample', values.hdf5File, ...
+%     'Events', values.event, 'ElementLocations', values.EEG.chanlocs, ...
+%     'BlockSize', 1000, 'SampleRate', values.EEG.srate);
+% bv1 = visviews.dualView('VisData', testVD1, 'Plots', pS');
+% assertTrue(isvalid(bv1));
+% drawnow
+% 
+% fprintf('It should produce a valid figure for epoched data\n');
+% pS = viewTestClass.getDefaultPlotsWithEvents();
+% assertEqual(length(pS), 10);
+% [events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
+% testVD2 = viscore.hdf5Data(values.EEGEpoch.data, 'Epoched', values.hdf5EpochFile, 'Events', events, ...
+%      'ElementLocations', values.EEGEpoch.chanlocs, ...
+%     'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
+%     'BlockTimeScale', escales, 'Epoched', true);
+% bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
+% assertTrue(isvalid(bv2));
+% drawnow
 % 
 % if values.deleteFigures
 %    delete(bv1)
