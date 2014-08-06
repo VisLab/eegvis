@@ -8,7 +8,8 @@ load('EEG.mat');
 values.EEG = EEG;  
 tEvents = EEG.event;
 types = {tEvents.type}';
-                                      % Convert to seconds since beginning
+
+% Convert to seconds since beginning
 startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
 values.event = struct('type', types, 'time', num2cell(startTimes), ...
     'certainty', ones(length(startTimes), 1));
@@ -358,364 +359,364 @@ if values.deleteFigures
     delete(fig11);
 end
 
-function testConstantAndNaNValues(values) %#ok<DEFNU>
-% Unit test visviews.eventImagePlot plot constant and NaN
-fprintf('\nUnit tests for visviews.eventImagePlot plot method with constant and NaN values\n')
-
-% Set up the functions
-defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-    viewTestClass.getDefaultFunctions());
-fMan = viscore.dataManager();
-fMan.putObjects(defaults);
-func = fMan.getEnabledObjects('block');
-thisFuncK = func{1};
-thisFuncS = func{2};
-
-% No events
-fprintf('It should produce a plot for when there are no events\n');
-testVD1 = viscore.memoryData(values.EEG.data, 'Rand1', ...
-    'SampleRate', values.EEG.srate, 'BlockSize', 1000);
-slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig1 = figure('Name', 'All zero values');
-ep1 = visviews.eventImagePlot(fig1, [], []);
-assertTrue(isvalid(ep1));
-ep1.plot(testVD1, thisFuncS, slice1);
-gaps = ep1.getGaps();
-ep1.reposition(gaps);
-drawnow
-
-% Data zeros, function NaN
-fprintf('It should produce a plot for when there is no function\n');
-data = zeros([32, 1000, 20]);
-testVD = viscore.memoryData(data, 'Data zeros, func NaN');
-slice2 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig2 = figure('Name', 'Data zero, func NaN');
-bp2 = visviews.eventImagePlot(fig2, [], []);
-assertTrue(isvalid(bp2));
-bp2.plot(testVD, thisFuncK, slice2);
-gaps = bp2.getGaps();
-bp2.reposition(gaps);
-drawnow
-
-% Data NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
-data = NaN([32, 1000, 20]);
-testVD = viscore.memoryData(data, 'Data NaN');
-slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig3 = figure('Name', 'Data NaNs');
-bp3 = visviews.eventImagePlot(fig3, [], []);
-assertTrue(isvalid(bp3));
-bp3.plot(testVD, thisFuncS, slice3);
-gaps = bp3.getGaps();
-bp3.reposition(gaps);
-drawnow
-
-% Data slice empty
-fprintf('It should produce empty axes when data slice is empty\n');
-data = zeros(5, 1);
-testVD = viscore.memoryData(data, 'Data empty');
-slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig4 = figure('Name', 'Data slice is empty');
-bp4 = visviews.eventImagePlot(fig4, [], []);
-assertTrue(isvalid(bp4));
-bp4.plot(testVD, thisFuncS, slice4);
-gaps = bp4.getGaps();
-bp4.reposition(gaps);
-drawnow
-
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-end
-
-function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
-% Unit test visviews.eventImagePlot plot constant and NaN
-fprintf('\nUnit tests for visviews.eventImagePlot plot method with constant and NaN values\n')
-
-% Set up the functions
-defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-    viewTestClass.getDefaultFunctions());
-fMan = viscore.dataManager();
-fMan.putObjects(defaults);
-func = fMan.getEnabledObjects('block');
-thisFuncK = func{1};
-thisFuncS = func{2};
-
-% No events
-fprintf('It should produce a plot for when there are no events\n');
-testVD1 = viscore.hdf5Data(values.EEG.data, 'Rand1', values.hdf5File, ...
-    'SampleRate', values.EEG.srate, 'BlockSize', 1000);
-slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig1 = figure('Name', 'All zero values');
-ep1 = visviews.eventImagePlot(fig1, [], []);
-assertTrue(isvalid(ep1));
-ep1.plot(testVD1, thisFuncS, slice1);
-gaps = ep1.getGaps();
-ep1.reposition(gaps);
-drawnow
-
-% Data zeros, function NaN
-fprintf('It should produce a plot for when there is no function\n');
-data = zeros([32, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD = viscore.hdf5Data(data, 'Data zeros, func NaN', hdf5File);
-slice2 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig2 = figure('Name', 'Data zero, func NaN');
-bp2 = visviews.eventImagePlot(fig2, [], []);
-assertTrue(isvalid(bp2));
-bp2.plot(testVD, thisFuncK, slice2);
-gaps = bp2.getGaps();
-bp2.reposition(gaps);
-drawnow
-delete(hdf5File);
-
-% Data NaN
-fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
-data = NaN([32, 1000, 20]);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD = viscore.hdf5Data(data, 'Data NaN', hdf5File);
-slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig3 = figure('Name', 'Data NaNs');
-bp3 = visviews.eventImagePlot(fig3, [], []);
-assertTrue(isvalid(bp3));
-bp3.plot(testVD, thisFuncS, slice3);
-gaps = bp3.getGaps();
-bp3.reposition(gaps);
-drawnow
-delete(hdf5File);
-
-% Data slice empty
-fprintf('It should produce empty axes when data slice is empty\n');
-data = zeros(5, 1);
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-testVD = viscore.hdf5Data(data, 'Data empty', hdf5File);
-slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig4 = figure('Name', 'Data slice is empty');
-bp4 = visviews.eventImagePlot(fig4, [], []);
-assertTrue(isvalid(bp4));
-bp4.plot(testVD, thisFuncS, slice4);
-gaps = bp4.getGaps();
-bp4.reposition(gaps);
-drawnow
-delete(hdf5File);
-
-if values.deleteFigures
-    delete(fig1);
-    delete(fig2);
-    delete(fig3);
-    delete(fig4);
-end
-
-function testSettingStructure(values) %#ok<DEFNU>
-% Unit test for visviews.eventImagePlot getDefaultProperties
-fprintf('\nUnit tests for visviews.eventImagePlot interaction with settings structure\n');
-
-fprintf('It should have a getDefaultProperties method that returns a structure\n');
-s = visviews.eventImagePlot.getDefaultProperties();
-assertTrue(isa(s, 'struct'));
-
-fprintf('It should allow a key in the structure\n');
-fig1 = figure('Name', 'Test of the settings structure');
-ipKey = 'Event image';
-ep1 = visviews.eventImagePlot(fig1, [], ipKey);
-assertTrue(isvalid(ep1));
-pConf = ep1.getConfigObj();
-assertTrue(isa(pConf, 'visprops.configurableObj'));
-assertTrue(strcmp(ipKey, pConf.getObjectID()));
-
-fprintf('It should allow configuration and lookup by key\n')
-% Create and set the data manager
-pMan = viscore.dataManager();
-visprops.configurableObj.updateManager(pMan, {pConf});  
-ep1.updateProperties(pMan);
-
-% Change the background color to blue through the property manager
-cObj = pMan.getObject(ipKey);
-assertTrue(isa(cObj, 'visprops.configurableObj'));
-s = cObj.getStructure();
-% s(1).Value = [0, 0, 1];
-cObj.setStructure(s);
-ep1.updateProperties(pMan);
-
-% Generate some data to plot
-testVD = viscore.memoryData(values.EEG.data, 'Rand1', ...
-    'Events', values.event, 'SampleRate', values.EEG.srate, 'BlockSize', 1000);
-defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-    viewTestClass.getDefaultFunctionsNoSqueeze());
-fMan = viscore.dataManager();
-fMan.putObjects(defaults);
-func = fMan.getEnabledObjects('block');
-thisFunc = func{1};
-slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ep1.plot(testVD, thisFunc, slice1);
-gaps = ep1.getGaps();
-ep1.reposition(gaps);
-drawnow
-if values.deleteFigures
-   delete(fig1);
-end
-
-function testSettingStructureHDF5(values) %#ok<DEFNU>
-% Unit test for visviews.eventImagePlot getDefaultProperties
-fprintf('\nUnit tests for visviews.eventImagePlot interaction with settings structure\n');
-
-fprintf('It should have a getDefaultProperties method that returns a structure\n');
-s = visviews.eventImagePlot.getDefaultProperties();
-assertTrue(isa(s, 'struct'));
-
-fprintf('It should allow a key in the structure\n');
-fig1 = figure('Name', 'Test of the settings structure');
-ipKey = 'Event image';
-ep1 = visviews.eventImagePlot(fig1, [], ipKey);
-assertTrue(isvalid(ep1));
-pConf = ep1.getConfigObj();
-assertTrue(isa(pConf, 'visprops.configurableObj'));
-assertTrue(strcmp(ipKey, pConf.getObjectID()));
-
-fprintf('It should allow configuration and lookup by key\n')
-% Create and set the data manager
-pMan = viscore.dataManager();
-visprops.configurableObj.updateManager(pMan, {pConf});  
-ep1.updateProperties(pMan);
-
-% Change the background color to blue through the property manager
-cObj = pMan.getObject(ipKey);
-assertTrue(isa(cObj, 'visprops.configurableObj'));
-s = cObj.getStructure();
-% s(1).Value = [0, 0, 1];
-cObj.setStructure(s);
-ep1.updateProperties(pMan);
-
-% Generate some data to plot
-testVD = viscore.hdf5Data(values.EEG.data, 'Rand1', values.hdf5File, ...
-    'Events', values.event, 'SampleRate', values.EEG.srate, 'BlockSize', 1000);
-defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-    viewTestClass.getDefaultFunctionsNoSqueeze());
-fMan = viscore.dataManager();
-fMan.putObjects(defaults);
-func = fMan.getEnabledObjects('block');
-thisFunc = func{1};
-slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-ep1.plot(testVD, thisFunc, slice1);
-gaps = ep1.getGaps();
-ep1.reposition(gaps);
-drawnow
-if values.deleteFigures
-   delete(fig1);
-end
-
-function testBlockPtr(values) %#ok<DEFNU>
-% Unit test for visviews.eventImagePlot position of block pointer
-fprintf('\nUnit tests for visviews.eventImagePlot positioning of block pointer\n');
-
-fprintf('It should allow callbacks to be registered\n');
-fig1 = figure('Name', 'Clumps of one window');
-ep1 = visviews.eventImagePlot(fig1, [], []);
-assertTrue(isvalid(ep1));
-testVD = viscore.memoryData(values.EEG.data, 'EEG', ...
-    'Events', values.event, ...
-    'SampleRate', values.EEG.srate, 'BlockSize', 1000);
-slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-    viewTestClass.getDefaultFunctionsNoSqueeze());
-fMan = viscore.dataManager();
-fMan.putObjects(defaults);
-func = fMan.getEnabledObjects('block');
-thisFunc = func{1};
-ep1.plot(testVD, thisFunc, slice1);
-gaps = ep1.getGaps();
-ep1.reposition(gaps + 10);
-ep1.registerCallbacks([]);
-
-fprintf('It should move the position marker when incremented\n');
-pause on
-for k = 1:32
-    pause(0.25);
-    ep1.getClicked(k);
-end
-fprintf('It should move the marker to beginning when position is -inf\n');
-pause(0.5);
-[ds1, f1, p1] = ep1.getClicked(-inf); %#ok<ASGLU>
-assertElementsAlmostEqual(1, p1);
-assertTrue(~isempty(ds1));
-
-fprintf('It should move the marker to end when position is inf\n');
-pause(0.5);
-[ds2, f2, p2] = ep1.getClicked(inf); %#ok<ASGLU>
-assertElementsAlmostEqual(31, p2);
-assertTrue(~isempty(ds2));
-
-fprintf('It marker should not move when the position is empty\n');
-pause(0.5);
-ep1.getClicked(inf);
-pause off
-pause off
-
-if values.deleteFigures
-    delete(fig1);
-end
-
-function testBlockPtrHDF5(values) %#ok<DEFNU>
-% Unit test for visviews.eventImagePlot position of block pointer
-fprintf('\nUnit tests for visviews.eventImagePlot positioning of block pointer\n');
-
-fprintf('It should allow callbacks to be registered\n');
-fig1 = figure('Name', 'Clumps of one window');
-ep1 = visviews.eventImagePlot(fig1, [], []);
-assertTrue(isvalid(ep1));
-testVD = viscore.hdf5Data(values.EEG.data, 'EEG', values.hdf5File, ...
-    'Events', values.event, ...
-    'SampleRate', values.EEG.srate, 'BlockSize', 1000);
-slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
-    viewTestClass.getDefaultFunctionsNoSqueeze());
-fMan = viscore.dataManager();
-fMan.putObjects(defaults);
-func = fMan.getEnabledObjects('block');
-thisFunc = func{1};
-ep1.plot(testVD, thisFunc, slice1);
-gaps = ep1.getGaps();
-ep1.reposition(gaps + 10);
-ep1.registerCallbacks([]);
-
-fprintf('It should move the position marker when incremented\n');
-pause on
-for k = 1:32
-    pause(0.25);
-    ep1.getClicked(k);
-end
-fprintf('It should move the marker to beginning when position is -inf\n');
-pause(0.5);
-[ds1, f1, p1] = ep1.getClicked(-inf); %#ok<ASGLU>
-assertElementsAlmostEqual(1, p1);
-assertTrue(~isempty(ds1));
-
-fprintf('It should move the marker to end when position is inf\n');
-pause(0.5);
-[ds2, f2, p2] = ep1.getClicked(inf); %#ok<ASGLU>
-assertElementsAlmostEqual(31, p2);
-assertTrue(~isempty(ds2));
-
-fprintf('It marker should not move when the position is empty\n');
-pause(0.5);
-ep1.getClicked(inf);
-pause off
-pause off
-
-if values.deleteFigures
-    delete(fig1);
-end
+% function testConstantAndNaNValues(values) %#ok<DEFNU>
+% % Unit test visviews.eventImagePlot plot constant and NaN
+% fprintf('\nUnit tests for visviews.eventImagePlot plot method with constant and NaN values\n')
+% 
+% % Set up the functions
+% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%     viewTestClass.getDefaultFunctions());
+% fMan = viscore.dataManager();
+% fMan.putObjects(defaults);
+% func = fMan.getEnabledObjects('block');
+% thisFuncK = func{1};
+% thisFuncS = func{2};
+% 
+% % No events
+% fprintf('It should produce a plot for when there are no events\n');
+% testVD1 = viscore.memoryData(values.EEG.data, 'Rand1', ...
+%     'SampleRate', values.EEG.srate, 'BlockSize', 1000);
+% slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig1 = figure('Name', 'All zero values');
+% ep1 = visviews.eventImagePlot(fig1, [], []);
+% assertTrue(isvalid(ep1));
+% ep1.plot(testVD1, thisFuncS, slice1);
+% gaps = ep1.getGaps();
+% ep1.reposition(gaps);
+% drawnow
+% 
+% % Data zeros, function NaN
+% fprintf('It should produce a plot for when there is no function\n');
+% data = zeros([32, 1000, 20]);
+% testVD = viscore.memoryData(data, 'Data zeros, func NaN');
+% slice2 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig2 = figure('Name', 'Data zero, func NaN');
+% bp2 = visviews.eventImagePlot(fig2, [], []);
+% assertTrue(isvalid(bp2));
+% bp2.plot(testVD, thisFuncK, slice2);
+% gaps = bp2.getGaps();
+% bp2.reposition(gaps);
+% drawnow
+% 
+% % Data NaN
+% fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
+% data = NaN([32, 1000, 20]);
+% testVD = viscore.memoryData(data, 'Data NaN');
+% slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig3 = figure('Name', 'Data NaNs');
+% bp3 = visviews.eventImagePlot(fig3, [], []);
+% assertTrue(isvalid(bp3));
+% bp3.plot(testVD, thisFuncS, slice3);
+% gaps = bp3.getGaps();
+% bp3.reposition(gaps);
+% drawnow
+% 
+% % Data slice empty
+% fprintf('It should produce empty axes when data slice is empty\n');
+% data = zeros(5, 1);
+% testVD = viscore.memoryData(data, 'Data empty');
+% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig4 = figure('Name', 'Data slice is empty');
+% bp4 = visviews.eventImagePlot(fig4, [], []);
+% assertTrue(isvalid(bp4));
+% bp4.plot(testVD, thisFuncS, slice4);
+% gaps = bp4.getGaps();
+% bp4.reposition(gaps);
+% drawnow
+% 
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
+% 
+% function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
+% % Unit test visviews.eventImagePlot plot constant and NaN
+% fprintf('\nUnit tests for visviews.eventImagePlot plot method with constant and NaN values\n')
+% 
+% % Set up the functions
+% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%     viewTestClass.getDefaultFunctions());
+% fMan = viscore.dataManager();
+% fMan.putObjects(defaults);
+% func = fMan.getEnabledObjects('block');
+% thisFuncK = func{1};
+% thisFuncS = func{2};
+% 
+% % No events
+% fprintf('It should produce a plot for when there are no events\n');
+% testVD1 = viscore.hdf5Data(values.EEG.data, 'Rand1', values.hdf5File, ...
+%     'SampleRate', values.EEG.srate, 'BlockSize', 1000);
+% slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig1 = figure('Name', 'All zero values');
+% ep1 = visviews.eventImagePlot(fig1, [], []);
+% assertTrue(isvalid(ep1));
+% ep1.plot(testVD1, thisFuncS, slice1);
+% gaps = ep1.getGaps();
+% ep1.reposition(gaps);
+% drawnow
+% 
+% % Data zeros, function NaN
+% fprintf('It should produce a plot for when there is no function\n');
+% data = zeros([32, 1000, 20]);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD = viscore.hdf5Data(data, 'Data zeros, func NaN', hdf5File);
+% slice2 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig2 = figure('Name', 'Data zero, func NaN');
+% bp2 = visviews.eventImagePlot(fig2, [], []);
+% assertTrue(isvalid(bp2));
+% bp2.plot(testVD, thisFuncK, slice2);
+% gaps = bp2.getGaps();
+% bp2.reposition(gaps);
+% drawnow
+% delete(hdf5File);
+% 
+% % Data NaN
+% fprintf('It should produce a plot for when data is zero, funcs NaNs\n');
+% data = NaN([32, 1000, 20]);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD = viscore.hdf5Data(data, 'Data NaN', hdf5File);
+% slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig3 = figure('Name', 'Data NaNs');
+% bp3 = visviews.eventImagePlot(fig3, [], []);
+% assertTrue(isvalid(bp3));
+% bp3.plot(testVD, thisFuncS, slice3);
+% gaps = bp3.getGaps();
+% bp3.reposition(gaps);
+% drawnow
+% delete(hdf5File);
+% 
+% % Data slice empty
+% fprintf('It should produce empty axes when data slice is empty\n');
+% data = zeros(5, 1);
+% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
+% testVD = viscore.hdf5Data(data, 'Data empty', hdf5File);
+% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig4 = figure('Name', 'Data slice is empty');
+% bp4 = visviews.eventImagePlot(fig4, [], []);
+% assertTrue(isvalid(bp4));
+% bp4.plot(testVD, thisFuncS, slice4);
+% gaps = bp4.getGaps();
+% bp4.reposition(gaps);
+% drawnow
+% delete(hdf5File);
+% 
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
+% 
+% function testSettingStructure(values) %#ok<DEFNU>
+% % Unit test for visviews.eventImagePlot getDefaultProperties
+% fprintf('\nUnit tests for visviews.eventImagePlot interaction with settings structure\n');
+% 
+% fprintf('It should have a getDefaultProperties method that returns a structure\n');
+% s = visviews.eventImagePlot.getDefaultProperties();
+% assertTrue(isa(s, 'struct'));
+% 
+% fprintf('It should allow a key in the structure\n');
+% fig1 = figure('Name', 'Test of the settings structure');
+% ipKey = 'Event image';
+% ep1 = visviews.eventImagePlot(fig1, [], ipKey);
+% assertTrue(isvalid(ep1));
+% pConf = ep1.getConfigObj();
+% assertTrue(isa(pConf, 'visprops.configurableObj'));
+% assertTrue(strcmp(ipKey, pConf.getObjectID()));
+% 
+% fprintf('It should allow configuration and lookup by key\n')
+% % Create and set the data manager
+% pMan = viscore.dataManager();
+% visprops.configurableObj.updateManager(pMan, {pConf});  
+% ep1.updateProperties(pMan);
+% 
+% % Change the background color to blue through the property manager
+% cObj = pMan.getObject(ipKey);
+% assertTrue(isa(cObj, 'visprops.configurableObj'));
+% s = cObj.getStructure();
+% % s(1).Value = [0, 0, 1];
+% cObj.setStructure(s);
+% ep1.updateProperties(pMan);
+% 
+% % Generate some data to plot
+% testVD = viscore.memoryData(values.EEG.data, 'Rand1', ...
+%     'Events', values.event, 'SampleRate', values.EEG.srate, 'BlockSize', 1000);
+% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%     viewTestClass.getDefaultFunctionsNoSqueeze());
+% fMan = viscore.dataManager();
+% fMan.putObjects(defaults);
+% func = fMan.getEnabledObjects('block');
+% thisFunc = func{1};
+% slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ep1.plot(testVD, thisFunc, slice1);
+% gaps = ep1.getGaps();
+% ep1.reposition(gaps);
+% drawnow
+% if values.deleteFigures
+%    delete(fig1);
+% end
+% 
+% function testSettingStructureHDF5(values) %#ok<DEFNU>
+% % Unit test for visviews.eventImagePlot getDefaultProperties
+% fprintf('\nUnit tests for visviews.eventImagePlot interaction with settings structure\n');
+% 
+% fprintf('It should have a getDefaultProperties method that returns a structure\n');
+% s = visviews.eventImagePlot.getDefaultProperties();
+% assertTrue(isa(s, 'struct'));
+% 
+% fprintf('It should allow a key in the structure\n');
+% fig1 = figure('Name', 'Test of the settings structure');
+% ipKey = 'Event image';
+% ep1 = visviews.eventImagePlot(fig1, [], ipKey);
+% assertTrue(isvalid(ep1));
+% pConf = ep1.getConfigObj();
+% assertTrue(isa(pConf, 'visprops.configurableObj'));
+% assertTrue(strcmp(ipKey, pConf.getObjectID()));
+% 
+% fprintf('It should allow configuration and lookup by key\n')
+% % Create and set the data manager
+% pMan = viscore.dataManager();
+% visprops.configurableObj.updateManager(pMan, {pConf});  
+% ep1.updateProperties(pMan);
+% 
+% % Change the background color to blue through the property manager
+% cObj = pMan.getObject(ipKey);
+% assertTrue(isa(cObj, 'visprops.configurableObj'));
+% s = cObj.getStructure();
+% % s(1).Value = [0, 0, 1];
+% cObj.setStructure(s);
+% ep1.updateProperties(pMan);
+% 
+% % Generate some data to plot
+% testVD = viscore.hdf5Data(values.EEG.data, 'Rand1', values.hdf5File, ...
+%     'Events', values.event, 'SampleRate', values.EEG.srate, 'BlockSize', 1000);
+% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%     viewTestClass.getDefaultFunctionsNoSqueeze());
+% fMan = viscore.dataManager();
+% fMan.putObjects(defaults);
+% func = fMan.getEnabledObjects('block');
+% thisFunc = func{1};
+% slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% ep1.plot(testVD, thisFunc, slice1);
+% gaps = ep1.getGaps();
+% ep1.reposition(gaps);
+% drawnow
+% if values.deleteFigures
+%    delete(fig1);
+% end
+% 
+% function testBlockPtr(values) %#ok<DEFNU>
+% % Unit test for visviews.eventImagePlot position of block pointer
+% fprintf('\nUnit tests for visviews.eventImagePlot positioning of block pointer\n');
+% 
+% fprintf('It should allow callbacks to be registered\n');
+% fig1 = figure('Name', 'Clumps of one window');
+% ep1 = visviews.eventImagePlot(fig1, [], []);
+% assertTrue(isvalid(ep1));
+% testVD = viscore.memoryData(values.EEG.data, 'EEG', ...
+%     'Events', values.event, ...
+%     'SampleRate', values.EEG.srate, 'BlockSize', 1000);
+% slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%     viewTestClass.getDefaultFunctionsNoSqueeze());
+% fMan = viscore.dataManager();
+% fMan.putObjects(defaults);
+% func = fMan.getEnabledObjects('block');
+% thisFunc = func{1};
+% ep1.plot(testVD, thisFunc, slice1);
+% gaps = ep1.getGaps();
+% ep1.reposition(gaps + 10);
+% ep1.registerCallbacks([]);
+% 
+% fprintf('It should move the position marker when incremented\n');
+% pause on
+% for k = 1:32
+%     pause(0.25);
+%     ep1.getClicked(k);
+% end
+% fprintf('It should move the marker to beginning when position is -inf\n');
+% pause(0.5);
+% [ds1, f1, p1] = ep1.getClicked(-inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(1, p1);
+% assertTrue(~isempty(ds1));
+% 
+% fprintf('It should move the marker to end when position is inf\n');
+% pause(0.5);
+% [ds2, f2, p2] = ep1.getClicked(inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(31, p2);
+% assertTrue(~isempty(ds2));
+% 
+% fprintf('It marker should not move when the position is empty\n');
+% pause(0.5);
+% ep1.getClicked(inf);
+% pause off
+% pause off
+% 
+% if values.deleteFigures
+%     delete(fig1);
+% end
+% 
+% function testBlockPtrHDF5(values) %#ok<DEFNU>
+% % Unit test for visviews.eventImagePlot position of block pointer
+% fprintf('\nUnit tests for visviews.eventImagePlot positioning of block pointer\n');
+% 
+% fprintf('It should allow callbacks to be registered\n');
+% fig1 = figure('Name', 'Clumps of one window');
+% ep1 = visviews.eventImagePlot(fig1, [], []);
+% assertTrue(isvalid(ep1));
+% testVD = viscore.hdf5Data(values.EEG.data, 'EEG', values.hdf5File, ...
+%     'Events', values.event, ...
+%     'SampleRate', values.EEG.srate, 'BlockSize', 1000);
+% slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
+%     viewTestClass.getDefaultFunctionsNoSqueeze());
+% fMan = viscore.dataManager();
+% fMan.putObjects(defaults);
+% func = fMan.getEnabledObjects('block');
+% thisFunc = func{1};
+% ep1.plot(testVD, thisFunc, slice1);
+% gaps = ep1.getGaps();
+% ep1.reposition(gaps + 10);
+% ep1.registerCallbacks([]);
+% 
+% fprintf('It should move the position marker when incremented\n');
+% pause on
+% for k = 1:32
+%     pause(0.25);
+%     ep1.getClicked(k);
+% end
+% fprintf('It should move the marker to beginning when position is -inf\n');
+% pause(0.5);
+% [ds1, f1, p1] = ep1.getClicked(-inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(1, p1);
+% assertTrue(~isempty(ds1));
+% 
+% fprintf('It should move the marker to end when position is inf\n');
+% pause(0.5);
+% [ds2, f2, p2] = ep1.getClicked(inf); %#ok<ASGLU>
+% assertElementsAlmostEqual(31, p2);
+% assertTrue(~isempty(ds2));
+% 
+% fprintf('It marker should not move when the position is empty\n');
+% pause(0.5);
+% ep1.getClicked(inf);
+% pause off
+% pause off
+% 
+% if values.deleteFigures
+%     delete(fig1);
+% end

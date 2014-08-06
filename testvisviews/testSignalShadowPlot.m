@@ -3,7 +3,6 @@ function test_suite = testSignalShadowPlot %#ok<STOUT>
 initTestSuite;
 
 function values = setup %#ok<DEFNU>
-
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);

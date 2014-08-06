@@ -38,11 +38,6 @@ values.hdf5EmptySliceData = viscore.hdf5Data(zeros(5, 1), 'Data empty', ...
     hdf5EmptySliceFile);
 values.deleteFigures = false;
 
-function teardown(values)  %#ok<DEFNU>
-% Function executed after each test
-delete(values.hdf5SFrameFile);
-delete(values.hdf5SChannelFile);
-
 % function testNormalConstructor(values) %#ok<DEFNU>
 % % Unit test for visviews.blockScalpPlot constructor
 % fprintf('\nUnit tests for visviews.blockScalpPlot valid constructor\n');
@@ -83,176 +78,57 @@ delete(values.hdf5SChannelFile);
 %   delete(fig);
 % end
 % 
-% function testPlot(values) %#ok<DEFNU>
-% % Unit test evisviews.blockScalpPlot plot
-% fprintf('\nUnit tests for visviews.blockScalpPlot plot method\n');
-% 
-% fprintf('It should produce a plot for identity slice\n');
-% fig1 = figure('Name', 'Clumps of one element');
-% sm1 = visviews.blockScalpPlot(fig1, [], []);
-% assertTrue(isvalid(sm1));
-% sm1.plot(values.bData, values.fun, values.slice);
-% gaps = sm1.getGaps();
-% sm1.reposition(gaps);
-% 
-% fprintf('It should allow callbacks to be registered\n')
-% sm1.registerCallbacks([]);
-% 
-% fprintf('It should produce a plot for empty slice\n');
-% fig2 = figure('Name', 'Empty slice');
-% sm2 = visviews.blockScalpPlot(fig2, [], []);
-% assertTrue(isvalid(sm2));
-% sm2.plot(values.bData, values.fun, []);
-% gaps = sm2.getGaps();
-% sm2.reposition(gaps);
-% 
-% fprintf('It should produce a plot when not all blocks in slice\n');
-% fig3 = figure('Name', 'Slice with Windows 6-8');
-% sm3 = visviews.blockScalpPlot(fig3, [], []);
-% slice3 = viscore.dataSlice('Slices', {':', ':', '6:8'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% sm3.plot(values.bData, values.fun, slice3);
-% gaps = sm3.getGaps();
-% sm3.reposition(gaps);
-% 
-% fprintf('It should produce a plot when not all channels in slice\n');
-% fig4 = figure('Name', 'Slice with Channels(2:10) Windows 4-7');
-% sm4 = visviews.blockScalpPlot(fig4, [], []);
-% assertTrue(isvalid(sm4));
-% slice4 = viscore.dataSlice('Slices', {'2:10', ':', '4:7'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% sm4.plot(values.bData, values.fun, slice4);
-% gaps = sm4.getGaps();
-% sm4.reposition(gaps);
-% 
-% fprintf('It should produce a plot for a slice consisting of single frame\n');
-% fig5 = figure('Name', 'Slice is single frame');
-% sm5 = visviews.blockScalpPlot(fig5, [], []);
-% slice5 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% assertTrue(isvalid(sm5));
-% sm5.plot(values.sFrame, values.fun, slice5);
-% gaps = sm5.getGaps();
-% sm5.reposition(gaps);
-% 
-% drawnow
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-%     delete(fig5);
-% end
-% 
-% function testPlotHDF5(values) %#ok<DEFNU>
-% % Unit test evisviews.blockScalpPlot plot
-% fprintf('\nUnit tests for visviews.blockScalpPlot plot method\n');
-% 
-% fprintf('It should produce a plot for identity slice\n');
-% fig1 = figure('Name', 'Clumps of one element');
-% sm1 = visviews.blockScalpPlot(fig1, [], []);
-% assertTrue(isvalid(sm1));
-% sm1.plot(values.hdf5Data, values.fun, values.slice);
-% gaps = sm1.getGaps();
-% sm1.reposition(gaps);
-% 
-% fprintf('It should allow callbacks to be registered\n')
-% sm1.registerCallbacks([]);
-% 
-% fprintf('It should produce a plot for empty slice\n');
-% fig2 = figure('Name', 'Empty slice');
-% sm2 = visviews.blockScalpPlot(fig2, [], []);
-% assertTrue(isvalid(sm2));
-% sm2.plot(values.hdf5Data, values.fun, []);
-% gaps = sm2.getGaps();
-% sm2.reposition(gaps);
-% 
-% fprintf('It should produce a plot when not all blocks in slice\n');
-% fig3 = figure('Name', 'Slice with Windows 6-8');
-% sm3 = visviews.blockScalpPlot(fig3, [], []);
-% slice3 = viscore.dataSlice('Slices', {':', ':', '6:8'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% sm3.plot(values.hdf5Data, values.fun, slice3);
-% gaps = sm3.getGaps();
-% sm3.reposition(gaps);
-% 
-% fprintf('It should produce a plot when not all channels in slice\n');
-% fig4 = figure('Name', 'Slice with Channels(2:10) Windows 4-7');
-% sm4 = visviews.blockScalpPlot(fig4, [], []);
-% assertTrue(isvalid(sm4));
-% slice4 = viscore.dataSlice('Slices', {'2:10', ':', '4:7'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% sm4.plot(values.hdf5Data, values.fun, slice4);
-% gaps = sm4.getGaps();
-% sm4.reposition(gaps);
-% 
-% fprintf('It should produce a plot for a slice consisting of single frame\n');
-% fig5 = figure('Name', 'Slice is single frame');
-% sm5 = visviews.blockScalpPlot(fig5, [], []);
-% slice5 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% assertTrue(isvalid(sm5));
-% sm5.plot(values.hdf5SFrame, values.fun, slice5);
-% gaps = sm5.getGaps();
-% sm5.reposition(gaps);
-% 
-% drawnow
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-%     delete(fig5);
-% end
+function testPlot(values) %#ok<DEFNU>
+% Unit test evisviews.blockScalpPlot plot
+fprintf('\nUnit tests for visviews.blockScalpPlot plot method\n');
 
-function testConstantAndNaNValues(values) %#ok<DEFNU>
-% Unit test visviews.blockScalpPlot plot constant and NaN
-fprintf('\nUnit tests for visviews.blockScalpPlot plot method with constant and NaN values\n')
-
-% All zeros
-fprintf('It should produce a plot for when all of the values are 0\n');
-data = zeros([32, 1000, 20]);
-testVD1 = viscore.memoryData(data, 'All zeros');
-fig1 = figure('Name', 'All zero values');
+fprintf('It should produce a plot for identity slice\n');
+fig1 = figure('Name', 'Clumps of one element');
 sm1 = visviews.blockScalpPlot(fig1, [], []);
 assertTrue(isvalid(sm1));
-sm1.plot(testVD1, values.fun, values.slice);
+sm1.plot(values.bData, values.fun, values.slice);
 gaps = sm1.getGaps();
 sm1.reposition(gaps);
-drawnow
 
-% Data zeros, function NaN
-fprintf('It should produce a bad plot for when data is zero, funcs NaNs (---see warning)\n');
-fig2 = figure('Name', 'Data zero, func NaN');
+fprintf('It should allow callbacks to be registered\n')
+sm1.registerCallbacks([]);
+
+fprintf('It should produce a plot for empty slice\n');
+fig2 = figure('Name', 'Empty slice');
 sm2 = visviews.blockScalpPlot(fig2, [], []);
 assertTrue(isvalid(sm2));
-sm2.plot(testVD1, [], values.slice);
+sm2.plot(values.bData, values.fun, []);
 gaps = sm2.getGaps();
 sm2.reposition(gaps);
 
-% Data NaN
-fprintf('It should produce a plot for when data is NaN\n');
-data = NaN([32, 1000, 20]);
-testVD3 = viscore.memoryData(data, 'Data NaN');
-fig3 = figure('Name', 'Data NaNs');
+fprintf('It should produce a plot when not all blocks in slice\n');
+fig3 = figure('Name', 'Slice with Windows 6-8');
 sm3 = visviews.blockScalpPlot(fig3, [], []);
-assertTrue(isvalid(sm3));
-sm3.plot(testVD3, values.fun, values.slice);
+slice3 = viscore.dataSlice('Slices', {':', ':', '6:8'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sm3.plot(values.bData, values.fun, slice3);
 gaps = sm3.getGaps();
 sm3.reposition(gaps);
 
-% Data slice empty
-fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-data = zeros(5, 1);
-testVD4 = viscore.memoryData(data, 'Data empty');
-slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig4 = figure('Name', 'Data slice is empty');
+fprintf('It should produce a plot when not all channels in slice\n');
+fig4 = figure('Name', 'Slice with Channels(2:10) Windows 4-7');
 sm4 = visviews.blockScalpPlot(fig4, [], []);
 assertTrue(isvalid(sm4));
-sm4.plot(testVD4, values.fun, slice4);
+slice4 = viscore.dataSlice('Slices', {'2:10', ':', '4:7'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sm4.plot(values.bData, values.fun, slice4);
 gaps = sm4.getGaps();
 sm4.reposition(gaps);
+
+fprintf('It should produce a plot for a slice consisting of single frame\n');
+fig5 = figure('Name', 'Slice is single frame');
+sm5 = visviews.blockScalpPlot(fig5, [], []);
+slice5 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+assertTrue(isvalid(sm5));
+sm5.plot(values.sFrame, values.fun, slice5);
+gaps = sm5.getGaps();
+sm5.reposition(gaps);
 
 drawnow
 if values.deleteFigures
@@ -260,50 +136,60 @@ if values.deleteFigures
     delete(fig2);
     delete(fig3);
     delete(fig4);
+    delete(fig5);
 end
 
-function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
-% Unit test visviews.blockScalpPlot plot constant and NaN
-fprintf('\nUnit tests for visviews.blockScalpPlot plot method with constant and NaN values\n')
+function testPlotHDF5(values) %#ok<DEFNU>
+% Unit test evisviews.blockScalpPlot plot
+fprintf('\nUnit tests for visviews.blockScalpPlot plot method\n');
 
-% All zeros
-fprintf('It should produce a plot for when all of the values are 0\n');
-fig1 = figure('Name', 'All zero values');
+fprintf('It should produce a plot for identity slice\n');
+fig1 = figure('Name', 'Clumps of one element');
 sm1 = visviews.blockScalpPlot(fig1, [], []);
 assertTrue(isvalid(sm1));
-sm1.plot(values.hdf5AllZerosData, values.fun, values.slice);
+sm1.plot(values.hdf5Data, values.fun, values.slice);
 gaps = sm1.getGaps();
 sm1.reposition(gaps);
-drawnow
 
-% Data zeros, function NaN
-fprintf('It should produce a bad plot for when data is zero, funcs NaNs (---see warning)\n');
-fig2 = figure('Name', 'Data zero, func NaN');
+fprintf('It should allow callbacks to be registered\n')
+sm1.registerCallbacks([]);
+
+fprintf('It should produce a plot for empty slice\n');
+fig2 = figure('Name', 'Empty slice');
 sm2 = visviews.blockScalpPlot(fig2, [], []);
 assertTrue(isvalid(sm2));
-sm2.plot(values.hdf5AllZerosData, [], values.slice);
+sm2.plot(values.hdf5Data, values.fun, []);
 gaps = sm2.getGaps();
 sm2.reposition(gaps);
 
-% Data NaN
-fprintf('It should produce a plot for when data is NaN\n');
-fig3 = figure('Name', 'Data NaNs');
+fprintf('It should produce a plot when not all blocks in slice\n');
+fig3 = figure('Name', 'Slice with Windows 6-8');
 sm3 = visviews.blockScalpPlot(fig3, [], []);
-assertTrue(isvalid(sm3));
-sm3.plot(values.hdf5NaNData, values.fun, values.slice);
+slice3 = viscore.dataSlice('Slices', {':', ':', '6:8'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sm3.plot(values.hdf5Data, values.fun, slice3);
 gaps = sm3.getGaps();
 sm3.reposition(gaps);
 
-% Data slice empty
-fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-    'DimNames', {'Channel', 'Sample', 'Window'});
-fig4 = figure('Name', 'Data slice is empty');
+fprintf('It should produce a plot when not all channels in slice\n');
+fig4 = figure('Name', 'Slice with Channels(2:10) Windows 4-7');
 sm4 = visviews.blockScalpPlot(fig4, [], []);
 assertTrue(isvalid(sm4));
-sm4.plot(values.hdf5EmptySliceData, values.fun, slice4);
+slice4 = viscore.dataSlice('Slices', {'2:10', ':', '4:7'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+sm4.plot(values.hdf5Data, values.fun, slice4);
 gaps = sm4.getGaps();
 sm4.reposition(gaps);
+
+fprintf('It should produce a plot for a slice consisting of single frame\n');
+fig5 = figure('Name', 'Slice is single frame');
+sm5 = visviews.blockScalpPlot(fig5, [], []);
+slice5 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+assertTrue(isvalid(sm5));
+sm5.plot(values.hdf5SFrame, values.fun, slice5);
+gaps = sm5.getGaps();
+sm5.reposition(gaps);
 
 drawnow
 if values.deleteFigures
@@ -311,7 +197,116 @@ if values.deleteFigures
     delete(fig2);
     delete(fig3);
     delete(fig4);
+    delete(fig5);
 end
+
+% function testConstantAndNaNValues(values) %#ok<DEFNU>
+% % Unit test visviews.blockScalpPlot plot constant and NaN
+% fprintf('\nUnit tests for visviews.blockScalpPlot plot method with constant and NaN values\n')
+% 
+% % All zeros
+% fprintf('It should produce a plot for when all of the values are 0\n');
+% data = zeros([32, 1000, 20]);
+% testVD1 = viscore.memoryData(data, 'All zeros');
+% fig1 = figure('Name', 'All zero values');
+% sm1 = visviews.blockScalpPlot(fig1, [], []);
+% assertTrue(isvalid(sm1));
+% sm1.plot(testVD1, values.fun, values.slice);
+% gaps = sm1.getGaps();
+% sm1.reposition(gaps);
+% drawnow
+% 
+% % Data zeros, function NaN
+% fprintf('It should produce a bad plot for when data is zero, funcs NaNs (---see warning)\n');
+% fig2 = figure('Name', 'Data zero, func NaN');
+% sm2 = visviews.blockScalpPlot(fig2, [], []);
+% assertTrue(isvalid(sm2));
+% sm2.plot(testVD1, [], values.slice);
+% gaps = sm2.getGaps();
+% sm2.reposition(gaps);
+% 
+% % Data NaN
+% fprintf('It should produce a plot for when data is NaN\n');
+% data = NaN([32, 1000, 20]);
+% testVD3 = viscore.memoryData(data, 'Data NaN');
+% fig3 = figure('Name', 'Data NaNs');
+% sm3 = visviews.blockScalpPlot(fig3, [], []);
+% assertTrue(isvalid(sm3));
+% sm3.plot(testVD3, values.fun, values.slice);
+% gaps = sm3.getGaps();
+% sm3.reposition(gaps);
+% 
+% % Data slice empty
+% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+% data = zeros(5, 1);
+% testVD4 = viscore.memoryData(data, 'Data empty');
+% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig4 = figure('Name', 'Data slice is empty');
+% sm4 = visviews.blockScalpPlot(fig4, [], []);
+% assertTrue(isvalid(sm4));
+% sm4.plot(testVD4, values.fun, slice4);
+% gaps = sm4.getGaps();
+% sm4.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
+% 
+% function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
+% % Unit test visviews.blockScalpPlot plot constant and NaN
+% fprintf('\nUnit tests for visviews.blockScalpPlot plot method with constant and NaN values\n')
+% 
+% % All zeros
+% fprintf('It should produce a plot for when all of the values are 0\n');
+% fig1 = figure('Name', 'All zero values');
+% sm1 = visviews.blockScalpPlot(fig1, [], []);
+% assertTrue(isvalid(sm1));
+% sm1.plot(values.hdf5AllZerosData, values.fun, values.slice);
+% gaps = sm1.getGaps();
+% sm1.reposition(gaps);
+% drawnow
+% 
+% % Data zeros, function NaN
+% fprintf('It should produce a bad plot for when data is zero, funcs NaNs (---see warning)\n');
+% fig2 = figure('Name', 'Data zero, func NaN');
+% sm2 = visviews.blockScalpPlot(fig2, [], []);
+% assertTrue(isvalid(sm2));
+% sm2.plot(values.hdf5AllZerosData, [], values.slice);
+% gaps = sm2.getGaps();
+% sm2.reposition(gaps);
+% 
+% % Data NaN
+% fprintf('It should produce a plot for when data is NaN\n');
+% fig3 = figure('Name', 'Data NaNs');
+% sm3 = visviews.blockScalpPlot(fig3, [], []);
+% assertTrue(isvalid(sm3));
+% sm3.plot(values.hdf5NaNData, values.fun, values.slice);
+% gaps = sm3.getGaps();
+% sm3.reposition(gaps);
+% 
+% % Data slice empty
+% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+%     'DimNames', {'Channel', 'Sample', 'Window'});
+% fig4 = figure('Name', 'Data slice is empty');
+% sm4 = visviews.blockScalpPlot(fig4, [], []);
+% assertTrue(isvalid(sm4));
+% sm4.plot(values.hdf5EmptySliceData, values.fun, slice4);
+% gaps = sm4.getGaps();
+% sm4.reposition(gaps);
+% 
+% drawnow
+% if values.deleteFigures
+%     delete(fig1);
+%     delete(fig2);
+%     delete(fig3);
+%     delete(fig4);
+% end
 
 % function testProperties(values) %#ok<DEFNU>
 % % Unit test for visviews.blockScalpPlot properties

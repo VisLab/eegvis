@@ -9,7 +9,8 @@ load('EEG.mat');
 values.EEG = EEG;  
 tEvents = EEG.event;
 types = {tEvents.type}';
-                                      % Convert to seconds since beginning
+
+% Convert to seconds since beginning
 startTimes = (round(double(cell2mat({EEG.event.latency}))') - 1)./EEG.srate; 
 values.event = struct('type', types, 'time', num2cell(startTimes), ...
     'certainty', ones(length(startTimes), 1));

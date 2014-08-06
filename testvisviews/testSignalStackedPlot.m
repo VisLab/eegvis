@@ -3,45 +3,6 @@ function test_suite = testSignalStackedPlot %#ok<STOUT>
 initTestSuite;
 
 function values = setup %#ok<DEFNU>
-hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG.hdf5');
-load('EEG.mat'); 
-values.bData = viscore.memoryData(EEG.data, 'EEG', ...
-    'SampleRate', EEG.srate);  
-values.hdf5Data = viscore.hdf5Data(EEG.data, 'EEG', hdf5File, ...
-    'SampleRate', EEG.srate);
-
-hdf5EpochFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEGEpoch.hdf5');
-load('EEGEpoch.mat');
-[values.event, values.startTimes, values.timeScale] = ...
-           viscore.blockedEvents.getEEGTimes(EEGEpoch);
-values.bDataEpoched = viscore.memoryData(EEGEpoch.data, 'EEGEpoch', ...
-    'SampleRate', EEGEpoch.srate, 'Epoched', true, ...
-    'Events', values.event, 'BlockStartTimes', values.startTimes, ...
-    'BlockTimeScale', values.timeScale);
-values.hdf5DataEpoched = viscore.hdf5Data(EEGEpoch.data, 'EEGEpoch', hdf5EpochFile, ...
-    'SampleRate', EEGEpoch.srate, 'Epoched', true, ...
-    'Events', values.event, 'BlockStartTimes', values.startTimes, ...
-    'BlockTimeScale', values.timeScale);
-
-nSamples = 1000;
-nChans = 32;
-nWindows = 20;
-x = linspace(0, nWindows, nSamples*nWindows);
-a = 10*rand(nChans, 1);
-p = pi*rand(nChans, 1);
-dataSmooth = 0.01*random('normal', 0, 1, [nChans, nSamples*nWindows]);
-for k = 1:nChans
-    dataSmooth(k, :) = dataSmooth(k, :) + a(k)*cos(2*pi*x + p(k));
-end
-dataSmooth(1, :) = 3*dataSmooth(1, :);
-dataSmooth = dataSmooth';
-dataSmooth = reshape(dataSmooth, [nSamples, nWindows, nChans]);
-dataSmooth = permute(dataSmooth, [3, 1, 2]);
-values.dataSmooth = dataSmooth;
-values.bDataSmooth =  viscore.memoryData(dataSmooth, 'Smooth');
-values.hdf5SmoothFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_SMOOTH.hdf5');
-values.hdf5DataSmooth =  viscore.hdf5Data(dataSmooth, 'Smooth', values.hdf5SmoothFile);
-
 keyfun = @(x) x.('ShortName');
 defFuns= visfuncs.functionObj.createObjects( ...
     'visfuncs.functionObj', viewTestClass.getDefaultFunctions(), keyfun);
@@ -51,51 +12,47 @@ values.slice = viscore.dataSlice('Slices', {':', ':', '1'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
 values.deleteFigures = true;
 
-% function teardown(values) %#ok<DEFNU>
-% Function executed after each test
-% delete(values.hdf5SmoothFile);
+function testNormalConstructor(values) %#ok<DEFNU>
+% testSignalShadowPlot unit test for visviews.signalStackedPlot constructor
+fprintf('\nUnit tests for visviews.signalStackedPlot valid constructor\n');
 
-% function testNormalConstructor(values) %#ok<DEFNU>
-% % testSignalShadowPlot unit test for visviews.signalStackedPlot constructor
-% fprintf('\nUnit tests for visviews.signalStackedPlot valid constructor\n');
-% 
-% fprintf('It should construct a valid shadow signal plot when only parent passed\n')
-% fig = figure('Name', 'Creates plot panel when only parent is passed');
-% sp = visviews.signalStackedPlot(fig, [], []);
-% assertTrue(isvalid(sp));
-% 
-% fprintf('It should allow callbacks to be registered\n')
-% sp.registerCallbacks([]);
-% 
-% drawnow
-% if values.deleteFigures
-%   delete(fig);
-% end
+fprintf('It should construct a valid shadow signal plot when only parent passed\n')
+fig = figure('Name', 'Creates plot panel when only parent is passed');
+sp = visviews.signalStackedPlot(fig, [], []);
+assertTrue(isvalid(sp));
 
-% function testBadConstructor(values) %#ok<DEFNU>
-% % testSignalShadowPlot unit test for signalStackedPlot constructor
-% fprintf('\nUnit tests for visviews.signalStackedPlot invalid constructor parameters\n');
-% 
-% fprintf('It should throw an exception when no parameters are passed\n');
-% f = @() visviews.signalStackedPlot();
-% assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
-% 
-% fprintf('It should throw an exception when only one parameter is passed\n');
-% fig = figure('Name', 'Invalid constructor');
-% f = @() visviews.signalStackedPlot(fig);
-% assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
-% 
-% fprintf('It should throw an exception when only two parameters are passed\n');
-% f = @() visviews.signalStackedPlot(fig, []);
-% assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
-% 
-% fprintf('It should throw an exception when more than three parameters are passed\n');
-% f = @() visviews.signalStackedPlot(fig, [], [], []);
-% assertExceptionThrown(f, 'MATLAB:maxrhs');
-% 
-% if values.deleteFigures
-%   delete(fig);
-% end
+fprintf('It should allow callbacks to be registered\n')
+sp.registerCallbacks([]);
+
+drawnow
+if values.deleteFigures
+  delete(fig);
+end
+
+function testBadConstructor(values) %#ok<DEFNU>
+% testSignalShadowPlot unit test for signalStackedPlot constructor
+fprintf('\nUnit tests for visviews.signalStackedPlot invalid constructor parameters\n');
+
+fprintf('It should throw an exception when no parameters are passed\n');
+f = @() visviews.signalStackedPlot();
+assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
+
+fprintf('It should throw an exception when only one parameter is passed\n');
+fig = figure('Name', 'Invalid constructor');
+f = @() visviews.signalStackedPlot(fig);
+assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
+
+fprintf('It should throw an exception when only two parameters are passed\n');
+f = @() visviews.signalStackedPlot(fig, []);
+assertAltExceptionThrown(f, {'MATLAB:inputArgUndefined', 'MATLAB:minrhs'});
+
+fprintf('It should throw an exception when more than three parameters are passed\n');
+f = @() visviews.signalStackedPlot(fig, [], [], []);
+assertExceptionThrown(f, 'MATLAB:maxrhs');
+
+if values.deleteFigures
+  delete(fig);
+end
 
 function testPlot(values) %#ok<DEFNU>
 %test signalStackedPlot plot
@@ -144,13 +101,13 @@ sp4.reposition(gaps);
 
 fprintf('It should produce a plot of epoched data for a normal slice along dim 3\n');
 load('EEGEpoch.mat');
-[values.event, values.startTimes, values.timeScale] = ...
+[event, startTimes, timeScale] = ...
            viscore.blockedEvents.getEEGTimes(EEGEpoch);
 bDataEpoched = viscore.memoryData(EEGEpoch.data, 'EEGEpoch', ...
     'SampleRate', EEGEpoch.srate, 'Epoched', true, ...
-    'Events', values.event, 'BlockStartTimes', values.startTimes, ...
-    'BlockTimeScale', values.timeScale);
-assertTrue(values.bDataEpoched.isEpoched())
+    'Events', event, 'BlockStartTimes', startTimes, ...
+    'BlockTimeScale', timeScale);
+assertTrue(bDataEpoched.isEpoched())
 fig5 = figure('Name', 'Plot when EEG data is epoched along dim 3');
 sp5 = visviews.signalStackedPlot(fig5, [], []);
 sp5.plot(bDataEpoched, values.fun, values.slice);
@@ -332,16 +289,16 @@ sp4.reposition(gaps);
 fprintf('It should produce a plot of epoched data for a normal slice along dim 3\n');
 load('EEGEpoch.mat');
 eegEpochFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEGEpoch.hdf5');
-[values.event, values.startTimes, values.timeScale] = ...
+[event, startTimes, timeScale] = ...
            viscore.blockedEvents.getEEGTimes(EEGEpoch);
 hdf5DataEpoched = viscore.hdf5Data(EEGEpoch.data, 'EEGEpoch', eegEpochFile, ...
     'SampleRate', EEGEpoch.srate, 'Epoched', true, ...
-    'Events', values.event, 'BlockStartTimes', values.startTimes, ...
-    'BlockTimeScale', values.timeScale);
-assertTrue(values.bDataEpoched.isEpoched())
+    'Events', event, 'BlockStartTimes', startTimes, ...
+    'BlockTimeScale', timeScale);
+assertTrue(hdf5DataEpoched.isEpoched())
 fig5 = figure('Name', 'Plot when EEG data is epoched along dim 3');
 sp5 = visviews.signalStackedPlot(fig5, [], []);
-sp5.plot(values.hdf5DataEpoched, values.fun, values.slice);
+sp5.plot(hdf5DataEpoched, values.fun, values.slice);
 gaps = sp5.getGaps();
 sp5.reposition(gaps);
 
@@ -351,7 +308,7 @@ sp6 = visviews.signalStackedPlot(fig6, [], []);
 assertTrue(isvalid(sp6));
 slice6 = viscore.dataSlice('Slices', {':', ':', '2:5'}, 'CombineDim', 3, ...
     'DimNames', {'Channel', 'Sample', 'Window'});
-sp6.plot(values.hdf5DataEpoched, values.fun, slice6);
+sp6.plot(hdf5DataEpoched, values.fun, slice6);
 gaps = sp6.getGaps();
 sp6.reposition(gaps);
 
@@ -361,7 +318,7 @@ sp7 = visviews.signalStackedPlot(fig7, [], []);
 assertTrue(isvalid(sp7));
 slice7 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp7.plot(values.hdf5DataEpoched, values.fun, slice7);
+sp7.plot(hdf5DataEpoched, values.fun, slice7);
 gaps = sp7.getGaps();
 sp7.reposition(gaps);
 
@@ -371,16 +328,19 @@ sp8 = visviews.signalStackedPlot(fig8, [], []);
 assertTrue(isvalid(sp8));
 slice8 = viscore.dataSlice('Slices', {'1', ':', ':'}, 'CombineDim', 1, ...
     'DimNames', {'Channel', 'Sample', 'Window'}); 
-sp8.plot(values.hdf5DataEpoched, values.fun, slice8);
+sp8.plot(hdf5DataEpoched, values.fun, slice8);
 gaps = sp8.getGaps();
 sp8.reposition(gaps);
 
 fprintf('It should plot smooth signals\n');
+load('DataSmooth.mat');
+smoothFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'DataSmooth.hdf5');
+hdf5DataSmooth =  viscore.hdf5Data(dataSmooth, 'Smooth', smoothFile);
 fig9 = figure('Name', 'Plot with smoothed signals');
 sp9 = visviews.signalStackedPlot(fig9, [], []);
 assertTrue(isvalid(sp9));
 sp9.SignalScale = 3.0;
-sp9.plot(values.hdf5DataSmooth, values.fun, values.slice);
+sp9.plot(hdf5DataSmooth, values.fun, values.slice);
 gaps = sp9.getGaps();
 sp9.reposition(gaps);
 
@@ -388,13 +348,12 @@ fprintf('It should plot smooth signals with a trim percent\n');
 fig10 = figure('Name', 'Plot with smoothed signals with out of range signal');
 sp10 = visviews.signalStackedPlot(fig10, [], []);
 assertTrue(isvalid(sp10));
-data10 = values.dataSmooth; 
-data10(2,:) = 100*data10(6, :);
-hdf5File10 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA10.hdf5');
-testVD10 = viscore.hdf5Data(data10, 'Large Cosine', hdf5File10);
+load('DataSmoothTrim.mat');
+smoothTrimFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'DataSmoothTrim.hdf5');
+hdf5DataSmoothTrim =  viscore.hdf5Data(dataSmoothTrim, 'Large Cosine', smoothTrimFile);
 sp10.SignalScale = 3.0;
 sp10.TrimPercent = 5;
-sp10.plot(testVD10, values.fun, values.slice);
+sp10.plot(hdf5DataSmoothTrim, values.fun, values.slice);
 gaps = sp10.getGaps();
 sp10.reposition(gaps);
 
@@ -404,199 +363,194 @@ sp11 = visviews.signalStackedPlot(fig11, [], []);
 assertTrue(isvalid(sp11));
 slice11 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
-sp11.plot(values.hdf5DataSmooth, values.fun, slice11);
+sp11.plot(hdf5DataSmooth, values.fun, slice11);
 gaps = sp11.getGaps();
 sp11.reposition(gaps);
 
-% fprintf('It should produce a plot for a clump of nonepoched windows sliced along dim 3 \n');
-% fig12 = figure('Name', 'Plot clump for slice along dimension 3, epoched');
-% sp12 = visviews.signalStackedPlot(fig12, [], []);
-% assertTrue(isvalid(sp12));
-% slice12 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
-% sp12.plot(values.hdf5DataEpoched, values.fun, slice12);
-% gaps = sp12.getGaps();
-% sp12.reposition(gaps);
+fprintf('It should produce a plot for a clump of nonepoched windows sliced along dim 3 \n');
+fig12 = figure('Name', 'Plot clump for slice along dimension 3, epoched');
+sp12 = visviews.signalStackedPlot(fig12, [], []);
+assertTrue(isvalid(sp12));
+slice12 = viscore.dataSlice('Slices', {':', ':', '2:4'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 3);
+sp12.plot(hdf5DataEpoched, values.fun, slice12);
+gaps = sp12.getGaps();
+sp12.reposition(gaps);
 
-% fprintf('It should produce a single window plot for a clump of epoched windows sliced along dim 3 \n');
-% fig13 = figure('Name', 'Plot clump for slice along dimension 3, epoched (epoch 5 and 7 are big)');
-% sp13 = visviews.signalStackedPlot(fig13, [], []);
-% assertTrue(isvalid(sp13));
-% bigData = values.bDataSmooth.getData;
-% bigData(:, :, 5) = 3*bigData(:, :, 5);
-% bigData(:, :, 7) = 3.5*bigData(:, :, 7);
-% hdf5File = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA.hdf5');
-% testVD13 = viscore.hdf5Data(bigData, 'Sinusoidal', hdf5File, ...
-%     'Epoched', true, 'SampleRate', 256);
-% slice13 = viscore.dataSlice('Slices', {':', ':', '4:8'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Epoch'}, 'CombineDim', 3);
-% sp13.plot(testVD13, values.fun, slice13);
-% gaps = sp13.getGaps();
-% sp13.reposition(gaps);
+fprintf('It should produce a single window plot for a clump of epoched windows sliced along dim 3 \n');
+fig13 = figure('Name', 'Plot clump for slice along dimension 3, epoched (epoch 5 and 7 are big)');
+sp13 = visviews.signalStackedPlot(fig13, [], []);
+assertTrue(isvalid(sp13));
+load('DataSmoothSingleWindow.mat');
+smoothSingleWindowFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'DataSmoothSingleWindow.hdf5');
+hdf5DataSmoothSingleWindow =  viscore.hdf5Data(dataSmoothSingleWindow, 'Sinusoidal', smoothSingleWindowFile, ...
+    'Epoched', true, 'SampleRate', 256);
+slice13 = viscore.dataSlice('Slices', {':', ':', '4:8'}, ...
+    'DimNames', {'Channel', 'Sample', 'Epoch'}, 'CombineDim', 3);
+sp13.plot(hdf5DataSmoothSingleWindow, values.fun, slice13);
+gaps = sp13.getGaps();
+sp13.reposition(gaps);
 
-% fprintf('It should produce a plot for a clump of nonepoched windows\n');
-% fig14 = figure('Name', 'Plot clump for channels 2:4 sliced dimension 1, big windows [5, 7], not epoched');
-% sp14 = visviews.signalStackedPlot(fig14, [], []);
-% assertTrue(isvalid(sp4));
-% slice14 = viscore.dataSlice('Slices', {'30:32', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 1);
-% sp14.plot(testVD13, values.fun, slice14);
-% gaps = sp14.getGaps();
-% sp14.reposition(gaps);
-% drawnow
+fprintf('It should produce a plot for a clump of nonepoched windows\n');
+fig14 = figure('Name', 'Plot clump for channels 2:4 sliced dimension 1, big windows [5, 7], not epoched');
+sp14 = visviews.signalStackedPlot(fig14, [], []);
+assertTrue(isvalid(sp4));
+slice14 = viscore.dataSlice('Slices', {'30:32', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'}, 'CombineDim', 1);
+sp14.plot(hdf5DataSmoothSingleWindow, values.fun, slice14);
+gaps = sp14.getGaps();
+sp14.reposition(gaps);
+drawnow
 
-% % Trim percentage out of range
-% fprintf('It ignores invalid trim percentages\n');
-% fig15 = figure('Name', 'Plot did''t change percentages');
-% sp15 = visviews.signalStackedPlot(fig15, [], []);
-% assertTrue(isvalid(sp15));
-% sp15.TrimPercent = 200;
-% sp15.plot(values.hdf5Data, values.fun, values.slice);
-% gaps = sp15.getGaps();
-% sp15.reposition(gaps);
-% assertElementsAlmostEqual(200, sp15.TrimPercent);
+% Trim percentage out of range
+fprintf('It ignores invalid trim percentages\n');
+fig15 = figure('Name', 'Plot did''t change percentages');
+sp15 = visviews.signalStackedPlot(fig15, [], []);
+assertTrue(isvalid(sp15));
+sp15.TrimPercent = 200;
+sp15.plot(hdf5Data, values.fun, values.slice);
+gaps = sp15.getGaps();
+sp15.reposition(gaps);
+assertElementsAlmostEqual(200, sp15.TrimPercent);
 
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-%     delete(fig5);
-%     delete(fig6);
-%     delete(fig7);
-%     delete(fig8);
-%     delete(fig9);
-%     delete(fig10);
-%     delete(fig11);
-%     delete(fig12);
-%     delete(fig13);
-%     delete(fig14);
-%     delete(fig15);
-% end
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+    delete(fig5);
+    delete(fig6);
+    delete(fig7);
+    delete(fig8);
+    delete(fig9);
+    delete(fig10);
+    delete(fig11);
+    delete(fig12);
+    delete(fig13);
+    delete(fig14);
+    delete(fig15);
+end
 
+function testConstantAndNaNValues(values) %#ok<DEFNU>
+% Unit test visviews.signalStackedPlot plot constant and NaN
+fprintf('\nUnit tests for visviews.signalStackedPlot plot method with constant and NaN values\n')
 
+% All zeros
+fprintf('It should produce a plot for when all of the values are 0\n');
+load('AllZeros.mat');
+testVD1 = viscore.memoryData(allZeros, 'All zeros');
+fig1 = figure('Name', 'All zero values');
+bp1 = visviews.signalStackedPlot(fig1, [], []);
+assertTrue(isvalid(bp1));
+bp1.plot(testVD1, values.fun, values.slice);
+gaps = bp1.getGaps();
+bp1.reposition(gaps);
 
-% function testConstantAndNaNValues(values) %#ok<DEFNU>
-% % Unit test visviews.signalStackedPlot plot constant and NaN
-% fprintf('\nUnit tests for visviews.signalStackedPlot plot method with constant and NaN values\n')
-% 
-% % All zeros
-% fprintf('It should produce a plot for when all of the values are 0\n');
-% data = zeros([32, 1000, 20]);
-% testVD1 = viscore.memoryData(data, 'All zeros');
-% fig1 = figure('Name', 'All zero values');
-% bp1 = visviews.signalStackedPlot(fig1, [], []);
-% assertTrue(isvalid(bp1));
-% bp1.plot(testVD1, values.fun, values.slice);
-% gaps = bp1.getGaps();
-% bp1.reposition(gaps);
-% 
-% % Data zeros, function NaN
-% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-% fig2 = figure('Name', 'Data zero, func NaN');
-% bp2 = visviews.signalStackedPlot(fig2, [], []);
-% assertTrue(isvalid(bp2));
-% bp2.plot(testVD1, [], values.slice);
-% gaps = bp2.getGaps();
-% bp2.reposition(gaps);
-% 
-% % Data NaN
-% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-% data = NaN([32, 1000, 20]);
-% testVD3 = viscore.memoryData(data, 'Data NaN');
-% fig3 = figure('Name', 'Data NaNs');
-% bp3 = visviews.signalStackedPlot(fig3, [], []);
-% assertTrue(isvalid(bp3));
-% bp3.plot(testVD3, values.fun, values.slice);
-% gaps = bp3.getGaps();
-% bp3.reposition(gaps);
-% 
-% % Data slice empty
-% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-% data = zeros(5, 1);
-% testVD4 = viscore.memoryData(data, 'Data empty');
-% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% fig4 = figure('Name', 'Data slice is empty');
-% bp4 = visviews.signalStackedPlot(fig4, [], []);
-% assertTrue(isvalid(bp4));
-% bp4.plot(testVD4, values.fun, slice4);
-% gaps = bp4.getGaps();
-% bp4.reposition(gaps);
-% drawnow
-% 
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-% end
+% Data zeros, function NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+fig2 = figure('Name', 'Data zero, func NaN');
+bp2 = visviews.signalStackedPlot(fig2, [], []);
+assertTrue(isvalid(bp2));
+bp2.plot(testVD1, [], values.slice);
+gaps = bp2.getGaps();
+bp2.reposition(gaps);
 
-% function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
-% % Unit test visviews.signalStackedPlot plot constant and NaN
-% fprintf('\nUnit tests for visviews.signalStackedPlot plot method with constant and NaN values\n')
-% 
-% % All zeros
-% fprintf('It should produce a plot for when all of the values are 0\n');
-% data = zeros([32, 1000, 20]);
-% hdf5File1 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA1.hdf5');
-% testVD1 = viscore.hdf5Data(data, 'All zeros', hdf5File1);
-% fig1 = figure('Name', 'All zero values');
-% bp1 = visviews.signalStackedPlot(fig1, [], []);
-% assertTrue(isvalid(bp1));
-% bp1.plot(testVD1, values.fun, values.slice);
-% gaps = bp1.getGaps();
-% bp1.reposition(gaps);
-% 
-% % Data zeros, function NaN
-% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-% fig2 = figure('Name', 'Data zero, func NaN');
-% bp2 = visviews.signalStackedPlot(fig2, [], []);
-% assertTrue(isvalid(bp2));
-% bp2.plot(testVD1, [], values.slice);
-% gaps = bp2.getGaps();
-% bp2.reposition(gaps);
-% 
-% % Data NaN
-% fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
-% data = NaN([32, 1000, 20]);
-% hdf5File3 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA3.hdf5');
-% testVD3 = viscore.hdf5Data(data, 'Data NaN', hdf5File3);
-% fig3 = figure('Name', 'Data NaNs');
-% bp3 = visviews.signalStackedPlot(fig3, [], []);
-% assertTrue(isvalid(bp3));
-% bp3.plot(testVD3, values.fun, values.slice);
-% gaps = bp3.getGaps();
-% bp3.reposition(gaps);
-% 
-% % Data slice empty
-% fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
-% data = zeros(5, 1);
-% hdf5File4 = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEG_NO_DATA4.hdf5');
-% testVD4 = viscore.hdf5Data(data, 'Data empty', hdf5File4);
-% slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
-%     'DimNames', {'Channel', 'Sample', 'Window'});
-% fig4 = figure('Name', 'Data slice is empty');
-% bp4 = visviews.signalStackedPlot(fig4, [], []);
-% assertTrue(isvalid(bp4));
-% bp4.plot(testVD4, values.fun, slice4);
-% gaps = bp4.getGaps();
-% bp4.reposition(gaps);
-% drawnow
+% Data NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+load('AllNaN.mat');
+testVD3 = viscore.memoryData(allNaN, 'Data NaN');
+fig3 = figure('Name', 'Data NaNs');
+bp3 = visviews.signalStackedPlot(fig3, [], []);
+assertTrue(isvalid(bp3));
+bp3.plot(testVD3, values.fun, values.slice);
+gaps = bp3.getGaps();
+bp3.reposition(gaps);
 
-% if values.deleteFigures
-%     delete(fig1);
-%     delete(fig2);
-%     delete(fig3);
-%     delete(fig4);
-% end
+% Data slice empty
+fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+load('EmptySlice.mat');
+testVD4 = viscore.memoryData(emptySlice, 'Data empty');
+slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+fig4 = figure('Name', 'Data slice is empty');
+bp4 = visviews.signalStackedPlot(fig4, [], []);
+assertTrue(isvalid(bp4));
+bp4.plot(testVD4, values.fun, slice4);
+gaps = bp4.getGaps();
+bp4.reposition(gaps);
+drawnow
 
-% 
-% function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>
-% % testStackedSignalPlot unit test for static getDefaultProperties
-% fprintf('\nUnit tests for visviews.signalStackedPlot getDefaultProperties\n');
-% fprintf('It should have a getDefaultProperties method that returns a structure\n');
-% s = visviews.signalStackedPlot.getDefaultProperties();
-% assertTrue(isa(s, 'struct'));
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+end
+
+function testConstantAndNaNValuesHDF5(values) %#ok<DEFNU>
+% Unit test visviews.signalStackedPlot plot constant and NaN
+fprintf('\nUnit tests for visviews.signalStackedPlot plot method with constant and NaN values\n')
+
+% All zeros
+fprintf('It should produce a plot for when all of the values are 0\n');
+allZerosFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'AllZeros.hdf5');
+load('AllZeros.mat');
+testVD1 = viscore.hdf5Data(allZeros, 'All zeros', allZerosFile);
+fig1 = figure('Name', 'All zero values');
+bp1 = visviews.signalStackedPlot(fig1, [], []);
+assertTrue(isvalid(bp1));
+bp1.plot(testVD1, values.fun, values.slice);
+gaps = bp1.getGaps();
+bp1.reposition(gaps);
+
+% Data zeros, function NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+fig2 = figure('Name', 'Data zero, func NaN');
+bp2 = visviews.signalStackedPlot(fig2, [], []);
+assertTrue(isvalid(bp2));
+bp2.plot(testVD1, [], values.slice);
+gaps = bp2.getGaps();
+bp2.reposition(gaps);
+
+% Data NaN
+fprintf('It should produce a plot for when data is zero, funcs NaNs (---see warning)\n');
+NaNFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'NaN.hdf5');
+load('AllNaN.mat');
+testVD3 = viscore.hdf5Data(allNaN,'Data NaN', NaNFile);
+fig3 = figure('Name', 'Data NaNs');
+bp3 = visviews.signalStackedPlot(fig3, [], []);
+assertTrue(isvalid(bp3));
+bp3.plot(testVD3, values.fun, values.slice);
+gaps = bp3.getGaps();
+bp3.reposition(gaps);
+
+% Data slice empty
+fprintf('It should produce empty axes when data slice is empty (---see warning)\n');
+emptySliceFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EmptySlice.hdf5');
+load('EmptySlice.mat');
+testVD4 = viscore.hdf5Data(emptySlice, 'Data empty', emptySliceFile);
+slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
+    'DimNames', {'Channel', 'Sample', 'Window'});
+fig4 = figure('Name', 'Data slice is empty');
+bp4 = visviews.signalStackedPlot(fig4, [], []);
+assertTrue(isvalid(bp4));
+bp4.plot(testVD4, values.fun, slice4);
+gaps = bp4.getGaps();
+bp4.reposition(gaps);
+drawnow
+
+if values.deleteFigures
+    delete(fig1);
+    delete(fig2);
+    delete(fig3);
+    delete(fig4);
+end
+
+function testGetDefaultProperties(values) %#ok<INUSD,DEFNU>
+% testStackedSignalPlot unit test for static getDefaultProperties
+fprintf('\nUnit tests for visviews.signalStackedPlot getDefaultProperties\n');
+fprintf('It should have a getDefaultProperties method that returns a structure\n');
+s = visviews.signalStackedPlot.getDefaultProperties();
+assertTrue(isa(s, 'struct'));
 
 
