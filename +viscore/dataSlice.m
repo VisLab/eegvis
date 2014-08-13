@@ -242,6 +242,7 @@ classdef dataSlice < hgsetget
         end % createSlices
         
         function [sData, sStart, sSizes] = getDataSlice(data, slices, cDims, method)
+            tStart = tic;
             % Returns data subarray of data for specified slice
             %
             % Input:
@@ -271,12 +272,13 @@ classdef dataSlice < hgsetget
             elseif isempty(sStart)
                 sData = '';
                 return;
-            end
-            
+            end           
             sData = eval(['data(' dSlice ')']);
             if ~isempty(cDims) && ~isempty(method)
                 sData = viscore.dataSlice.combineDims(sData, cDims, method);
             end
+            tEnd = toc(tStart);
+            fprintf('Memory Slice Time: %d\n', tEnd);
         end % getDataSlice
         
 %         function [sData, sStart, sSizes] = getHDF5Slice(visData, slices, cDims, method)
@@ -333,6 +335,7 @@ classdef dataSlice < hgsetget
         function [sData, sStart, sSizes] = getHDF5Slice(visData, slices, cDims, method)
             % This only works for 3d blocked and epoched data and NOT 2d
             % data
+            tStart = tic;
             hdf5File = visData.getHDF5File();
             originalDims = h5read(hdf5File, '/dims');
             [nElements, nSamples, nBlocks] = visData.getDataSize();
@@ -343,15 +346,11 @@ classdef dataSlice < hgsetget
                 return;
             end
             elements = 1:nElements;
-            samples = 1:nSamples;
             blocks = 1:nBlocks;
             if ~isempty(slices)
                 sliceIndecies = strsplit(dSlice, ',');
                 if sliceIndecies{1} ~= ':'
                     elements = str2num(sliceIndecies{1}); %#ok<ST2NM>
-                end
-                if sliceIndecies{2} ~= ':'
-                    samples = str2num(sliceIndecies{2}); %#ok<ST2NM>
                 end
                 if sliceIndecies{3} ~= ':'
                     blocks = str2num(sliceIndecies{3}); %#ok<ST2NM>
@@ -367,23 +366,15 @@ classdef dataSlice < hgsetget
                 currentBlock = h5read(hdf5File, '/data', ...
                         [(nSamples * (blocks(a) - 1) * nElements + 1) 1], ...
                         [(realBlockSize * nElements) 1])';
-%                 for b = 1:length(elements)
-%                     currentBlock = h5read(hdf5File, '/data', ...
-%                         [(nSamples * (blocks(a) - 1) * nElements + elements(b)) 1], ...
-%                         [realBlockSize 1], [nElements 1])';
-%                     if ~visData.isEpoched
-%                         currentBlock = [currentBlock, ...
-%                             repmat(visData.getPadValue, ...
-%                             [1, nSamples - realBlockSize])]; %#ok<AGROW>
-%                     end
                  currentBlock = reshape(currentBlock, ...
-                     [length(elements) realBlockSize]);
-                    sData(elements, 1:realBlockSize, a) = currentBlock;
-%                 end
+                     [nElements realBlockSize]);
+                    sData(:,1:realBlockSize, a) = currentBlock(elements, 1:realBlockSize);
             end
             if ~isempty(slices) && ~isempty(cDims) && ~isempty(method)
                 sData = viscore.dataSlice.combineDims(sData, cDims, method);
             end
+            tEnd = toc(tStart);
+            fprintf('HDF5 Slice Time: %d\n', tEnd);
         end
         
         

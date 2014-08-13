@@ -105,6 +105,7 @@ classdef hdf5Data < hgsetget & viscore.blockedData
     
     properties (Access = private)
         HDF5File;             % hdf5 file that contains a data array
+        CachedBlocks;
     end % private properties
     
     methods
@@ -151,15 +152,26 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             end
         end % getDataSize
         
-        function [values, sValues] = getDataSlice(obj, dSlice)
+        function [values, sValues, sSizes] = getDataSlice(obj, slices, cDims, method)
             % Return function values and starting indices corresponding to this slice
-            if ~isempty(dSlice)
-                slices = dSlice.getParameters(3);
-            else
-                slices = [];
+%             if ~isempty(dSlice)
+%                 slices = dSlice.getParameters(3);
+%             else
+%                 slices = [];
+%             end
+            tStart = tic;
+            try
+                dataSlice = obj.CachedBlocks(char([slices, num2str(cDims), method]));
+                values = dataSlice{1};
+                sValues = dataSlice{2};
+                sSizes = dataSlice{3};
+            catch
+                [values, sValues, sSizes] = viscore.dataSlice.getHDF5Slice(...
+                    obj, slices, cDims, method);
+                obj.CachedBlocks(char([slices, num2str(cDims), method])) = {values, sValues, sSizes};
             end
-            [values, sValues] = viscore.dataSlice.getHDF5Slice(...
-                obj, slices, [], []);
+            tEnd = toc(tStart);
+            fprintf('HDF5 getDataSlice Time: %d\n', tEnd);
         end % getDataSlice
         
         function hdf5File = getHDF5File(obj)
@@ -209,6 +221,8 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             checkHDF5File(obj, pdata);
             setBlocks(obj);
             obj.setEvents();
+            % Create Map with blocks
+            obj.CachedBlocks = containers.Map;
         end % parseParameters
         
         function checkHDF5File(obj, pdata)
