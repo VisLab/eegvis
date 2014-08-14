@@ -143,8 +143,8 @@ classdef signalHistogramPlot < visviews.axesPanel & visprops.configurable
                 obj.CurrentSlice = dSlice;
             end
             
-            [slices, names] = obj.CurrentSlice.getParameters(3); %#ok<ASGLU>
-            [data, s] = visData.getDataSlice(obj.CurrentSlice);
+            [slices, names] = obj.CurrentSlice.getParameters(3); 
+            [data, s] = visData.getDataSlice(slices, [], []);
             if isempty(data)
                 warning('signalHistogramPlot:emptyData', 'No data for this plot');
                 return;

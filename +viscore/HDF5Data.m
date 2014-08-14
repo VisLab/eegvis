@@ -154,24 +154,21 @@ classdef hdf5Data < hgsetget & viscore.blockedData
         
         function [values, sValues, sSizes] = getDataSlice(obj, slices, cDims, method)
             % Return function values and starting indices corresponding to this slice
-%             if ~isempty(dSlice)
-%                 slices = dSlice.getParameters(3);
-%             else
-%                 slices = [];
-%             end
             tStart = tic;
             try
                 dataSlice = obj.CachedBlocks(char([slices, num2str(cDims), method]));
                 values = dataSlice{1};
                 sValues = dataSlice{2};
                 sSizes = dataSlice{3};
+                tEnd = toc(tStart);
+                fprintf('Cached Block Time: %d\n', tEnd);
             catch
                 [values, sValues, sSizes] = viscore.dataSlice.getHDF5Slice(...
                     obj, slices, cDims, method);
                 obj.CachedBlocks(char([slices, num2str(cDims), method])) = {values, sValues, sSizes};
+                tEnd = toc(tStart);
+                fprintf('Computed Block Time: %d\n', tEnd);
             end
-            tEnd = toc(tStart);
-            fprintf('HDF5 getDataSlice Time: %d\n', tEnd);
         end % getDataSlice
         
         function hdf5File = getHDF5File(obj)
