@@ -244,106 +244,73 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             end
         end % getName
         
-%         function plot(obj, visData, bFunction, dSlice)
-%             % Plots the scalp map with color bar and electrodes
-%             obj.reset();
-%             
-%             % Get needed information from the data and function objects
-%             if isempty(visData) || isempty(bFunction)
-%                 warning('blockScalpPlot:emptyFunctionOrData', ...
-%                     'Missing summary function or block data for this plot');
-%                 return;
-%             end
-%             bFunction.setData(visData);
-%             obj.CurrentFunction = bFunction; 
-%             if isempty(dSlice)
-%                 obj.CurrentSlice = viscore.dataSlice();
-%             else
-%                 obj.CurrentSlice = dSlice;
-%             end 
-%             [slices, names] = obj.CurrentSlice.getParameters(3);
-%             
-%             % Get values for unsliced elements first (for interpolation)
-%             [bValues, sStarts, sSizes] =  viscore.dataSlice.getDataSlice(...
-%                 obj.CurrentFunction.getBlockValues(), {':', slices{3}}, ...
-%                 2, obj.CombineMethod);
-%             if isempty(bValues) 
-%                 warning('blockScalpPlot:emptyData', 'No data for this plot');
-%                 return;
-%             end
-%             obj.StartBlock = sStarts(2);
-%             obj.NumberBlocks = sSizes(2);
-%             
-%             % Now get values sliced for elements
-%             [sValues, sStarts, sSizes] =  viscore.dataSlice.getDataSlice(...
-%                 bValues, slices(1), [], []);
-%             if isempty(sValues) 
-%                 warning('blockScalpPlot:emptyData', 'No slice data');
-%                 obj.StartElement = 1;
-%                 obj.NumberElements = 0;
-%             else
-%                 obj.StartElement = sStarts(1);
-%                 obj.NumberElements = sSizes(1);
-%             end
-%             [x, y, labels, values] = ...
-%                 obj.findLocations(visData.getElementLocations(), bValues);
-% 
-%             % Create the label at the bottom
-%             if obj.NumberBlocks ~= size(sValues, 2)
-%                 combineString = [obj.CombineMethod ' '];
-%             else
-%                 combineString = '';
-%             end
-%             obj.XStringBase = [obj.CurrentFunction.getValue(1, 'DisplayName'), ...
-%                 ' (' combineString names{3} ' ' num2str(obj.StartBlock) ':' ...
-%                 num2str(obj.StartBlock + obj.NumberBlocks - 1) ')'];
-%             obj.XString = obj.XStringBase;
-%             obj.CursorString = {'Y:'; 'X:'};
-%             
-%             % Set the properties of the main axes
-%             bColor = obj.getBackgroundColor();
-%             set(obj.MainAxes, 'Color', 'none', 'XTick', [], 'yTick', [], ...
-%                 'Box', 'off', 'XColor', bColor, 'YColor', bColor, 'ZColor', bColor);
-%             set(get(obj.MainAxes, 'XLabel'), 'Color', [0, 0, 0]);
-%             
-%             % Set the current axes to the head axes for plotting map
-%             myFigure = ancestor(obj.MainAxes, 'figure');
-%             set(myFigure, 'CurrentAxes', obj.HeadAxes); 
-%             hold (obj.HeadAxes, 'on')
-%             obj.plotMap(x, y, values)
-%             obj.plotHead();
-%             obj.plotElements(x, y, labels);
-%             hold (obj.HeadAxes, 'off')
-%             axis(obj.HeadAxes, 'off')
-%             set(myFigure, 'CurrentAxes', obj.MainAxes)
-%             obj.redraw();
-%         end % plot
-        
-        
-        function plot(obj, data, chanlocs, interpolation, ...
-                showColorbar, headColor, elementColor)
+        function plot(obj, visData, bFunction, dSlice)
             % Plots the scalp map with color bar and electrodes
-            obj.reset();   
-            obj.ShowColorbar = showColorbar;
-            obj.HeadColor = headColor;
-            obj.ElementColor = elementColor;
-            obj.CurrentSlice = viscore.dataSlice();            
-                obj.NumberElements = length(data);
+            obj.reset();
+            
+            % Get needed information from the data and function objects
+            if isempty(visData) || isempty(bFunction)
+                warning('blockScalpPlot:emptyFunctionOrData', ...
+                    'Missing summary function or block data for this plot');
+                return;
+            end
+            bFunction.setData(visData);
+            obj.CurrentFunction = bFunction; 
+            if isempty(dSlice)
+                obj.CurrentSlice = viscore.dataSlice();
+            else
+                obj.CurrentSlice = dSlice;
+            end 
+            [slices, names] = obj.CurrentSlice.getParameters(3);
+            
+            % Get values for unsliced elements first (for interpolation)
+            [bValues, sStarts, sSizes] =  viscore.dataSlice.getDataSlice(...
+                obj.CurrentFunction.getBlockValues(), {':', slices{3}}, ...
+                2, obj.CombineMethod);
+            if isempty(bValues) 
+                warning('blockScalpPlot:emptyData', 'No data for this plot');
+                return;
+            end
+            obj.StartBlock = sStarts(2);
+            obj.NumberBlocks = sSizes(2);
+            
+            % Now get values sliced for elements
+            [sValues, sStarts, sSizes] =  viscore.dataSlice.getDataSlice(...
+                bValues, slices(1), [], []);
+            if isempty(sValues) 
+                warning('blockScalpPlot:emptyData', 'No slice data');
+                obj.StartElement = 1;
+                obj.NumberElements = 0;
+            else
+                obj.StartElement = sStarts(1);
+                obj.NumberElements = sSizes(1);
+            end
             [x, y, labels, values] = ...
-                obj.findLocations(chanlocs, data);
-            obj.CursorString = {'Y:'; 'X:'};    
+                obj.findLocations(visData.getElementLocations(), bValues);
+
+            % Create the label at the bottom
+            if obj.NumberBlocks ~= size(sValues, 2)
+                combineString = [obj.CombineMethod ' '];
+            else
+                combineString = '';
+            end
+            obj.XStringBase = [obj.CurrentFunction.getValue(1, 'DisplayName'), ...
+                ' (' combineString names{3} ' ' num2str(obj.StartBlock) ':' ...
+                num2str(obj.StartBlock + obj.NumberBlocks - 1) ')'];
+            obj.XString = obj.XStringBase;
+            obj.CursorString = {'Y:'; 'X:'};
             
             % Set the properties of the main axes
             bColor = obj.getBackgroundColor();
             set(obj.MainAxes, 'Color', 'none', 'XTick', [], 'yTick', [], ...
                 'Box', 'off', 'XColor', bColor, 'YColor', bColor, 'ZColor', bColor);
-            set(get(obj.MainAxes, 'XLabel'), 'Color', [0, 0, 0]);           
-           
+            set(get(obj.MainAxes, 'XLabel'), 'Color', [0, 0, 0]);
+            
             % Set the current axes to the head axes for plotting map
             myFigure = ancestor(obj.MainAxes, 'figure');
             set(myFigure, 'CurrentAxes', obj.HeadAxes); 
             hold (obj.HeadAxes, 'on')
-            obj.plotMap(x, y, values, interpolation)
+            obj.plotMap(x, y, values)
             obj.plotHead();
             obj.plotElements(x, y, labels);
             hold (obj.HeadAxes, 'off')
@@ -658,50 +625,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             set(obj.HeadAxes, 'xlim', [-0.51 0.51], 'ylim', [-0.51 0.51]);
         end % plotHead
         
-%         function plotMap(obj, x, y, values)
-%             % Plot contour map image on current axes for interpolation electrodes
-%             if isempty(values)  % Nothing to plot
-%                 return;
-%             end
-% 
-%             % Find the elements to interpolate
-%             values = reshape(values, size(x)); % Make sure same dimensions
-%             intElements = find(x <= obj.InterpolationRadius & ...
-%                                y <= obj.InterpolationRadius & ...
-%                                ~isempty(values) & ~isnan(values)); 
-%             intElements = intersect(obj.ValidElements, intElements);
-%             intx  = x(intElements);
-%             inty  = y(intElements);
-%             intValues = values(intElements);
-%             
-%             xmin = min(-obj.HeadRadius, min(intx));
-%             xmax = max(obj.HeadRadius, max(intx));
-%             ymin = min(-obj.HeadRadius, min(inty));
-%             ymax = max(obj.HeadRadius, max(inty));
-%             
-%             xLin = linspace(xmin, xmax, 67);
-%             yLin = linspace(ymin, ymax, 67);
-%  
-%             [Xi, Yi, Zi] = griddata(inty, intx, intValues, yLin', xLin, ...
-%                 obj.InterpolationMethod); %#ok<GRIDD> % interpolate
-%  
-%             mask = (sqrt(Xi.^2 + Yi.^2) > obj.HeadRadius); % mask outside the plotting circle
-%             Zi(mask)  = NaN;                 % mask non-plotting areas
-%             delta = xLin(2) - xLin(1); % length of grid entry
-%             
-%             % instead of default larger AXHEADFAC
-%             AXHEADFAC = 1.3;        % head to axes scaling factor
-%             if obj.SqueezeFactor < 0.92 && obj.PlotRadius-obj.HeadRadius > 0.05  % (size of head in axes)
-%                 AXHEADFAC = 1.05;     % do not leave room for external ears if head cartoon
-%             end
-%             set(obj.HeadAxes, ...
-%                 'Xlim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC, ...
-%                 'Ylim', [-obj.HeadRadius obj.HeadRadius]*AXHEADFAC);
-%             surf(obj.HeadAxes, Xi' - delta/2, Yi' - delta/2, zeros(size(Zi)), ...
-%                   Zi', 'EdgeColor', 'none', 'FaceColor', 'flat');
-%         end % plotMap
-        
-        function plotMap(obj, x, y, values, interpolation)
+        function plotMap(obj, x, y, values)
             % Plot contour map image on current axes for interpolation electrodes
             if isempty(values)  % Nothing to plot
                 return;
@@ -726,7 +650,7 @@ classdef blockScalpPlot < visviews.axesPanel & visprops.configurable
             yLin = linspace(ymin, ymax, 67);
  
             [Xi, Yi, Zi] = griddata(inty, intx, intValues, yLin', xLin, ...
-                interpolation);  % interpolate
+                obj.InterpolationMethod); %#ok<GRIDD> % interpolate
  
             mask = (sqrt(Xi.^2 + Yi.^2) > obj.HeadRadius); % mask outside the plotting circle
             Zi(mask)  = NaN;                 % mask non-plotting areas
