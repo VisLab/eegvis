@@ -443,8 +443,9 @@ defaults = visfuncs.functionObj.createObjects('visfuncs.functionObj', ...
 fMan = viscore.dataManager();
 fMan.putObjects(defaults);
 func = fMan.getEnabledObjects('block');
-thisFuncK = func{1};
-thisFuncS = func{2};
+thisFunc = func{1};
+% thisFuncK = func{1};
+% thisFuncS = func{2};
 
 % No events
 fprintf('It should produce a plot for when there are no events\n');
@@ -455,7 +456,7 @@ slice1 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
 fig1 = figure('Name', 'All zero values');
 ep1 = visviews.eventImagePlot(fig1, [], []);
 assertTrue(isvalid(ep1));
-ep1.plot(testVD1, thisFuncS, slice1);
+ep1.plot(testVD1, thisFunc, slice1);
 gaps = ep1.getGaps();
 ep1.reposition(gaps);
 drawnow
@@ -470,7 +471,7 @@ slice2 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
 fig2 = figure('Name', 'Data zero, func NaN');
 bp2 = visviews.eventImagePlot(fig2, [], []);
 assertTrue(isvalid(bp2));
-bp2.plot(testVD1, thisFuncK, slice2);
+bp2.plot(testVD1, thisFunc, slice2);
 gaps = bp2.getGaps();
 bp2.reposition(gaps);
 drawnow
@@ -485,7 +486,7 @@ slice3 = viscore.dataSlice('Slices', {':', ':', ':'}, ...
 fig3 = figure('Name', 'Data NaNs');
 bp3 = visviews.eventImagePlot(fig3, [], []);
 assertTrue(isvalid(bp3));
-bp3.plot(testVD3, thisFuncS, slice3);
+bp3.plot(testVD3, thisFunc, slice3);
 gaps = bp3.getGaps();
 bp3.reposition(gaps);
 drawnow
@@ -500,7 +501,7 @@ slice4 = viscore.dataSlice('Slices', {'6', ':', ':'}, ...
 fig4 = figure('Name', 'Data slice is empty');
 bp4 = visviews.eventImagePlot(fig4, [], []);
 assertTrue(isvalid(bp4));
-bp4.plot(testVD4, thisFuncS, slice4);
+bp4.plot(testVD4, thisFunc, slice4);
 gaps = bp4.getGaps();
 bp4.reposition(gaps);
 drawnow

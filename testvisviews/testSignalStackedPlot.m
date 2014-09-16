@@ -552,5 +552,3 @@ fprintf('\nUnit tests for visviews.signalStackedPlot getDefaultProperties\n');
 fprintf('It should have a getDefaultProperties method that returns a structure\n');
 s = visviews.signalStackedPlot.getDefaultProperties();
 assertTrue(isa(s, 'struct'));
-
-

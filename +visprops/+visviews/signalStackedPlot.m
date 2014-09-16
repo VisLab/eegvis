@@ -383,13 +383,13 @@ classdef signalStackedPlot < visviews.axesPanel  & visprops.configurable
                 return;
             end
             % Take care of trimming based on scope
-%             if strcmpi(obj.TrimScope, 'global')
-%                 [tMean, tStd, tLow, tHigh] = ...
-%                     obj.VisData.getTrimValues(obj.TrimPercent);
-%             else
+            if strcmpi(obj.TrimScope, 'global')
+                [tMean, tStd, tLow, tHigh] = ...
+                    obj.VisData.getTrimValues(obj.TrimPercent);
+            else
                       [tMean, tStd, tLow, tHigh] = ...
                     obj.VisData.getTrimValues(obj.TrimPercent, data);
-%             end
+            end
             
             scale = obj.SignalScale;
             if isempty(scale)

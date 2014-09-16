@@ -22,7 +22,7 @@ load('EEGEpoch.mat');
 values.EEGEpoch = EEGEpoch;
 values.eegEpochFile = regexprep(which('EEG.mat'), 'EEG.mat$', 'EEGEpoch.hdf5');
 
-values.deleteFigures = false;
+values.deleteFigures = true;
 
 function testNormalConstructor(values) %#ok<DEFNU>
 % Unit test for normal dualView normal constructor
@@ -644,7 +644,7 @@ pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
 [events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
 testVD2 = viscore.memoryData(values.EEGEpoch.data, 'Epoched', 'Events', events, ...
-     'ElementLocations', values.EEGEpoch.chanlocs, ...
+    'ElementLocations', values.EEGEpoch.chanlocs, ...
     'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
     'BlockTimeScale', escales, 'Epoched', true);
 bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
@@ -652,8 +652,8 @@ assertTrue(isvalid(bv2));
 drawnow
 
 if values.deleteFigures
-   delete(bv1)
-   delete(bv2)
+    delete(bv1)
+    delete(bv2)
 end
 
 function testEventPlotsHDF5(values) %#ok<DEFNU>
@@ -674,7 +674,7 @@ pS = viewTestClass.getDefaultPlotsWithEvents();
 assertEqual(length(pS), 10);
 [events, estarts, escales] = viscore.blockedEvents.getEEGTimes(values.EEGEpoch);
 testVD2 = viscore.hdf5Data(values.EEGEpoch.data, 'Epoched', values.eegEpochFile, 'Events', events, ...
-     'ElementLocations', values.EEGEpoch.chanlocs, ...
+    'ElementLocations', values.EEGEpoch.chanlocs, ...
     'SampleRate', values.EEGEpoch.srate, 'BlockStartTimes', estarts, ...
     'BlockTimeScale', escales, 'Epoched', true);
 bv2 = visviews.dualView('VisData', testVD2, 'Plots', pS');
@@ -682,6 +682,6 @@ assertTrue(isvalid(bv2));
 drawnow
 
 if values.deleteFigures
-   delete(bv1)
-%    delete(bv2)
+    delete(bv1)
+    delete(bv2)
 end

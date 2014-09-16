@@ -116,18 +116,37 @@ classdef hdf5Data < hgsetget & viscore.blockedData
             obj.parseParameters(data, hdf5File);
         end % blockedData constructor
         
-        function values = funEval(obj, fh, fn)
+        function [values, blockMean, blockStd] = funEval(obj, fObj)
+            fh = str2func(fObj.getDefinition());
+            fn = fObj.getDisplay();
+            % Check if blocked values exists
             try
-                % Get data from file if it exists
                 values = h5read(obj.HDF5File, ['/',fn,...
                     '_',num2str(obj.BlockSize)]);
             catch
-                % Compute the data and store it in the file
                 values = obj.computeBlocks(fh);
                 h5create(obj.HDF5File,['/',fn,...
                     '_',num2str(obj.BlockSize)],size(values));
                 h5write(obj.HDF5File,['/',fn,...
                     '_',num2str(obj.BlockSize)], values);
+            end
+            % Check if mean and std exists
+            try
+                blockMean = h5read(obj.HDF5File, ['/Block_Mean_', ...
+                    num2str(obj.BlockSize)]);
+                blockStd = h5read(obj.HDF5File, ['/Block_Std_', ...
+                    num2str(obj.BlockSize)]);
+            catch
+                blockMean = nanmean(values(:));
+                blockStd = nanstd(values(:));
+                h5create(obj.HDF5File,['/Block_Mean_', ...
+                    num2str(obj.BlockSize)], [1 1]);
+                h5write(obj.HDF5File,['/Block_Mean_', ...
+                    num2str(obj.BlockSize)], nanmean(values(:)));
+                h5create(obj.HDF5File,['/Block_Std_', ...
+                    num2str(obj.BlockSize)],[1 1]);
+                h5write(obj.HDF5File,['/Block_Std_', ...
+                    num2str(obj.BlockSize)], nanstd(values(:)));
             end
         end % funEval
         
@@ -154,20 +173,15 @@ classdef hdf5Data < hgsetget & viscore.blockedData
         
         function [values, sValues, sSizes] = getDataSlice(obj, slices, cDims, method)
             % Return function values and starting indices corresponding to this slice
-            tStart = tic;
             try
                 dataSlice = obj.CachedBlocks(char([slices, num2str(cDims), method]));
                 values = dataSlice{1};
                 sValues = dataSlice{2};
                 sSizes = dataSlice{3};
-                tEnd = toc(tStart);
-                fprintf('Cached Block Time: %d\n', tEnd);
             catch
                 [values, sValues, sSizes] = viscore.dataSlice.getHDF5Slice(...
                     obj, slices, cDims, method);
                 obj.CachedBlocks(char([slices, num2str(cDims), method])) = {values, sValues, sSizes};
-                tEnd = toc(tStart);
-                fprintf('Computed Block Time: %d\n', tEnd);
             end
         end % getDataSlice
         
@@ -223,12 +237,10 @@ classdef hdf5Data < hgsetget & viscore.blockedData
         end % parseParameters
         
         function checkHDF5File(obj, pdata)
-            % Case 1
             if ~isempty(pdata.Data) && ...
                     ~exist(pdata.HDF5File, 'file')
                 createHDF5(double(pdata.Data), pdata.HDF5File);
                 obj.HDF5File = pdata.HDF5File;
-                % Case 2
             elseif ~isempty(pdata.Data) && ...
                     exist(pdata.HDF5File, 'file')
                 if pdata.Overwrite
@@ -236,17 +248,15 @@ classdef hdf5Data < hgsetget & viscore.blockedData
                     createHDF5(double(pdata.Data), pdata.HDF5File);
                 end
                 obj.HDF5File = pdata.HDF5File;
-                % Case 3
             elseif isempty(pdata.Data) && ...
                     exist(pdata.HDF5File, 'file')
                 obj.HDF5File = pdata.HDF5File;
-                % Case 4
             elseif isempty(pdata.Data) && ...
                     ~exist(pdata.HDF5File, 'file')
                 throw(MException('HDF5Chk:NoData', ...
                     'Data and HDF5 file cannot be empty'));
             end
-        end % compareDataAndHDF5File
+        end % checkHDF5File
         
         
         function computedBlocks = computeBlocks(obj, fh)

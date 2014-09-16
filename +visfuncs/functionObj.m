@@ -221,6 +221,11 @@ classdef functionObj < hgsetget & viscore.managedObj
             def = obj.ManStruct(1).Definition;
         end % getDefinition
         
+        function dis = getDisplay(obj)
+           % Return string display of this function 
+           dis = obj.ManStruct(1).DisplayName;
+        end
+        
         function colors = getThresholdColors(obj)
             % Return a color map with one color for each threshold level
             colors = obj.ManStruct(1).ThresholdColors();
@@ -313,15 +318,8 @@ classdef functionObj < hgsetget & viscore.managedObj
         
         function reevaluate(obj)
             % Evaluate the function and the threshold mask
-            fh = str2func(obj.ManStruct.Definition);
-            if isa(obj.CurrentData, 'viscore.memoryData')
-                obj.CurrentValues = obj.CurrentData.funEval(fh);
-            elseif isa(obj.CurrentData, 'viscore.hdf5Data')
-                 fn = obj.ManStruct.DisplayName;
-                 obj.CurrentValues = obj.CurrentData.funEval(fh, fn);
-            end
-            obj.BlockMean = nanmean(obj.CurrentValues(:));
-            obj.BlockStd = nanstd(obj.CurrentValues(:));
+            [obj.CurrentValues, obj.BlockMean, obj.BlockStd] ...
+                = obj.CurrentData.funEval(obj);
             obj.calculateLimits();
         end % reevaluate
         

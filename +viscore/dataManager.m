@@ -90,6 +90,7 @@ classdef dataManager < hgsetget
             end
             eFlags = true(length(enabled), 1);
             for k = 1:length(enabled)
+                nEnabledDefinition = enabled{k}.getDefinition;            
                 nEnabled = enabled{k}.getNumberEnabled();
                 categories = enabled{k}.getCategories();
                 if nEnabled == 0 || (~isempty(category) && ...

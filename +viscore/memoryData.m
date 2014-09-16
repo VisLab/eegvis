@@ -119,10 +119,13 @@ classdef memoryData < hgsetget & viscore.blockedData
             obj.parseParameters(data);
         end % memoryData constructor
         
-        function values = funEval(obj, fh)
+        function [values, blockMean, blockStd] = funEval(obj, fObj)
             [e, s, b] = obj.getDataSize(); %#ok<ASGLU>
+            fh = str2func(fObj.getDefinition());
             values = reshape(...
                 feval(fh, obj.getData()), e, b);
+            blockMean = nanmean(values(:));
+            blockStd = nanstd(values(:));
         end % funEval
         
              
