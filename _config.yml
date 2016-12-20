@@ -1,0 +1,8 @@
+title: Eegvis
+description: EEGVIS Toolbox for MATLAB
+google_analytics: UA-38199871-1
+show_downloads: true
+theme: jekyll-theme-slate
+
+gems:
+  - jekyll-mentions
