@@ -58,7 +58,7 @@ Other items included with the distribution:
 
 2) The eegVis package has a fairly extensive set of unit tests and includes
    the MATLAB xUnit Test Framework, which is available on MATLAB Central
-   at http://www.mathworks.com/matlabcentral/fileexchange/22846.
+   at https://www.mathworks.com/matlabcentral/fileexchange/47302-xunit4.
 
    To run all of the regression tests type:
 
