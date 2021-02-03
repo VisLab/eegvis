@@ -1,9 +1,11 @@
 The eegVis package provides configurable viewers for exploring and 
 summarizing array data, such as multichannel EEG. The eegVis package 
-requires MATLAB 2010a or later and the MATLAB Statistics toolbox. 
+requires MATLAB 2010a or laterm but does not run on the most recent 
+versions of MATLAB. There are no immediate plans to update.
 
+The eegvis package also requires the  MATLAB Statistics toolbox. 
 The dependencies on the statististics toolbox are minor:  
-                                       nanmean, nanmedian, and kurtosis.
+      nanmean, nanmedian, and kurtosis.
 
 To run without eeglab:
 
